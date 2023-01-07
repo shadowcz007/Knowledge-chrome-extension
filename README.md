@@ -9,6 +9,9 @@ DIY 一个 web3 的知识采集工具。
 - anyweb 树图钱包
   https://anyweb.cc
 
+- UI
+https://mantine.dev/
+
 ## Installing and Running
 
 ### Procedures:

@@ -81,7 +81,8 @@ function travelCommit (elements, commit) {
             commit.createdAt,
             commit.cfxAddresses,
             commit.count,
-            commit.replies
+            commit.replies,
+            commit.tags,commit.relate
           )
       }
     }
@@ -89,8 +90,8 @@ function travelCommit (elements, commit) {
 }
 
 function matchWords (
-  words = ['h', 'l', 'e', 'f', 'g'],
-  texts = ['e', 'f', 'g']
+  words = ['meta','人工', '智能', '无', '监督','学习'],
+  texts = ['无', '监督','学习']
 ) {
   const sum = (ts) => ts.reduce((partialSum, a) => partialSum + a, 0)
 
@@ -141,18 +142,32 @@ import React from 'react'
 import { render } from 'react-dom'
 import { format } from 'timeago.js'
 
-// import { ReactCusdis } from 'react-cusdis'
 
-// let div = document.createElement('div')
-// // window.document.body.appendChild(div)
-// window.document.body.insertAdjacentElement('beforebegin', div)
-// div.style = `
-// width: 100%;z-index: 999999999;`
+import {Divider  , Progress, Badge, Avatar, HoverCard, Text, Rating, Button   } from '@mantine/core'
+
 
 function getPageUrl () {
   return window.location.href.replace(/\?.*/, '')
 }
 
+function getUrlParam(name) {
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+    var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+    if (r != null) return r[2]; return null; //返回参数值
+}
+
+function getKnowledgeTags(){
+    let t=decodeURI(getUrlParam('knowledgeTags')||'');
+    if(t) return t.toUpperCase().split(',')
+    return
+}
+
+function getKnowledgeReply(){
+  let t=decodeURI(getUrlParam('knowledgeReply')||'');
+  return t
+}
+
+// 获取用户划选的内容
 function getSelectionByUser () {
   var selObj = window.getSelection()
   var range = selObj.getRangeAt(0)
@@ -161,7 +176,6 @@ function getSelectionByUser () {
   let parentText = range.startContainer.parentElement.innerText
   let url = getPageUrl()
   return {
-    // appId: 'bf33fa6f-f24f-4876-a1db-12fea5c672ec',
     pageId: url,
     nodeName: nodeName,
     textContent: textContent,
@@ -170,6 +184,7 @@ function getSelectionByUser () {
     pageUrl: url,
     pageTitle: document.title,
     createdAt: new Date().toLocaleString(),
+    tags:getKnowledgeTags()
   }
 }
 
@@ -196,7 +211,8 @@ function getComments () {
 
 function displayComments (cms) {
   let textContents = {}
-
+//   标签
+  let tags={};
   Array.from(cms, (d) => {
     try {
       let json = {
@@ -204,6 +220,7 @@ function displayComments (cms) {
         nodeName: d.nodeName,
         cfxAddress: d.cfxAddress,
         createdAt: new Date(d.createdAt).getTime(),
+        tags:d.tags,relate:d.relate
       }
       if (!textContents[d.textContent])
         textContents[d.textContent] = {
@@ -211,16 +228,25 @@ function displayComments (cms) {
           replies: {},
         }
       textContents[d.textContent].data.push(json)
-      textContents[d.textContent].replies[d.reply] = 1
+      textContents[d.textContent].replies[d.reply] = 1;
     } catch (error) {
       console.log(error)
     }
+    for (const tag of d.tags) {
+        if(!tags[tag.name])tags[tag.name]={
+            count:0,
+            ...tag
+        };
+        tags[tag.name].count++;
+    }
+
   })
 
   //
   addRating(Object.keys(textContents).length)
 
-  // console.log(res, textContents)
+   console.log(tags);
+  
 
   // 排序后
   for (const key in textContents) {
@@ -341,7 +367,7 @@ function unqueArray (arr) {
 //   (window.CUSDIS.initial = d),
 //   d()
 
-import { Progress, Badge, Avatar, HoverCard, Text, Rating } from '@mantine/core'
+
 
 function Demo () {
   const [count, setCount] = React.useState(0)
@@ -435,9 +461,10 @@ function Demo () {
 function addRating (count = 0) {
   if (document.body.getAttribute('data-rating')) return
   let div2 = document.createElement('div')
-  div2.style = `position:fixed;top:12px;left:12px;z-index:999999999999999999`
+  div2.style = `position:fixed;top:44px;left:12px;z-index:999999999999999999`
   document.body.insertAdjacentElement('beforeend', div2)
   document.body.setAttribute('data-rating', true)
+
   render(
     <Badge color='gray' size='lg' sx={{ paddingRight: 3, paddingLeft: 3 }}>
       <Rating defaultValue={count} readOnly={true} />
@@ -452,7 +479,8 @@ function addBadge (
   createdAt,
   nicknames = [],
   count = 1,
-  replies = []
+  replies = [],
+  tags=[],relate
 ) {
   let div2 = document.createElement('div')
   div2.style = `cursor :pointer;display: inline;
@@ -468,7 +496,7 @@ function addBadge (
     </Avatar.Group>
   )
 
-  // console.log(replies)
+  // console.log(relate)
   render(
     <HoverCard width={440} shadow='md' zIndex={9999999999}>
       <HoverCard.Target>
@@ -493,6 +521,21 @@ function addBadge (
             <Badge size='xs'>点评</Badge>
             {replies.join('\n')}
           </Text>
+        ) : (
+          ''
+        )}
+
+{tags && tags.length > 0 ? Array.from(tags,t=><Badge key={t.name} size='xs' color={t.color} >{t.name}</Badge>) :''}
+{relate && relate.length > 0 ? 
+  <Divider my="xs" label="相关" labelPosition="center" />:''}
+
+{relate && relate.length > 0 ? (
+          Array.from(relate,e=>(
+          <a target="_blank" key={e.pageTitle} href={e.pageId} style={{ textDecoration: "none",
+            fontSize: "12px",
+            display:'block',
+            fontWeight: 300,border: 'none',
+            color: "#2196f3"}}>{e.pageTitle}</a>))
         ) : (
           ''
         )}
@@ -541,15 +584,23 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   // console.log(request)
   let isOpenLogin = false
   if (request.cmd == 'mark-run') {
-    let res = getSelectionByUser()
 
+    let res = getSelectionByUser()
+    // 弹出modal ，让用户输入评论
+    let reply=window.prompt("输入评论",getKnowledgeReply()||res.textContent);
+
+    let data={...res,reply}
     // 向bg发送消息
     chrome.runtime.sendMessage(
-      { cmd: 'mark-result', data: res },
+      { cmd: 'mark-result', data: data },
       function (response) {
         console.log('收到来自后台的回复：' + response)
       }
     )
+    
+
+    
+
   } else if (request.cmd == 'login') {
     // alert('请登录anyweb或者填写钱包地址')
     if (window.confirm('请登录anyweb或者填写钱包地址')) {
@@ -571,7 +622,11 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   sendResponse('我收到了你的消息！')
 })
 
+
+
 getComments()
+
+
 
 document.addEventListener('scroll', (event) => {
   if (

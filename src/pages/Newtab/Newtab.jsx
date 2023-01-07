@@ -52,10 +52,11 @@ import {
 
 let allUrls = {}
 
+console.log(chrome.runtime.getManifest().config.anywebId)
 import { Provider } from '@idealight-labs/anyweb-js-sdk'
 const provider = new Provider({
   logger: console,
-  appId: '5a125145-87fc-4634-ba4e-c82dcff9cde8',
+  appId: chrome.runtime.getManifest().config.anywebId,
 })
 
 function unqueArray (arr) {
@@ -76,6 +77,7 @@ function parseData (data) {
         replies: [d.reply],
         content: [d.textContent],
         createdAt: [new Date(d.createdAt).getTime()],
+        tags:d.tags
       }
     us[d.pageId].address[d.cfxAddress] = 1
     us[d.pageId].replies = unqueArray([...us[d.pageId].replies, d.reply])
@@ -199,6 +201,7 @@ const Newtab = () => {
         title: data.title,
         url: url,
         createdAt: data.createdAt[0],
+        tags:data.tags
       })
 
       for (const a of Object.keys(data.address)) {
@@ -260,7 +263,7 @@ const Newtab = () => {
         gap='lg'
         justify='flex-start'
         align='center'
-        direction='column'
+        direction='row'
         wrap='wrap'
       >
         <Space h='xl' />
@@ -306,28 +309,46 @@ const Newtab = () => {
                 ''
               )}
             </Group>
-          </Card>
+          </Card><Space h='xl' />
         </Container>
-
+        </Flex>
+        <Flex
+        bg='#282c34'
+        gap='lg'
+        justify='flex-start'
+        align='flex-start'
+        direction='row'
+        wrap='wrap'
+      >
         <Space h='xl' />
         {Array.from(cards, (c) => {
           return (
             <Container size={440} px={12} key={c.title}>
               <Card shadow='sm' p='lg' radius='md'>
-                <Space h='xl' />
+                 
                 <a
                   href={c.url}
                   target='_blank'
                   style={{ textDecoration: 'none', color: '#1e1e1e' }}
                 >
                   <Card.Section>
+        
                     <Container size={440} px={12}>
-                      <Title order={3} align='left'>
-                        {c.title}{' '}
+                      <Flex
+         
+        gap='lg'
+        justify='flex-start'
+        align='flex-start'
+        direction='column'
+        wrap='wrap'
+      > <Group>{c.tags && c.tags.length > 0 ? Array.from(c.tags,t=><Badge key={t.name} size='xs' color={t.color}>{t.name}</Badge>) :''}</Group>
+                    
+                     <Title order={3} align='left'>
+                      {c.title}{' '}
                         <Badge color='orange' variant='light'>
                           {createDay(c.createdAt)}
                         </Badge>
-                      </Title>
+                      </Title></Flex>
                     </Container>
                   </Card.Section>
                 </a>
