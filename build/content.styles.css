@@ -1,0 +1,16 @@
+.data-find{
+    background-color: rgb(255 235 59 / 14%);
+}
+
+#cusdis_thread{
+    position: fixed;
+    /* bottom: 0;  */
+    background: #fff;
+    padding: 12px;
+    font-size: 12px;
+    width: 100%;
+    /* position: relative; */
+    top: 0;
+    z-index: 999999;
+}
+
