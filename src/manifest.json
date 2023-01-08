@@ -2,6 +2,11 @@
     "manifest_version": 3,
     "name": "Knowledge",
     "description": "A chrome extension for Knowledge",
+    "config": {
+        "anywebId": "5a125145-87fc-4634-ba4e-c82dcff9cde8",
+        "notionToken": "secret_8X2Ryn7H8qsmTQ4c1gEQeP6A6Mw4QZgErwh7SwKKewO",
+        "notionDatabaseId": "1be3bd9842fb43dbbe2e944870632415"
+    },
     "background": {
         "service_worker": "background.bundle.js"
     },

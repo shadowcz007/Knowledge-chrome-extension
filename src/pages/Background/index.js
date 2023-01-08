@@ -105,7 +105,7 @@ async function postData(url = '', data = {}) {
         headers: {
             Authorization: 'Bearer ' + token,
             'Content-Type': 'application/json',
-            'Notion-Version': '2021-05-13',
+            'Notion-Version': '2022-06-28',
         },
         redirect: 'follow', // manual, *follow, error
         referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
@@ -215,43 +215,98 @@ function queryByPageId(pageId) {
 
 function queryByTag(tag) {
     let url = `https://api.notion.com/v1/databases/${databaseId}/query`
+    let sorts=[{
+        property: 'createdAt',
+        direction: 'descending',
+    }, ]
     return postData(url, {
         filter: {
             property: 'tags',
             multi_select: {
                 contains:tag,
             },
-        },
+        },sorts
     })
 }
 
 function findByTag(tag){
-    if(tag){
-        return queryByTag(tag).then((res) => {
-            return Array.from(res.results, (r) => {
-                let d=parseData(r)[0];
-                return {pageTitle:d.pageTitle,pageId:d.pageId}
+    let urls={};
+    return new Promise((res,rej)=>{
+        if(tag){
+            queryByTag(tag).then((data) => {
+                Array.from(data.results, (r) => {
+                    let d=parseData(r)[0];
+                    urls[d.pageId]={tag,pageTitle:d.pageTitle,pageId:d.pageId};
+                });
+
+                res(Object.values(urls))
             });
-        });
-    } 
+        }else{
+            res();
+        }
+    })
+    
+}
+
+// 获取几天前时间
+function getTimestamp(n=1){
+    let t=new Date()
+    return new Date(t.getTime()-1000*60*60*24*n).toLocaleString().split(' ')[0]
 }
 
 // let isQueryNotEmptyOfReply = false
-function queryNotEmptyOfReply() {
+function queryNotEmptyOfReply(timestamp=null) {
     // if (isQueryNotEmptyOfReply == false) {
     isQueryNotEmptyOfReply = true
     let url = `https://api.notion.com/v1/databases/${databaseId}/query`
+
+    let  sorts=[{
+        property: 'createdAt',
+        direction: 'descending',
+    }, ]
+
+    let filter= {
+            "and": [
+                {
+                    property: 'reply',
+                    rich_text: {
+                        is_not_empty: true,
+                    },
+                } 
+            ]
+        }
+   
+
+    if(timestamp=='this_week'){
+        filter.and.push({
+            "timestamp": "created_time",
+                  "created_time": {
+            "this_week": {}
+          }
+          })
+          sorts=[{
+            property: 'tags',
+            direction: 'ascending',
+        }, ]
+    }else if(timestamp=='past_week'){
+        filter.and.push({
+            "timestamp": "created_time",
+                  "created_time": {
+            "past_week": {}
+          }
+          })
+          
+          sorts=[{
+            property: 'tags',
+            direction: 'ascending',
+        }, ]
+      
+    }
+      
+  
     return postData(url, {
-            filter: {
-                property: 'reply',
-                rich_text: {
-                    is_not_empty: true,
-                },
-            },
-            sorts: [{
-                property: 'createdAt',
-                direction: 'ascending',
-            }, ],
+            filter: filter,
+            sorts:sorts,
         })
         // }
 }
@@ -266,7 +321,7 @@ function parseData(res) {
         cfxAddress: res.properties.cfxAddress.rich_text[0] ?.plain_text,
         nodeName: '#text',
         textContent: res.properties.textContent.rich_text[0] ?.plain_text,
-        tags:Array.from(res.properties.tags.multi_select,t=>({color:t.color,name:t.name}))
+        tags:Array.from(res.properties.tags.multi_select,t=>({color:t.color,name:t.name,id:t.id}))
     }, ]
 }
 
@@ -327,10 +382,15 @@ chrome.runtime.onMessage.addListener(async function(
                 return rs
             });
 
-            if(Object.keys(tags)[0]){
-                findByTag(Object.keys(tags)[0]).then(tagRes=>{
-                    Array.from(data,d=>d.relate=tagRes.filter(f=>f.pageId!=d.pageId))
-    
+             findByTag(Object.keys(tags)[0]).then(tagRes=>{
+                    if(tagRes){
+                        Array.from(data,d=>{
+                            d.relate=tagRes.filter(f=>{
+                                return d.tags.filter(t=>t.name==f.tag).length>0&&f.pageId!=d.pageId
+                            })
+                        })
+                    }
+
                     chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
                         chrome.tabs.sendMessage(
                             tabs[0].id, {
@@ -342,28 +402,15 @@ chrome.runtime.onMessage.addListener(async function(
                             }
                         )
                     })
-    
-                })
-            }else{
-                chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-                    chrome.tabs.sendMessage(
-                        tabs[0].id, {
-                            cmd: 'get-by-pageId-result',
-                            data: data,
-                        },
-                        function(response) {
-                            console.log(response)
-                        }
-                    )
-                })
-            }
-            
 
+                     
+                })
             
         })
         
     } else if (request.cmd == 'new-reply') {
-        queryNotEmptyOfReply().then((res) => {
+        console.log(request)
+        queryNotEmptyOfReply(request.timestamp).then((res) => {
             // isQueryNotEmptyOfReply = false
             chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
                 chrome.tabs.sendMessage(

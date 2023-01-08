@@ -37,7 +37,7 @@ import './Newtab.scss'
 // }
 
 import {
-  ActionIcon,
+  CopyButton,
   Badge,
   Group,
   TextInput,
@@ -47,7 +47,7 @@ import {
   Text,
   Flex,
   Space,
-  Container,
+  Container,Select
 } from '@mantine/core'
 
 let allUrls = {}
@@ -68,7 +68,7 @@ function unqueArray (arr) {
 }
 
 function parseData (data) {
-  let us = { ...allUrls }
+  let us = {  }
   Array.from(data, (d) => {
     if (!us[d.pageId])
       us[d.pageId] = {
@@ -94,6 +94,10 @@ function parseData (data) {
 
 window.isNew = false
 
+
+ 
+
+ 
 const Newtab = () => {
   const [address, setAddress] = React.useState('')
   const [urls, setUrls] = React.useState({})
@@ -105,12 +109,14 @@ const Newtab = () => {
     return `${y}/${m}/${d}`
   }
 
-  const getData = (page = 1) => {
+  const getData = (e='this_week') => {
+    console.log(e)
     // 向bg发送消息
     if (window.isNew) return
     window.isNew = true
-    chrome.runtime.sendMessage({ cmd: 'new-reply' }, function (response) {
+    chrome.runtime.sendMessage({ cmd: 'new-reply',timestamp:e }, function (response) {
       console.log('new-reply 收到来自后台的回复：' + response)
+      setTimeout(()=>window.isNew=false,1000)
     })
   }
 
@@ -121,12 +127,13 @@ const Newtab = () => {
     sender,
     sendResponse
   ) {
-    // console.log('new-reply:', request)
+    console.log('new-reply-result:', request)
     if (request.cmd == 'new-reply') {
       let res = request.data
       parseData(res)
       setUrls(allUrls)
     }
+    sendResponse('new-reply-result')
   })
 
   provider.on('ready', () => {
@@ -188,11 +195,12 @@ const Newtab = () => {
   }
 
   let cards = [],
-    userAddress = {}
+    userAddress = {};
   for (const url in urls) {
     let data = urls[url]
     if (!data.createdAt) data.createdAt = []
-    data.createdAt.sort((a, b) => b - a)
+    data.createdAt.sort((a, b) => b - a);
+
     if (data.replies.join('\n')) {
       cards.push({
         address: Object.keys(data.address),
@@ -231,8 +239,9 @@ const Newtab = () => {
     // })
   }
   userAddressRank.sort((a, b) => b.count - a.count)
-  cards.sort((a, b) => b.createdAt - a.createdAt)
 
+  // cards.sort((a, b) => b.tags[0]?b.tags[0].id:0 - a.tags[0]?a.tags[0].id:0)
+// console.log('sort',cards)
   return (
     <div className='App'>
       <header className='App-header'>
@@ -256,6 +265,33 @@ const Newtab = () => {
           />
 
           <Button onClick={login}>登陆anyweb</Button>
+          <Select
+            label="时间"
+            placeholder="all"
+            defaultValue="this_week"
+            data={[
+              { value: 'this_week', label: '本周' },
+              { value: 'past_week', label: '上一周' },
+              { value: null, label: '所有' },
+            ]}
+            onChange={e=>{
+              // window.isNew=false;
+              allUrls={}
+              setUrls(allUrls);
+              getData(e)
+            }}
+          />
+
+<CopyButton value={Array.from(cards,(c,i)=>{
+  return `${i+1}- #${Array.from(c.tags,t=>t.name).join('#')}\n${c.content}\n${c.replies}\n${c.title}\n${c.url}\n\n`
+}).join('')}>
+      {({ copied, copy }) => (
+        <Button color={copied ? 'teal' : 'blue'} onClick={copy}>
+          {copied ? 'Copied' : 'Copy'}
+        </Button>
+      )}
+    </CopyButton>
+
         </Flex>
       </header>
       <Flex
@@ -348,7 +384,9 @@ const Newtab = () => {
                         <Badge color='orange' variant='light'>
                           {createDay(c.createdAt)}
                         </Badge>
-                      </Title></Flex>
+                      </Title>
+                      <Text fz="xs">{c.url}</Text>
+                      </Flex>
                     </Container>
                   </Card.Section>
                 </a>
@@ -367,6 +405,15 @@ const Newtab = () => {
                 ) : (
                   ''
                 )}
+<Space h='xl' />
+<CopyButton value={`/${Array.from(c.tags,t=>t.name).join(' ')} \n${c.content} \n${c.replies}\n -${c.title}\n${c.url} `}>
+      {({ copied, copy }) => (
+        <Button color={copied ? 'teal' : 'blue'} onClick={copy}>
+          {copied ? 'Copied' : 'Copy'}
+        </Button>
+      )}
+    </CopyButton>
+
               </Card>
             </Container>
           )

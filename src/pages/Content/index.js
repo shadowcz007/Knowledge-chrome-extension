@@ -245,7 +245,7 @@ function displayComments (cms) {
   //
   addRating(Object.keys(textContents).length)
 
-   console.log(tags);
+  //  console.log(tags);
   
 
   // 排序后
@@ -525,7 +525,7 @@ function addBadge (
           ''
         )}
 
-{tags && tags.length > 0 ? Array.from(tags,t=><Badge key={t.name} size='xs' color={t.color} >{t.name}</Badge>) :''}
+{/* {tags && tags.length > 0 ? Array.from(tags,t=><Badge key={t.name} size='xs' color={t.color} >{t.name}</Badge>) :''} */}
 {relate && relate.length > 0 ? 
   <Divider my="xs" label="相关" labelPosition="center" />:''}
 
@@ -535,7 +535,7 @@ function addBadge (
             fontSize: "12px",
             display:'block',
             fontWeight: 300,border: 'none',
-            color: "#2196f3"}}>{e.pageTitle}</a>))
+            color: "#2196f3"}}>{e.pageTitle} <Badge key={e.pageTitle} size='xs'>{e.tag}</Badge></a>))
         ) : (
           ''
         )}
