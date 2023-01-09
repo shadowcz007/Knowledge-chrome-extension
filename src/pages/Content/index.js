@@ -63,7 +63,7 @@ function travel (elements) {
         child.classList.add('data-find')
         child.setAttribute('data-find', counts.join(','))
         child.setAttribute('data-position', JSON.stringify(pos))
-
+        child.style.background='rgba(249, 232, 76, 0.5);';
         targets.push({ child, pos, keywords: counts.join(',') })
       }
     }
