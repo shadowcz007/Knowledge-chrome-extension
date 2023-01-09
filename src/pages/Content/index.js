@@ -1,10 +1,11 @@
 // import { printLine } from './modules/print'
-
 // console.log('Content script works!')
 // console.log('Must reload extension for modifications to take effect.')
-
 // printLine("Using the 'printLine' function from the Print Module")
 
+// import getElementXpath from 'element-xpath'
+// console.log(getElementXpath)
+// window.getElementXpath = getElementXpath
 let _TEXTS = []
 
 let targets = []
@@ -24,9 +25,6 @@ function extractWords (str) {
 // 遍历
 function travel (elements) {
   for (let child of elements) {
-    let check = Array.from(child.childNodes, (c) => c).filter(
-      (c) => c.nodeName == '#text'
-    )
     // console.log(check, child.children.length)
     if (child.children.length > 0) {
       Array.from(child.children, (c) => c.classList.remove('data-find'))
@@ -39,11 +37,28 @@ function travel (elements) {
         // match
         for (const texts of _TEXTS) {
           let isMatch = matchWords(words, texts)
-          if (isMatch) counts.push(texts.join())
+          if (isMatch) counts.push(texts.join(''))
         }
       }
-      if (counts.length > 0) {
-        console.log(counts)
+      if (counts.length > 0 && child.innerText.trim().length > 20) {
+        counts = unqueArray(counts)
+        // console.log(counts)
+
+        addBadge(
+          child,
+          'blue',
+          null,
+          [],
+          counts.length,
+          [],
+          [],
+          Array.from(counts, (c) => ({
+            tag: c,
+            pageId: `https://bing.com/search?q=${c}`,
+            pageTitle: '',
+          }))
+        )
+
         let pos = getElementViewPosition(child)
         child.classList.add('data-find')
         child.setAttribute('data-find', counts.join(','))
@@ -63,12 +78,9 @@ function travelCommit (elements, commit) {
     if (child.children.length > 0) {
       travelCommit(child.children, commit)
     }
+    // if (getElementXpath(child) == commit.xpath) console.log(child)
     // 对比#text和commit的匹配
     for (const c of check) {
-      // console.log(
-      //   c.nodeName == commit.nodeName && c.textContent == commit.textContent,
-      //   commit
-      // )
       if (
         c.nodeName == commit.nodeName &&
         c.textContent == commit.textContent
@@ -77,12 +89,13 @@ function travelCommit (elements, commit) {
         if (!c.parentElement.getAttribute('data-badge'))
           addBadge(
             c.parentElement,
-            commit.cfxAddress,
+            'red',
             commit.createdAt,
             commit.cfxAddresses,
             commit.count,
             commit.replies,
-            commit.tags,commit.relate
+            commit.tags,
+            commit.relate
           )
       }
     }
@@ -90,9 +103,13 @@ function travelCommit (elements, commit) {
 }
 
 function matchWords (
-  words = ['meta','人工', '智能', '无', '监督','学习'],
-  texts = ['无', '监督','学习']
+  words = ['meta', '人工', '智能', '无', '监督', '学习'],
+  texts = ['无', '监督', '学习']
 ) {
+  // 大写
+  words = Array.from([...words], (w) => w.toUpperCase())
+  texts = Array.from([...texts], (w) => w.toUpperCase())
+
   const sum = (ts) => ts.reduce((partialSum, a) => partialSum + a, 0)
 
   let res = Array.from(words, (t) => texts.indexOf(t) + 1).filter((f) => f > 0)
@@ -142,28 +159,36 @@ import React from 'react'
 import { render } from 'react-dom'
 import { format } from 'timeago.js'
 
-
-import {Divider  , Progress, Badge, Avatar, HoverCard, Text, Rating, Button   } from '@mantine/core'
-
+import {
+  Divider,
+  Progress,
+  Badge,
+  Avatar,
+  HoverCard,
+  Text,
+  Rating,
+  Button,
+} from '@mantine/core'
 
 function getPageUrl () {
   return window.location.href.replace(/\?.*/, '')
 }
 
-function getUrlParam(name) {
-    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
-    var r = window.location.search.substr(1).match(reg);  //匹配目标参数
-    if (r != null) return r[2]; return null; //返回参数值
+function getUrlParam (name) {
+  var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)') //构造一个含有目标参数的正则表达式对象
+  var r = window.location.search.substr(1).match(reg) //匹配目标参数
+  if (r != null) return r[2]
+  return null //返回参数值
 }
 
-function getKnowledgeTags(){
-    let t=decodeURI(getUrlParam('knowledgeTags')||'');
-    if(t) return t.toUpperCase().split(',')
-    return
+function getKnowledgeTags () {
+  let t = decodeURI(getUrlParam('knowledgeTags') || '')
+  if (t) return t.toUpperCase().split(',')
+  return
 }
 
-function getKnowledgeReply(){
-  let t=decodeURI(getUrlParam('knowledgeReply')||'');
+function getKnowledgeReply () {
+  let t = decodeURI(getUrlParam('knowledgeReply') || '')
   return t
 }
 
@@ -174,6 +199,8 @@ function getSelectionByUser () {
   var nodeName = range.startContainer.nodeName
   var textContent = range.startContainer.textContent
   let parentText = range.startContainer.parentElement.innerText
+  // let xpath = getElementXpath(range.startContainer.parentElement)
+  // console.log(xpath)
   let url = getPageUrl()
   return {
     pageId: url,
@@ -184,7 +211,8 @@ function getSelectionByUser () {
     pageUrl: url,
     pageTitle: document.title,
     createdAt: new Date().toLocaleString(),
-    tags:getKnowledgeTags()
+    tags: getKnowledgeTags(),
+    // xpath,
   }
 }
 
@@ -211,16 +239,18 @@ function getComments () {
 
 function displayComments (cms) {
   let textContents = {}
-//   标签
-  let tags={};
+  //   标签
+  let tags = {}
   Array.from(cms, (d) => {
     try {
       let json = {
         textContent: d.textContent,
         nodeName: d.nodeName,
+        xpath: d.xpath,
         cfxAddress: d.cfxAddress,
         createdAt: new Date(d.createdAt).getTime(),
-        tags:d.tags,relate:d.relate
+        tags: d.tags,
+        relate: d.relate,
       }
       if (!textContents[d.textContent])
         textContents[d.textContent] = {
@@ -228,25 +258,24 @@ function displayComments (cms) {
           replies: {},
         }
       textContents[d.textContent].data.push(json)
-      textContents[d.textContent].replies[d.reply] = 1;
+      textContents[d.textContent].replies[d.reply] = 1
     } catch (error) {
       console.log(error)
     }
     for (const tag of d.tags) {
-        if(!tags[tag.name])tags[tag.name]={
-            count:0,
-            ...tag
-        };
-        tags[tag.name].count++;
+      if (!tags[tag.name])
+        tags[tag.name] = {
+          count: 0,
+          ...tag,
+        }
+      tags[tag.name].count++
     }
-
   })
 
   //
   addRating(Object.keys(textContents).length)
 
   //  console.log(tags);
-  
 
   // 排序后
   for (const key in textContents) {
@@ -367,8 +396,6 @@ function unqueArray (arr) {
 //   (window.CUSDIS.initial = d),
 //   d()
 
-
-
 function Demo () {
   const [count, setCount] = React.useState(0)
 
@@ -475,48 +502,54 @@ function addRating (count = 0) {
 
 function addBadge (
   element,
-  nickname,
+  color = 'red',
   createdAt,
   nicknames = [],
   count = 1,
   replies = [],
-  tags=[],relate
+  tags = [],
+  relate
 ) {
   let div2 = document.createElement('div')
   div2.style = `cursor :pointer;display: inline;
-  margin-right: 8px;`
+  margin-right: 8px;text-align:left`
   element.insertAdjacentElement('afterbegin', div2)
   element.setAttribute('data-badge', true)
 
   const countBtn = (
-    <Avatar.Group spacing='sm'>
-      <Avatar variant='filled' radius='xl' size='sm' color='red'>
-        +{count}
+    <Avatar.Group>
+      <Avatar variant='filled' radius='lg' size='sm' color={color}>
+        <Text fz={createdAt ? 'sm' : 'xs'}>+{count}</Text>
       </Avatar>
     </Avatar.Group>
   )
 
   // console.log(relate)
   render(
-    <HoverCard width={440} shadow='md' zIndex={9999999999}>
+    <HoverCard
+      width={color == 'red' ? 440 : 120}
+      shadow='md'
+      zIndex={9999999999}
+    >
       <HoverCard.Target>
         <Badge
-          color='red'
+          color={color}
           size='lg'
-          sx={{ paddingRight: 3 }}
-          rightSection={countBtn}
+          sx={{ paddingRight: createdAt ? 3 : 0 }}
+          leftSection={createdAt ? '' : countBtn}
+          rightSection={createdAt ? countBtn : ''}
         >
-          {format(createdAt, 'zh_CN')}
+          {createdAt ? format(createdAt, 'zh_CN') : ''}
         </Badge>
       </HoverCard.Target>
 
       <HoverCard.Dropdown>
-        <Text size='xs' c='dimmed'>
+        <Text size='xs' c='dimmed' align='left'>
           {nicknames.join('\n')}
         </Text>
 
         {replies && replies.length > 0 ? (
-          <Text size='sm'>
+          <Text size='sm' align='left'>
             <br />
             <Badge size='xs'>点评</Badge>
             {replies.join('\n')}
@@ -525,38 +558,58 @@ function addBadge (
           ''
         )}
 
-{/* {tags && tags.length > 0 ? Array.from(tags,t=><Badge key={t.name} size='xs' color={t.color} >{t.name}</Badge>) :''} */}
-{relate && relate.length > 0 ? 
-  <Divider my="xs" label="相关" labelPosition="center" />:''}
-
-{relate && relate.length > 0 ? (
-          Array.from(relate,e=>(
-          <a target="_blank" key={e.pageTitle} href={e.pageId} style={{ textDecoration: "none",
-            fontSize: "12px",
-            display:'block',
-            fontWeight: 300,border: 'none',
-            color: "#2196f3"}}>{e.pageTitle} <Badge key={e.pageTitle} size='xs'>{e.tag}</Badge></a>))
+        {/* {tags && tags.length > 0 ? Array.from(tags,t=><Badge key={t.name} size='xs' color={t.color} >{t.name}</Badge>) :''} */}
+        {((replies && replies.length > 0) || nicknames.join('\n')) &&
+        relate &&
+        relate.length > 0 ? (
+          <Divider my='xs' label='相关' labelPosition='left' />
         ) : (
           ''
         )}
+
+        {relate && relate.length > 0
+          ? Array.from(relate, (e) => (
+              <a
+                target='_blank'
+                key={e.pageTitle}
+                href={e.pageId}
+                style={{
+                  textDecoration: 'none',
+                  fontSize: '12px',
+                  display: 'block',
+                  fontWeight: 300,
+                  border: 'none',
+                  color: '#2196f3',
+                  margin: '4px',
+                }}
+              >
+                {e.pageTitle}{' '}
+                <Badge key={e.pageTitle} size='xs'>
+                  {e.tag}
+                </Badge>
+              </a>
+            ))
+          : ''}
       </HoverCard.Dropdown>
     </HoverCard>,
     div2
   )
 }
 
-function update (tx) {
-  if (tx && tx.length)
-    window.requestAnimationFrame(() => {
-      targets = []
-      _TEXTS = Array.from(tx, (w) => {
-        w = w.trim()
-        if (w) return extractWords(w)
-      }).filter((f) => f)
-      //   console.log(_TEXTS)
-      scrollTo(0, 0)
-      travel(document.body.children)
-    })
+function update () {
+  chrome.storage.local.get('tags').then(({ tags }, _) => {
+    if (tags && tags.length)
+      window.requestAnimationFrame(() => {
+        targets = []
+        _TEXTS = Array.from(tags, (w) => {
+          w = w.trim()
+          if (w) return extractWords(w)
+        }).filter((f) => f)
+        //   console.log(_TEXTS)
+        // scrollTo(0, 0)
+        travel(document.body.children)
+      })
+  })
 }
 
 // chrome.storage.local.onChanged.addListener(onGot)
@@ -584,12 +637,14 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   // console.log(request)
   let isOpenLogin = false
   if (request.cmd == 'mark-run') {
-
     let res = getSelectionByUser()
     // 弹出modal ，让用户输入评论
-    let reply=window.prompt("输入评论",getKnowledgeReply()||res.textContent);
+    let reply = window.prompt(
+      '输入评论',
+      getKnowledgeReply() || res.textContent
+    )
 
-    let data={...res,reply}
+    let data = { ...res, reply }
     // 向bg发送消息
     chrome.runtime.sendMessage(
       { cmd: 'mark-result', data: data },
@@ -597,10 +652,6 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         console.log('收到来自后台的回复：' + response)
       }
     )
-    
-
-    
-
   } else if (request.cmd == 'login') {
     // alert('请登录anyweb或者填写钱包地址')
     if (window.confirm('请登录anyweb或者填写钱包地址')) {
@@ -612,21 +663,15 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     }
   } else if (request.cmd == 'mark-push') {
     alert('已提交')
-    let res = request.data
-    displayComments(res)
+    if (request.data) displayComments(request.data)
   } else if (request.cmd == 'get-by-pageId-result') {
-    console.log(request.data)
-    let cms = request.data
-    displayComments(cms)
+    // console.log(request.data)
+    if (request.data) displayComments(request.data)
   }
   sendResponse('我收到了你的消息！')
 })
 
-
-
 getComments()
-
-
 
 document.addEventListener('scroll', (event) => {
   if (
@@ -635,6 +680,7 @@ document.addEventListener('scroll', (event) => {
   ) {
     window.requestAnimationFrame(() => {
       getComments()
+      update()
       ticking = false
       lastKnownScrollPosition = window.scrollY
     })

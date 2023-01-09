@@ -9,30 +9,40 @@ interface Props {
   title: string;
 }
 
+
+// chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+// if (request.cmd == 'get-all-tags-result') {
+//   console.log(request.data)
+// }
+// sendResponse('我收到了你的消息！')
+// })
+
 const Options: React.FC<Props> = ({ title }: Props) => {
   const [texts, setTexts] = React.useState([''])
   const [value, setValue] = React.useState('');
 
-  let gettingItem = chrome.storage.local.get()
+  const getTags=()=>{
+    let gettingItem = chrome.storage.local.get('tags')
     gettingItem.then(onGot, onError)
     function onGot (e: any) {
-      // console.log(e)
-      setTexts(e.data)
+      if(e.tags) setTexts(e.tags)
       
     }
     function onError (e: any) {
       console.log(e)
     }
+  }
+  
 
   const updateText=(t: string)=>{
     let textsNew=Array.from(texts,te=>te.trim()).filter(f=>f);
     textsNew.push(t.trim());
+    
     // console.log(t.target.value)
     setTexts(textsNew);
     chrome.storage.local.set({
-      data:textsNew
+      tags:textsNew
     });
-
   }
 
  
@@ -47,7 +57,7 @@ const Options: React.FC<Props> = ({ title }: Props) => {
         setTexts(nts as [string]);
         // console.log(nts)
         chrome.storage.local.set({
-          data:nts
+          tags:nts
         });
       }
     }}>
@@ -55,7 +65,7 @@ const Options: React.FC<Props> = ({ title }: Props) => {
     </ActionIcon>
   );
 
- 
+  getTags()
 
   return <div>
     <div className="OptionsContainer">{title} Page</div>
@@ -74,7 +84,12 @@ const Options: React.FC<Props> = ({ title }: Props) => {
       event.preventDefault();
       updateText(value.trim());
     }}>ADD</Button>
-       
+      
+      <Button onClick={(event) => {
+      event.preventDefault();
+      getTags();
+    }}>UPDATE</Button>
+
     </Group>
 
     
