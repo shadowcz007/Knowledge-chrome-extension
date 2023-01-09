@@ -520,8 +520,8 @@ chrome.runtime.onMessage.addListener(async function (
             nTags[t.name] = 1
           })
         })
-        chrome.storage.local.get('tags').then(({ tags }, _) => {
-          Array.from(tags, (t) => (nTags[t] = 1))
+        chrome.storage.local.get('tags').then((r, _) => {
+          if(r&&r.tags) Array.from(r.tags, (t) => (nTags[t] = 1))
           chrome.storage.local.set({
             tags: Object.keys(nTags),
           })

@@ -265,7 +265,7 @@ class Newtab2 extends React.Component {
   }
 
   getData (e = 'this_week') {
-    // console.log(e)
+    console.log(e,this.state.isNew)
     // 向bg发送消息
     if (this.state.isNew) return
     this.setState({
@@ -278,15 +278,18 @@ class Newtab2 extends React.Component {
       { cmd: 'new-reply', timestamp: e },
       function (response) {
         // console.log('new-reply 收到来自后台的回复：' + response)
-        setTimeout(
-          () =>
-            that.setState({
-              isNew: true,
-            }),
-          3000
-        )
+       
       }
+    );
+
+    setTimeout(
+      () =>
+        that.setState({
+          isNew: false,
+        }),
+      3000
     )
+
   }
 
   updateCfxAddress (address) {
@@ -429,6 +432,7 @@ class Newtab2 extends React.Component {
                 { value: null, label: '所有' },
               ]}
               onChange={(event) => {
+                that.setState({isNew:false})
                 that.getData(event)
               }}
             />
