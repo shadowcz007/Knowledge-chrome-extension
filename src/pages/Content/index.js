@@ -60,8 +60,7 @@ function travel (elements) {
         )
 
         let pos = getElementViewPosition(child)
-        child.classList.remove('data-find')
-        child.classList.add('data-find')
+        if(!child.classList.contains('data-find'))  child.classList.add('data-find')
         child.setAttribute('data-find', counts.join(','))
         child.setAttribute('data-position', JSON.stringify(pos))
         child.style.background='rgba(249, 232, 76, 0.5);';
