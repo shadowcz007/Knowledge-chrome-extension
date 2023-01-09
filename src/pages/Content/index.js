@@ -27,7 +27,7 @@ function travel (elements) {
   for (let child of elements) {
     // console.log(check, child.children.length)
     if (child.children.length > 0) {
-      Array.from(child.children, (c) => c.classList.remove('data-find'))
+      // Array.from(child.children, (c) => c.classList.remove('data-find'))
       travel(child.children)
     } else {
       let res = extractSentence(child.innerText)
@@ -60,6 +60,7 @@ function travel (elements) {
         )
 
         let pos = getElementViewPosition(child)
+        child.classList.remove('data-find')
         child.classList.add('data-find')
         child.setAttribute('data-find', counts.join(','))
         child.setAttribute('data-position', JSON.stringify(pos))
