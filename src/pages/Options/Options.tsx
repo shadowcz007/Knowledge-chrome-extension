@@ -25,7 +25,7 @@ const Options: React.FC<Props> = ({ title }: Props) => {
     let gettingItem = chrome.storage.local.get('tags')
     gettingItem.then(onGot, onError)
     function onGot (e: any) {
-      if(e.tags) setTexts(e.tags)
+      if(e.tags) setTexts(Object.keys(e.tags))
       
     }
     function onError (e: any) {
@@ -38,11 +38,26 @@ const Options: React.FC<Props> = ({ title }: Props) => {
     let textsNew=Array.from(texts,te=>te.trim()).filter(f=>f);
     textsNew.push(t.trim());
     
-    // console.log(t.target.value)
     setTexts(textsNew);
-    chrome.storage.local.set({
-      tags:textsNew
-    });
+    // console.log(t)
+    chrome.runtime.sendMessage(
+      { "cmd": 'find-by-tag', data: t.trim() },
+      function (response) {
+        console.log('收到来自后台的回复：' + response)
+      }
+    )
+    // chrome.storage.local.get('tags').then(r => {
+    //   let tags={};
+    //   if (r && r.tags) tags = { ...r.tags }
+    //     chrome.storage.local
+    //       .set({
+    //         tags,
+    //       })
+    // })
+
+    // chrome.storage.local.set({
+    //   tags:textsNew
+    // });
   }
 
  
@@ -65,7 +80,7 @@ const Options: React.FC<Props> = ({ title }: Props) => {
     </ActionIcon>
   );
 
-  getTags()
+  // getTags()
 
   return <div>
     <div className="OptionsContainer">{title} Page</div>

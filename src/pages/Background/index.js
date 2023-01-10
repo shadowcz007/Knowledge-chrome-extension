@@ -122,6 +122,29 @@ const fetchRequest = (url, params = {}, timeout = 10000) => {
   })
 }
 
+function updateTags (data = []) {
+  let tags = {}
+  return new Promise((res, rej) => {
+    chrome.storage.local.get('tags').then((r, _) => {
+      if (r && r.tags) tags = { ...r.tags }
+      if (data && data.length > 0) {
+        Array.from(data, (d) => {
+          Array.from(d.tags, (tag) => {
+            tags[tag.name] = d
+          })
+        })
+        chrome.storage.local
+          .set({
+            tags,
+          })
+          .then(() => res(tags))
+      } else {
+        res(tags)
+      }
+    })
+  })
+}
+
 // 发送到后台记录标注
 async function postData (url = '', data = {}) {
   // Default options are marked with *
@@ -140,9 +163,18 @@ async function postData (url = '', data = {}) {
     body: JSON.stringify(data), // body data type must match "Content-Type" header
   })
   if (response && response.status == 200) {
-    // console.log('response', response)
-    return response.json()
+    let res = await response.json()
+
+    if (res && res.properties) {
+      res.results = [{ properties: res.properties }]
+    }
+
+    res = Array.from(res && res.results ? res.results : [], (r) => {
+      return parseData(r)[0]
+    })
+    return res
   }
+  return []
 }
 
 function save (json) {
@@ -292,24 +324,6 @@ function getAllTags () {
   })
 }
 
-function findByTag (tag) {
-  let urls = {}
-  return new Promise((res, rej) => {
-    if (tag) {
-      queryByTag(tag).then((data) => {
-        Array.from(data.results, (r) => {
-          let d = parseData(r)[0]
-          urls[d.pageId] = { tag, pageTitle: d.pageTitle, pageId: d.pageId }
-        })
-
-        res(Object.values(urls))
-      })
-    } else {
-      res()
-    }
-  })
-}
-
 // 获取几天前时间
 function getTimestamp (n = 1) {
   let t = new Date()
@@ -318,10 +332,9 @@ function getTimestamp (n = 1) {
     .split(' ')[0]
 }
 
-// let isQueryNotEmptyOfReply = false
 function queryNotEmptyOfReply (timestamp = null) {
   // if (isQueryNotEmptyOfReply == false) {
-  isQueryNotEmptyOfReply = true
+
   let url = `https://api.notion.com/v1/databases/${databaseId}/query`
 
   let sorts = [
@@ -404,9 +417,10 @@ chrome.runtime.onMessage.addListener(async function (
   sender,
   sendResponse
 ) {
-  console.log('收到来自content-script的消息：', request)
+  const { cmd } = request
+  console.log('收到来自content-script的消息：', request, cmd)
 
-  if (request.cmd == 'mark-result') {
+  if (cmd == 'mark-result') {
     const data = await chrome.storage.sync.get('cfxAddress')
     if (data && data.cfxAddress) cfxAddress = data.cfxAddress
 
@@ -431,7 +445,7 @@ chrome.runtime.onMessage.addListener(async function (
           function (tabs) {
             chrome.tabs.sendMessage(
               tabs[0].id,
-              { cmd: 'mark-push', data: res ? parseData(res) : null },
+              { cmd: 'mark-push', data: res },
               function (response) {
                 console.log(response)
               }
@@ -440,35 +454,22 @@ chrome.runtime.onMessage.addListener(async function (
         )
       })
     }
-  } else if (request.cmd == 'cfx-address') {
+  } else if (cmd == 'cfx-address') {
     cfxAddress = request.data
     if (cfxAddress) chrome.storage.sync.set({ cfxAddress })
-  } else if (request.cmd == 'get-address') {
+  } else if (cmd == 'get-address') {
     const data = await chrome.storage.sync.get('cfxAddress')
     if (data && data.cfxAddress) cfxAddress = data.cfxAddress
     if (cfxAddress) sendResponse(cfxAddress)
-  } else if (request.cmd == 'get-by-pageId') {
-    queryByPageId(request.data).then((res) => {
-      // tags
-      let tags = {},
-        data = Array.from(res && res.results ? res.results : [], (r) => {
-          let rs = parseData(r)[0]
-          Array.from(rs.tags, (t) => (tags[t.name] = 1))
-          return rs
+  } else if (cmd == 'get-by-pageId') {
+    queryByPageId(request.data).then((data) => {
+      updateTags().then((tags) => {
+        data = Array.from(data, (d) => {
+          d.relate = Array.from(d.tags, (tag) => tags[tag.name]).filter(
+            (f) => f && f.pageId != d.pageId
+          )
+          return d
         })
-
-      findByTag(Object.keys(tags)[0]).then((tagRes) => {
-        if (tagRes) {
-          Array.from(data, (d) => {
-            d.relate = tagRes.filter((f) => {
-              return (
-                d.tags.filter((t) => t.name == f.tag).length > 0 &&
-                f.pageId != d.pageId
-              )
-            })
-          })
-        }
-
         chrome.tabs.query(
           { active: true, currentWindow: true },
           function (tabs) {
@@ -486,7 +487,7 @@ chrome.runtime.onMessage.addListener(async function (
         )
       })
     })
-  } else if (request.cmd == 'new-reply') {
+  } else if (cmd == 'new-reply') {
     // console.log(request)
     queryNotEmptyOfReply(request.timestamp).then((res) => {
       // isQueryNotEmptyOfReply = false
@@ -495,55 +496,34 @@ chrome.runtime.onMessage.addListener(async function (
           tabs[0].id,
           {
             cmd: 'new-reply',
-            data: Array.from(res && res.results ? res.results : [], (r) => {
-              return parseData(r)[0]
-            }),
+            data: res,
           },
           function (response) {
             console.log(response)
           }
         )
       })
-
-      let nTags = {}
-      getAllTags().then((tRes) => {
-        // console.log(tRes, res)
-        let results = []
-        if (tRes && tRes.results) {
-          results = [...tRes.results]
-        }
-        if (res && res.results) {
-          results = [...res.results, ...results]
-        }
-        Array.from(results, (r) => {
-          Array.from(parseData(r)[0].tags, (t) => {
-            nTags[t.name] = 1
-          })
-        })
-        chrome.storage.local.get('tags').then((r, _) => {
-          if(r&&r.tags) Array.from(r.tags, (t) => (nTags[t] = 1))
-          chrome.storage.local.set({
-            tags: Object.keys(nTags),
-          })
-        })
-      })
+      getAllTags().then((res) => updateTags(res))
     })
-  } else if ((request.cmd = 'open-login' && isOpenLogin == false)) {
+  } else if (cmd == 'open-login' && isOpenLogin == false) {
     chrome.tabs.create({ url: 'newtab.html' })
     isOpenLogin = true
-  } else if (request.cmd == 'find-by-tag' && request.data) {
+  } else if (cmd == 'find-by-tag' && request.data) {
     queryByTag(request.data).then((res) => {
-      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        chrome.tabs.sendMessage(
-          tabs[0].id,
-          {
-            cmd: 'find-by-tag-result',
-            data: Array.from(res && res.results ? res.results : [], (r) => {
-              return parseData(r)[0]
-            }),
-          },
-          function (response) {
-            console.log(response)
+      updateTags(res).then((data) => {
+        chrome.tabs.query(
+          { active: true, currentWindow: true },
+          function (tabs) {
+            chrome.tabs.sendMessage(
+              tabs[0].id,
+              {
+                cmd: 'find-by-tag-result',
+                data: data,
+              },
+              function (response) {
+                console.log(response)
+              }
+            )
           }
         )
       })

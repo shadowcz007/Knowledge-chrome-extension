@@ -21,8 +21,7 @@
         {
             "matches": [
                 "http://*/*",
-                "https://*/*",
-                "<all_urls>"
+                "https://*/*"
             ],
             "js": [
                 "contentScript.bundle.js"

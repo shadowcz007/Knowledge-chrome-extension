@@ -6,9 +6,6 @@
 // import getElementXpath from 'element-xpath'
 // console.log(getElementXpath)
 // window.getElementXpath = getElementXpath
-let _TEXTS = []
-
-let targets = []
 
 // 提取句子
 function extractSentence (str) {
@@ -22,70 +19,110 @@ function extractWords (str) {
   const segments = segmenterJa.segment(str)
   return Array.from(segments, (s) => s.segment)
 }
+
 // 遍历
-function travel (elements) {
+function travel (elements, _TEXTS) {
+  let targets = []
   for (let child of elements) {
-    // console.log(check, child.children.length)
-    if (child.children.length > 0) {
-      // Array.from(child.children, (c) => c.classList.remove('data-find'))
-      travel(child.children)
-    } else {
-      let res = extractSentence(child.innerText)
-      let counts = []
-      for (let r of res) {
-        let words = extractWords(r)
-        // match
-        for (const texts of _TEXTS) {
-          let isMatch = matchWords(words, texts)
-          if (isMatch) counts.push(texts.join(''))
+    let childTexts = []
+    let res = extractSentence(child.innerText)
+    let counts = {}
+    for (let r of res) {
+      let words = extractWords(r)
+      childTexts.push(words)
+      // match
+      for (const texts of _TEXTS) {
+        let isMatch = matchWords(words, texts)
+        if (isMatch && isMatch.count > 0) {
+          counts = { ...counts, ...isMatch.result }
+          // console.log('isMatch:', r, isMatch.html)
         }
       }
-      if (counts.length > 0 && child.innerText.trim().length > 20) {
-        counts = unqueArray(counts)
-        // console.log(counts)
+    }
+    if (Object.keys(counts).length > 0 && child.innerText.trim().length > 0) {
+      let tags = unqueArray(Array.from(Object.values(counts), (c) => c.tag))
 
-        addBadge(
-          child,
-          'blue',
-          null,
-          [],
-          counts.length,
-          [],
-          [],
-          Array.from(counts, (c) => ({
-            tag: c,
-            pageId: `https://bing.com/search?q=${c}`,
-            pageTitle: '',
-          }))
-        )
+      childTexts = Array.from(childTexts, (ct) => {
+        let emTags = {}
+        for (const c of Object.values(counts)) {
+          if (ct.join('') == c.words.join('')) {
+            // console.log(c)
+            emTags[c.id] = c
+          }
+        }
+        for (const tag of Object.values(emTags)) {
+          ct[tag.startIndex] =
+            `<a href="https://bing.com/search?q=${tag.tag}" style="
+              padding: 2px 2px;
+              text-decoration: none;
+              box-shadow:none;
+              font-weight: 800;
+              border-bottom: 1px dashed ${getComputedStyle(child).color};">` +
+            ct[tag.startIndex]
+          ct[tag.endIndex] = ct[tag.endIndex] + '</a>'
+        }
+        return ct.filter((f) => f).join('')
+      })
 
-        let pos = getElementViewPosition(child)
-        if(!child.classList.contains('data-find'))  child.classList.add('data-find')
-        child.setAttribute('data-find', counts.join(','))
-        child.setAttribute('data-position', JSON.stringify(pos))
-        child.style.background='rgba(249, 232, 76, 0.5);';
-        targets.push({ child, pos, keywords: counts.join(',') })
+      let pos = getElementViewPosition(child)
+
+      // console.log(child, child.nodeName)
+      if (['A'].includes(child.nodeName) && child.href) {
+        // child.classList.add('data-find')
+        // child.setAttribute('data-find', tags.join(','))
+        // child.setAttribute('data-position', JSON.stringify(pos))
+        // child.innerHTML = childTexts.filter((f) => f).join('')
+        targets.push({
+          pageId: child.href,
+          pageTitle: child.innerText,
+          pos,
+          tags: Array.from(tags, (t) => ({ name: t })),
+        })
       }
     }
   }
+
+  targets = targets.sort((a, b) => b.pageTitle.length - a.pageTitle.length)
+
+  return targets
 }
 // 遍历评论
-function travelCommit (elements, commit) {
+function travelCommit (elements, commit, pageRelate) {
+  // 直接对比h1
+  Array.from(document.body.querySelectorAll('h1'), (h1) => {
+    if (!h1.getAttribute('data-badge')) {
+      addBadge(
+        h1,
+        'blue',
+        null,
+        [],
+        pageRelate.length,
+        [],
+        [],
+        Array.from(pageRelate, (c) => ({
+          tags: c.tags,
+          pageId: c.pageId,
+          pageTitle: c.pageTitle,
+        }))
+      )
+    }
+  })
+
   for (let child of elements) {
     let check = Array.from(child.childNodes, (c) => c).filter(
       (c) => c.nodeName == '#text'
     )
     if (child.children.length > 0) {
-      travelCommit(child.children, commit)
+      travelCommit(child.children, commit, pageRelate)
     }
-    // if (getElementXpath(child) == commit.xpath) console.log(child)
+
     // 对比#text和commit的匹配
     for (const c of check) {
+      // console.log(c.textContent, document.title)
       if (
         c.nodeName == commit.nodeName &&
         c.textContent == commit.textContent
       ) {
-        // console.log(c)
         if (!c.parentElement.getAttribute('data-badge'))
           addBadge(
             c.parentElement,
@@ -97,27 +134,87 @@ function travelCommit (elements, commit) {
             commit.tags,
             commit.relate
           )
+      } else if (
+        c.textContent.trim() == document.title.trim() &&
+        !c.parentElement.getAttribute('data-badge')
+      ) {
+        addBadge(
+          c.parentElement,
+          'blue',
+          null,
+          [],
+          pageRelate.length,
+          [],
+          [],
+          Array.from(pageRelate, (c) => ({
+            tags: Array.from(c.tags, (t) => ({ name: t })),
+            pageId: c.url,
+            pageTitle: c.title,
+          }))
+        )
       }
     }
   }
 }
-
 function matchWords (
   words = ['meta', '人工', '智能', '无', '监督', '学习'],
   texts = ['无', '监督', '学习']
 ) {
+  let oWords = [...words],
+    oTexts = [...texts]
   // 大写
   words = Array.from([...words], (w) => w.toUpperCase())
   texts = Array.from([...texts], (w) => w.toUpperCase())
 
-  const sum = (ts) => ts.reduce((partialSum, a) => partialSum + a, 0)
+  let word = words.join('')
+  let text = texts.join('')
+  // 获得在原字符的位置
+  const getIndex = (arr, index) => {
+    return [...arr].slice(0, index).join('').length
+  }
 
-  let res = Array.from(words, (t) => texts.indexOf(t) + 1).filter((f) => f > 0)
+  let result = {}
 
-  return (
-    sum(res) === sum(Array.from(texts, (w, i) => i + 1)) &&
-    words.join('').match(texts.join(''))
-  )
+  Array.from(new Array(word.length), (_, i) => {
+    // 匹配到关键词
+    if (word.indexOf(text, i) != -1) {
+      let wIndex = word.indexOf(text, i)
+      for (let index = 0; index < words.length; index++) {
+        if (getIndex(words, index) === wIndex) {
+          let isMatch = true
+          for (let j = index; j < index + texts.length; j++) {
+            if (words[j] !== texts[j - index]) isMatch = false
+            // console.log('match',j,words[j],texts[j-index])
+          }
+          // console.log(
+          //   isMatch,
+          //   index,
+          //   index + texts.length - 1,
+          //   '<em>' + words[index],
+          //   words[index + texts.length - 1] + '</em>'
+          // )
+          if (isMatch) {
+            let res = {
+              startWord: oWords[index],
+              endWord: oWords[index + texts.length - 1],
+              startIndex: index,
+              endIndex: index + texts.length - 1,
+              tag: oTexts.join(''),
+              words: oWords,
+            }
+            let id = Object.values(res).join('')
+            result[id] = { ...res, id }
+          }
+        }
+      }
+    }
+  })
+
+  return {
+    count: Object.keys(result).length,
+    result,
+    tag: oTexts.join(''),
+  }
 }
 
 // 获取元素的绝对位置坐标（像对于浏览器视区左上角）
@@ -194,26 +291,38 @@ function getKnowledgeReply () {
 
 // 获取用户划选的内容
 function getSelectionByUser () {
-  var selObj = window.getSelection()
-  var range = selObj.getRangeAt(0)
-  var nodeName = range.startContainer.nodeName
-  var textContent = range.startContainer.textContent
-  let parentText = range.startContainer.parentElement.innerText
-  // let xpath = getElementXpath(range.startContainer.parentElement)
-  // console.log(xpath)
-  let url = getPageUrl()
-  return {
+  let url = getPageUrl(),
+    createdAt = new Date().toLocaleString(),
+    tags = getKnowledgeTags()
+
+  let res = {
     pageId: url,
-    nodeName: nodeName,
-    textContent: textContent,
-    parentText,
     cfxAddress: 'shadow',
     pageUrl: url,
     pageTitle: document.title,
-    createdAt: new Date().toLocaleString(),
-    tags: getKnowledgeTags(),
+    createdAt,
+    tags,
     // xpath,
   }
+
+  var selObj = window.getSelection()
+  if (selObj.type == 'None') {
+    res = {
+      ...res,
+      nodeName: '#text',
+      textContent: document.title,
+      parentText: document.title,
+    }
+  } else {
+    var range = selObj.getRangeAt(0)
+    var nodeName = range.startContainer.nodeName
+    var textContent = range.startContainer.textContent
+    let parentText = range.startContainer.parentElement.innerText
+    // let xpath = getElementXpath(range.startContainer.parentElement)
+    // console.log(xpath)
+    res = { ...res, nodeName: nodeName, textContent: textContent, parentText }
+  }
+  return res
 }
 
 function getComments () {
@@ -225,19 +334,23 @@ function getComments () {
       console.log('收到来自后台的回复：' + response)
     }
   )
-
-  // fetch(
-  //   `https://cusdis.com/api/open/comments?page=1&appId=bf33fa6f-f24f-4876-a1db-12fea5c672ec&pageId=${encodeURI(
-  //     url
-  //   )}`
-  // )
-  //   .then((res) => res.json())
-  //   .then((res) => {
-
-  //   })
 }
 
 function displayComments (cms) {
+  // 只保留前4条,标签多的排前面
+  let pageRelate = travel(
+    document.body.querySelectorAll('a'),
+    Array.from(Object.keys(window._knowledgeTags), (w) => {
+      w = w.trim()
+      if (w) return extractWords(w)
+    }).filter((f) => f)
+  )
+    .slice(0, 4)
+    .sort((a, b) => b.tags.length - a.tags.length)
+
+  // 把tags的关联上?
+  console.log(pageRelate)
+
   let textContents = {}
   //   标签
   let tags = {}
@@ -273,9 +386,7 @@ function displayComments (cms) {
   })
 
   //
-  addRating(Object.keys(textContents).length)
-
-  //  console.log(tags);
+  addRating(Object.keys(textContents).length + pageRelate.length)
 
   // 排序后
   for (const key in textContents) {
@@ -289,7 +400,7 @@ function displayComments (cms) {
     data[0].cfxAddresses = unqueArray(Array.from(data, (d) => d.cfxAddress))
     try {
       let json = { ...data[0], replies }
-      travelCommit(document.body.children, json)
+      travelCommit(document.body.children, json, pageRelate)
       // console.log(json)
     } catch (error) {
       console.log(error)
@@ -464,11 +575,12 @@ function Demo () {
     </div>
   )
 }
-// render(<Demo />, div)
 
-// let div2 = document.createElement('div')
+// let div = document.createElement('div')
 // // window.document.body.appendChild(div2)
-// window.document.body.insertAdjacentElement('beforebegin', div2)
+// window.document.body.insertAdjacentElement('beforebegin', div)
+
+// render(<Demo />, div)
 
 // function Demo2 () {
 //   return (
@@ -526,11 +638,7 @@ function addBadge (
 
   // console.log(relate)
   render(
-    <HoverCard
-      width={color == 'red' ? 440 : 120}
-      shadow='md'
-      zIndex={9999999999}
-    >
+    <HoverCard width={440} shadow='md' zIndex={9999999999}>
       <HoverCard.Target>
         <Badge
           color={color}
@@ -575,18 +683,33 @@ function addBadge (
                 href={e.pageId}
                 style={{
                   textDecoration: 'none',
+                  boxShadow: 'none',
                   fontSize: '12px',
                   display: 'block',
                   fontWeight: 300,
                   border: 'none',
                   color: '#2196f3',
                   margin: '4px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
                 }}
               >
+                {color == 'blue'
+                  ? Array.from(e.tags, (t) => (
+                      <Badge key={t.name} size='xs'>
+                        {t.name}
+                      </Badge>
+                    ))
+                  : ''}
                 {e.pageTitle}{' '}
-                <Badge key={e.pageTitle} size='xs'>
-                  {e.tag}
-                </Badge>
+                {color == 'red' ? (
+                  <Badge key={e.pageTitle} size='xs'>
+                    {Array.from(e.tags, (t) => t.name).join(' ')}
+                  </Badge>
+                ) : (
+                  ''
+                )}
               </a>
             ))
           : ''}
@@ -596,19 +719,11 @@ function addBadge (
   )
 }
 
+// 发现有价值的url
 function update () {
   chrome.storage.local.get('tags').then(({ tags }, _) => {
-    if (tags && tags.length)
-      window.requestAnimationFrame(() => {
-        targets = []
-        _TEXTS = Array.from(tags, (w) => {
-          w = w.trim()
-          if (w) return extractWords(w)
-        }).filter((f) => f)
-        //   console.log(_TEXTS)
-        // scrollTo(0, 0)
-        travel(document.body.children)
-      })
+    if (tags) window._knowledgeTags = { ...tags }
+    console.log(window._knowledgeTags)
   })
 }
 
@@ -643,15 +758,16 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       '输入评论',
       getKnowledgeReply() || res.textContent
     )
-
-    let data = { ...res, reply }
-    // 向bg发送消息
-    chrome.runtime.sendMessage(
-      { cmd: 'mark-result', data: data },
-      function (response) {
-        console.log('收到来自后台的回复：' + response)
-      }
-    )
+    if (reply) {
+      let data = { ...res, reply }
+      // 向bg发送消息
+      chrome.runtime.sendMessage(
+        { cmd: 'mark-result', data: data },
+        function (response) {
+          console.log('收到来自后台的回复：' + response)
+        }
+      )
+    }
   } else if (request.cmd == 'login') {
     // alert('请登录anyweb或者填写钱包地址')
     if (window.confirm('请登录anyweb或者填写钱包地址')) {
@@ -663,6 +779,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     }
   } else if (request.cmd == 'mark-push') {
     alert('已提交')
+    // console.log(request.data)
     if (request.data) displayComments(request.data)
   } else if (request.cmd == 'get-by-pageId-result') {
     // console.log(request.data)
@@ -671,16 +788,26 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   sendResponse('我收到了你的消息！')
 })
 
-getComments()
+function domContentLoadedDoSomething () {
+  console.info('DOM loaded')
+  update()
+  getComments()
+}
+
+if (document.readyState !== 'complete') {
+  // 此时加载尚未完成
+  document.addEventListener('DOMContentLoaded', domContentLoadedDoSomething)
+}
+setTimeout(() => domContentLoadedDoSomething(), 200)
 
 document.addEventListener('scroll', (event) => {
   if (
     !ticking &&
-    Math.abs(window.scrollY - lastKnownScrollPosition) > window.innerHeight * 4
+    Math.abs(window.scrollY - lastKnownScrollPosition) >
+      window.innerHeight * 3.5
   ) {
     window.requestAnimationFrame(() => {
-      getComments()
-      update()
+      domContentLoadedDoSomething()
       ticking = false
       lastKnownScrollPosition = window.scrollY
     })
