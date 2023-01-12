@@ -6,7 +6,10 @@ let cfxAddress,
 
 const { notionToken: token, notionDatabaseId: databaseId } =
   chrome.runtime.getManifest().config
-console.log(token, databaseId)
+console.log(token, databaseId, chrome.action)
+
+const saveUrl = 'https://api.notion.com/v1/pages'
+const queryUrl = `https://api.notion.com/v1/databases/${databaseId}/query`
 
 chrome.runtime.onInstalled.addListener(async () => {
   // chrome.contextMenus.create({
@@ -16,6 +19,9 @@ chrome.runtime.onInstalled.addListener(async () => {
   //   contexts: ['selection'],
   // })
 
+  chrome.storage.sync.clear()
+  chrome.storage.local.clear()
+
   chrome.contextMenus.create({
     id: 'mark',
     title: '标注',
@@ -23,20 +29,32 @@ chrome.runtime.onInstalled.addListener(async () => {
     contexts: ['selection'],
   })
 
-  let gettingItem = chrome.storage.local.get()
-  gettingItem.then(onGot, onError)
+  // let gettingItem = chrome.storage.local.get()
+  // gettingItem.then(onGot, onError)
 
-  function onGot (e) {
-    // console.log(e)
-    if (e.data == undefined)
-      chrome.storage.local.set({
-        data: ['元宇宙', '人工智能', 'web3', 'Web3', '大模型'],
-      })
-  }
+  // function onGot (e) {
+  //   // console.log(e)
+  //   if (e.data == undefined)
+  //     chrome.storage.local.set({
+  //       data: ['元宇宙', '人工智能', 'web3', 'Web3', '大模型'],
+  //     })
+  // }
 
-  function onError (e) {
-    console.log(e)
-  }
+  // function onError (e) {
+  //   console.log(e)
+  // }
+})
+
+chrome.action.onClicked.addListener(function (tab) {
+  // 当点击扩展图标时，执行...
+  console.log('browserAction.onClicked')
+  chrome.tabs.create(
+    {
+      url: chrome.runtime.getURL('options.html'),
+    },
+    function (tab) {}
+  )
+  getAllTags().then((res) => updateTags(res))
 })
 
 // Open a new search tab when the user clicks a context menu
@@ -63,7 +81,8 @@ chrome.contextMenus.onClicked.addListener(async (item, tab) => {
   } else if (id == 'mark') {
     // 右键菜单选择了标注
     const data = await chrome.storage.sync.get('cfxAddress')
-    if (data && data.cfxAddress) cfxAddress = data.cfxAddress
+    if (data && data.cfxAddress && data.cfxAddress.address)
+      cfxAddress = data.cfxAddress.address
 
     if (!cfxAddress) {
       // chrome.tabs.query({}, function (tabs) {
@@ -178,10 +197,6 @@ async function postData (url = '', data = {}) {
 }
 
 function save (json) {
-  // json.content = encodeURI(JSON.stringify(json.content))
-  let url = 'https://api.notion.com/v1/pages'
-  // postData('https://cusdis.com/api/open/comments', json)
-
   let data = {
     parent: { database_id: databaseId },
     properties: {
@@ -266,15 +281,22 @@ function save (json) {
     }
   }
 
-  return postData(url, data)
-  // chrome.storage.local.set({
-  //   mark: json,
-  // })
+  return postData(saveUrl, data)
+}
+
+function queryByCfxAddress (address) {
+  return postData(queryUrl, {
+    filter: {
+      property: 'cfxAddress',
+      rich_text: {
+        equals: address,
+      },
+    },
+  })
 }
 
 function queryByPageId (pageId) {
-  let url = `https://api.notion.com/v1/databases/${databaseId}/query`
-  return postData(url, {
+  return postData(queryUrl, {
     filter: {
       property: 'pageId',
       rich_text: {
@@ -285,14 +307,13 @@ function queryByPageId (pageId) {
 }
 
 function queryByTag (tag, page_size = 5) {
-  let url = `https://api.notion.com/v1/databases/${databaseId}/query`
   let sorts = [
     {
       property: 'createdAt',
       direction: 'descending',
     },
   ]
-  return postData(url, {
+  return postData(queryUrl, {
     filter: {
       property: 'tags',
       multi_select: {
@@ -305,7 +326,6 @@ function queryByTag (tag, page_size = 5) {
 }
 
 function getAllTags () {
-  let url = `https://api.notion.com/v1/databases/${databaseId}/query`
   let sorts = [
     {
       property: 'createdAt',
@@ -313,7 +333,7 @@ function getAllTags () {
     },
   ]
   // console.log('getAllTags')
-  return postData(url, {
+  return postData(queryUrl, {
     filter: {
       property: 'tags',
       multi_select: {
@@ -334,8 +354,6 @@ function getTimestamp (n = 1) {
 
 function queryNotEmptyOfReply (timestamp = null) {
   // if (isQueryNotEmptyOfReply == false) {
-
-  let url = `https://api.notion.com/v1/databases/${databaseId}/query`
 
   let sorts = [
     {
@@ -384,7 +402,7 @@ function queryNotEmptyOfReply (timestamp = null) {
     ]
   }
 
-  return postData(url, {
+  return postData(queryUrl, {
     filter: filter,
     sorts: sorts,
   })
@@ -422,7 +440,8 @@ chrome.runtime.onMessage.addListener(async function (
 
   if (cmd == 'mark-result') {
     const data = await chrome.storage.sync.get('cfxAddress')
-    if (data && data.cfxAddress) cfxAddress = data.cfxAddress
+    if (data && data.cfxAddress && data.cfxAddress.address)
+      cfxAddress = data.cfxAddress.address
 
     if (!cfxAddress) {
       console.log('请登录')
@@ -456,11 +475,33 @@ chrome.runtime.onMessage.addListener(async function (
     }
   } else if (cmd == 'cfx-address') {
     cfxAddress = request.data
-    if (cfxAddress) chrome.storage.sync.set({ cfxAddress })
+    if (cfxAddress)
+      chrome.storage.sync.set({
+        cfxAddress: {
+          address: cfxAddress,
+          addressIsCheck: false,
+        },
+      })
   } else if (cmd == 'get-address') {
     const data = await chrome.storage.sync.get('cfxAddress')
-    if (data && data.cfxAddress) cfxAddress = data.cfxAddress
+    if (data && data.cfxAddress && data.cfxAddress.address)
+      cfxAddress = data.cfxAddress.address
     if (cfxAddress) sendResponse(cfxAddress)
+  } else if (cmd == 'check-cfx-address' && request.data) {
+    // 检查是否有贡献,设置贡献条件
+    queryByCfxAddress(request.data).then((res) => {
+      // console.log(res)
+      // 通知页面
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        chrome.tabs.sendMessage(
+          tabs[0].id,
+          { cmd: 'check-cfx-address-result', data: res, address: request.data },
+          function (response) {
+            // console.log(response)
+          }
+        )
+      })
+    })
   } else if (cmd == 'get-by-pageId') {
     queryByPageId(request.data).then((data) => {
       updateTags().then((tags) => {
@@ -488,23 +529,48 @@ chrome.runtime.onMessage.addListener(async function (
       })
     })
   } else if (cmd == 'new-reply') {
-    // console.log(request)
-    queryNotEmptyOfReply(request.timestamp).then((res) => {
-      // isQueryNotEmptyOfReply = false
-      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        chrome.tabs.sendMessage(
-          tabs[0].id,
-          {
-            cmd: 'new-reply',
-            data: res,
-          },
-          function (response) {
-            console.log(response)
+    if (request.isMy && request.address) {
+      // 我的贡献
+      queryByCfxAddress(request.address).then((res) => {
+        chrome.tabs.query(
+          { active: true, currentWindow: true },
+          function (tabs) {
+            chrome.tabs.sendMessage(
+              tabs[0].id,
+              {
+                cmd: 'new-reply',
+                data: res,
+              },
+              function (response) {
+                console.log(response)
+              }
+            )
           }
         )
       })
-      getAllTags().then((res) => updateTags(res))
-    })
+    } else {
+      //获取知识库内容
+      queryNotEmptyOfReply(request.timestamp).then((res) => {
+        // isQueryNotEmptyOfReply = false
+        chrome.tabs.query(
+          { active: true, currentWindow: true },
+          function (tabs) {
+            chrome.tabs.sendMessage(
+              tabs[0].id,
+              {
+                cmd: 'new-reply',
+                data: res,
+              },
+              function (response) {
+                console.log(response)
+              }
+            )
+          }
+        )
+      })
+    }
+
+    getAllTags().then((res) => updateTags(res))
   } else if (cmd == 'open-login' && isOpenLogin == false) {
     chrome.tabs.create({ url: 'newtab.html' })
     isOpenLogin = true

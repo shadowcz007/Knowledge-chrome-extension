@@ -10,7 +10,21 @@ DIY 一个 web3 的知识采集工具。
   https://anyweb.cc
 
 - UI
-https://mantine.dev/
+  https://mantine.dev/
+
+#TODO
+需要梳理下几种事件的先后顺序
+
+- 获取标签全集
+- 获取知识库（按时间、贡献）
+- 获取页面标注
+
+- 触发：
+  chrome.runtime.onInstalled
+  chrome.action.onClicked
+  chrome.contextMenus.onClicked
+  chrome.runtime.onMessage
+  chrome.storage.local.onChanged
 
 ## Installing and Running
 

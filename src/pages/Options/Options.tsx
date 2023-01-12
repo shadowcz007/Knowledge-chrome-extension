@@ -10,12 +10,7 @@ interface Props {
 }
 
 
-// chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-// if (request.cmd == 'get-all-tags-result') {
-//   console.log(request.data)
-// }
-// sendResponse('我收到了你的消息！')
-// })
+
 
 const Options: React.FC<Props> = ({ title }: Props) => {
   const [texts, setTexts] = React.useState([''])
@@ -26,13 +21,13 @@ const Options: React.FC<Props> = ({ title }: Props) => {
     gettingItem.then(onGot, onError)
     function onGot (e: any) {
       if(e.tags) setTexts(Object.keys(e.tags))
-      
     }
     function onError (e: any) {
       console.log(e)
     }
   }
   
+  chrome.storage.local.onChanged.addListener(getTags)
 
   const updateText=(t: string)=>{
     let textsNew=Array.from(texts,te=>te.trim()).filter(f=>f);

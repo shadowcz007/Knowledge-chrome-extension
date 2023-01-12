@@ -7,6 +7,7 @@
         "notionToken": "secret_8X2Ryn7H8qsmTQ4c1gEQeP6A6Mw4QZgErwh7SwKKewO",
         "notionDatabaseId": "1be3bd9842fb43dbbe2e944870632415"
     },
+    "action": {},
     "options_page": "options.html",
     "background": {
         "service_worker": "background.bundle.js"

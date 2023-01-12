@@ -1,11 +1,15 @@
 // import { printLine } from './modules/print'
-// console.log('Content script works!')
-// console.log('Must reload extension for modifications to take effect.')
+// _console('Content script works!')
+// _console('Must reload extension for modifications to take effect.')
 // printLine("Using the 'printLine' function from the Print Module")
 
-// import getElementXpath from 'element-xpath'
-// console.log(getElementXpath)
-// window.getElementXpath = getElementXpath
+const _console = (t) => {
+  if (typeof t === 'string') {
+    console.log(`%c${t}`, 'background:yellow;padding:4px;color:black')
+  } else {
+    console.log(t)
+  }
+}
 
 // 提取句子
 function extractSentence (str) {
@@ -136,12 +140,13 @@ function getColor (element) {
 }
 
 function addMarkForLinks (element, pageRelate, tags) {
-  // console.log(
+  // _console(
   //   !element.getAttribute('data-badge'),
   //   pageRelate,
   //   pageRelate.length > 0
   // )
   if (
+    element &&
     !element.getAttribute('data-badge') &&
     pageRelate &&
     pageRelate.length > 0
@@ -321,6 +326,7 @@ import {
   Rating,
   Button,
 } from '@mantine/core'
+import { type } from 'os'
 
 function getPageUrl () {
   return parseUrl(window.location.href)
@@ -378,7 +384,7 @@ function getSelectionByUser () {
     var textContent = range.startContainer.textContent
     let parentText = range.startContainer.parentElement.innerText
     // let xpath = getElementXpath(range.startContainer.parentElement)
-    // console.log(xpath)
+    // _console(xpath)
     res = { ...res, nodeName: nodeName, textContent: textContent, parentText }
   }
   return res
@@ -389,7 +395,7 @@ function getComments () {
   chrome.runtime.sendMessage(
     { cmd: 'get-by-pageId', data: url },
     function (response) {
-      // console.log('收到来自后台的回复：' + response)
+      // _console('收到来自后台的回复：' + response)
     }
   )
 }
@@ -398,7 +404,7 @@ function displayComments (cms) {
   // 只保留前4条,标签多的排前面
   let pageRelate = findPageLinks(
     document.body.querySelectorAll('a'),
-    Object.keys(window._knowledgeTags),
+    Object.keys(window._knowledgeTags || []),
     4
   )
 
@@ -424,7 +430,7 @@ function displayComments (cms) {
       textContents[d.textContent].data.push(json)
       textContents[d.textContent].replies[d.reply] = 1
     } catch (error) {
-      console.log(error)
+      _console(error)
     }
     for (const tag of d.tags) {
       if (!tags[tag.name])
@@ -441,10 +447,14 @@ function displayComments (cms) {
     Object.keys(textContents).length + pageRelate.length
   )
   // 把tags的关联上?
-  console.log(textContents, pageRelate)
+  _console(textContents, pageRelate)
 
   // 页面内值得关注的链接
-  addMarkForLinks(ratingElement, pageRelate, Object.keys(window._knowledgeTags))
+  addMarkForLinks(
+    ratingElement,
+    pageRelate,
+    Object.keys(window._knowledgeTags || [])
+  )
 
   // 排序后
   for (const key in textContents) {
@@ -452,16 +462,16 @@ function displayComments (cms) {
     let replies = textContents[key].replies
     // 评论处理
     replies = Object.keys(replies).filter((f) => f != 'undefined' && f)
-    // console.log(replies)
+    // _console(replies)
     data.sort((a, b) => b.createdAt - a.createdAt)
     data[0].count = data.length
     data[0].cfxAddresses = unqueArray(Array.from(data, (d) => d.cfxAddress))
     try {
       let json = { ...data[0], replies }
       travelCommit(document.body.children, json, pageRelate)
-      // console.log(json)
+      // _console(json)
     } catch (error) {
-      console.log(error)
+      _console(error)
     }
   }
 }
@@ -589,7 +599,7 @@ function Demo () {
         (f) => f.pos.y + f.pos.height > scrollPos + window.innerHeight
       ).length /
         targets.length
-    console.log(
+    _console(
       scrollPos,
       targets.filter(
         (f) => f.pos.y + f.pos.height > scrollPos + window.innerHeight
@@ -655,18 +665,36 @@ function Demo () {
 // }
 // render(<Demo2 />, div2)
 
-function addRating (count = 0) {
+function addRating () {
   if (document.body.getAttribute('data-rating')) return
   document.body.setAttribute('data-rating', true)
 
   let div2 = document.createElement('div')
+  div2.id = 'knowledge-data-rating-icon'
   div2.style = `position:fixed;top:44px;left:12px;z-index:999999999999999999`
   document.body.insertAdjacentElement('beforeend', div2)
 
+  chrome.storage.local.get('markPosition').then((res) => {
+    if (
+      res &&
+      res.markPosition &&
+      res.markPosition.left &&
+      res.markPosition.top
+    ) {
+      div2.style.left = res.markPosition.left
+      div2.style.top = res.markPosition.top
+    }
+  })
+
   window.isMoveClicked = false
   div2.addEventListener('click', (e) => {
-    e.preventDefault()
-    window.isMoveClicked = !window.isMoveClicked
+    // 用来判断是否点击到位，不然会到hover里去了
+    // console.log(e.target.className)
+    if (e.target.className.match(/mantine\-.*\-root/)) {
+      window.isMoveClicked = !window.isMoveClicked
+    }
+    // e.preventDefault()
+    // e.stopPropagation()
   })
 
   // 跟随鼠标
@@ -674,9 +702,18 @@ function addRating (count = 0) {
     if (window.isMoveClicked) {
       // console.dir(span);
       // span.innerText = event.clientX + ', ' + event.clientY
-      div2.style.setProperty('display', 'inline')
-      div2.style.setProperty('top', event.clientY + 'px')
-      div2.style.setProperty('left', event.clientX + 'px')
+
+      window.requestAnimationFrame(() => {
+        div2.style.setProperty('display', 'inline')
+        div2.style.setProperty('top', event.clientY - 12 + 'px')
+        div2.style.setProperty('left', event.clientX - 24 + 'px')
+        chrome.storage.local.set({
+          markPosition: {
+            top: event.clientY - 12 + 'px',
+            left: event.clientX - 24 + 'px',
+          },
+        })
+      })
       // TODO 记录下来
     }
   }
@@ -717,7 +754,7 @@ function addBadge (
     </Avatar.Group>
   )
 
-  // console.log(relate)
+  // _console(relate)
   render(
     <HoverCard width={440} shadow='md' zIndex={9999999999}>
       <HoverCard.Target>
@@ -805,7 +842,7 @@ function update () {
   return new Promise((res, rej) => {
     chrome.storage.local.get('tags').then(({ tags }, _) => {
       if (tags) window._knowledgeTags = { ...tags }
-      // console.log(window._knowledgeTags)
+      // _console(window._knowledgeTags)
       res(window._knowledgeTags)
     })
   })
@@ -815,7 +852,7 @@ function update () {
 // let gettingItem = chrome.storage.local.get()
 // gettingItem.then(onGot, onError)
 // function onGot (e) {
-//   //   console.log(e)
+//   //   _console(e)
 //   if (e.data && e.data.newValue) {
 //     // reload
 //     update(e.data.newValue)
@@ -829,11 +866,11 @@ function update () {
 //   }
 // }
 // function onError (e) {
-//   console.log(e)
+//   _console(e)
 // }
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-  // console.log(request)
+  // _console(request)
   let isOpenLogin = false
   if (request.cmd == 'mark-run') {
     let res = getSelectionByUser()
@@ -848,7 +885,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       chrome.runtime.sendMessage(
         { cmd: 'mark-result', data: data },
         function (response) {
-          console.log('收到来自后台的回复：' + response)
+          _console('收到来自后台的回复：' + response)
         }
       )
     }
@@ -857,23 +894,23 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (window.confirm('请登录anyweb或者填写钱包地址')) {
       if (isOpenLogin == false)
         chrome.runtime.sendMessage({ cmd: 'open-login' }, function (response) {
-          console.log('收到来自后台的回复：' + response)
+          _console('收到来自后台的回复：' + response)
           isOpenLogin = true
         })
     }
   } else if (request.cmd == 'mark-push') {
     alert('已提交')
-    // console.log(request.data)
+    // _console(request.data)
     if (request.data) displayComments(request.data)
   } else if (request.cmd == 'get-by-pageId-result') {
-    // console.log(request.data)
+    // _console(request.data)
     if (request.data) displayComments(request.data)
   }
   sendResponse('我收到了你的消息！')
 })
 
 function domContentLoadedDoSomething () {
-  console.info('DOM loaded')
+  _console('DOM loaded')
   window.requestAnimationFrame(() => {
     update().then(() => getComments())
   })
