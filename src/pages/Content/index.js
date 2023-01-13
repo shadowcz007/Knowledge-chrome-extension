@@ -202,25 +202,43 @@ function addMarkForCommit (element, commit, tags) {
 }
 
 // 遍历评论
-function travelCommit (elements, commit, pageRelate) {
-  for (let child of elements) {
-    if (child.childNodes.length > 0) {
-      travelCommit(child.childNodes, commit, pageRelate)
-    } else {
-      // text
-      // 对比#text和commit的匹配
-      if (
-        child.nodeName == '#text' &&
-        child.textContent == commit.textContent
-      ) {
-        addMarkForCommit(child.parentElement, commit)
-      }
-
-      // if (child.textContent.trim() == document.title.trim()) {
-      //   addMarkForLinks(child.parentElement, pageRelate, tags)
-      // }
+function travelCommit (commit) {
+  const treeWalker = document.createTreeWalker(
+    document.body,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode (node) {
+        return NodeFilter.FILTER_ACCEPT
+      },
     }
+  )
+
+  // const nodeList = []
+  let currentNode = treeWalker.currentNode
+
+  while (currentNode) {
+    // text
+    // 对比#text和commit的匹配
+    if (
+      currentNode.nodeName == '#text' &&
+      currentNode.textContent.trim() == commit.textContent.trim()
+    ) {
+      addMarkForCommit(currentNode.parentElement, commit)
+    }
+
+    // nodeList.push(currentNode)
+    currentNode = treeWalker.nextNode()
   }
+
+  // for (let child of elements) {
+  //   if (child.childNodes.length > 0) {
+  //     travelCommit(child.childNodes, commit, pageRelate)
+  //   } else {
+  //     // if (child.textContent.trim() == document.title.trim()) {
+  //     //   addMarkForLinks(child.parentElement, pageRelate, tags)
+  //     // }
+  //   }
+  // }
 }
 function matchWords (
   words = ['meta', '人工', '智能', '无', '监督', '学习'],
@@ -468,7 +486,7 @@ function displayComments (cms) {
     data[0].cfxAddresses = unqueArray(Array.from(data, (d) => d.cfxAddress))
     try {
       let json = { ...data[0], replies }
-      travelCommit(document.body.children, json, pageRelate)
+      travelCommit(json)
       // _console(json)
     } catch (error) {
       _console(error)
