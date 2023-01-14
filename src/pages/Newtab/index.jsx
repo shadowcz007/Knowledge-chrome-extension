@@ -312,12 +312,13 @@ class Newtab2 extends React.Component {
     if (!address) addressIsCheck = false
     that.setState({ address, addressIsCheck })
     // console.log(address, addressIsCheck)
-    that.setLoading(true)
+    
     chrome.storage.sync.set({
       cfxAddress: { address, addressIsCheck },
     })
 
     if (addressIsCheck == false) {
+      that.setLoading(true)
       // 检查是否钱包地址有贡献
       chrome.runtime.sendMessage(
         { cmd: 'check-cfx-address', data: address },
@@ -326,6 +327,7 @@ class Newtab2 extends React.Component {
         }
       )
     } else {
+      that.setLoading(false)
       // 有钱包地址才能获取
       that.getData(getDataType)
     }
@@ -341,7 +343,8 @@ class Newtab2 extends React.Component {
   }
 
   init () {
-    let that = this
+    let that = this;
+    this.setLoading(false)
     chrome.runtime.onMessage.addListener(function (
       request,
       sender,
@@ -440,7 +443,7 @@ class Newtab2 extends React.Component {
     return Array.from(cards, (c, i) => {
       return `${i + 1}- #${Array.from(c.tags, (t) => t.name).join('#')}\n${
         c.content
-      }\n${c.replies}\n${c.title}\n${c.url}\n\n`
+      }\n\n*${c.replies}\n\n${c.title}\n${c.url}\n\n`
     }).join('')
   }
 
@@ -519,7 +522,7 @@ class Newtab2 extends React.Component {
                 }}
               />
 
-              <CopyButton value={() => this.extractData(cards)}>
+              <CopyButton value={that.extractData(cards)}>
                 {({ copied, copy }) => (
                   <Button color={copied ? 'teal' : 'blue'} onClick={copy}>
                     {copied ? 'Copied' : 'Copy'}
