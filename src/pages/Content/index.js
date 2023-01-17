@@ -212,7 +212,7 @@ function travelCommit (commit) {
       },
     }
   )
-
+  // console.log('##commit', commit)
   // const nodeList = []
   let currentNode = treeWalker.currentNode
 
@@ -221,7 +221,9 @@ function travelCommit (commit) {
     // 对比#text和commit的匹配
     if (
       currentNode.nodeName == '#text' &&
-      currentNode.textContent.trim() == commit.textContent.trim()
+      currentNode.textContent &&
+      commit.text &&
+      currentNode.textContent.trim() == commit.text.trim()
     ) {
       addMarkForCommit(currentNode.parentElement, commit)
     }
@@ -361,9 +363,10 @@ function getUrlParam (name) {
   return null //返回参数值
 }
 
+// 字符串，逗号分隔
 function getKnowledgeTags () {
   let t = decodeURI(getUrlParam('knowledgeTags') || '')
-  if (t) return t.toUpperCase().split(',')
+  if (t) return t.toUpperCase()
   return
 }
 
@@ -373,45 +376,57 @@ function getKnowledgeReply () {
 }
 
 // 获取用户划选的内容
+// 网站链接 url
+//     标题 title
+//     创建时间 createdAt
+//     标签 tags
+//     划选的文字 text
+//     评论 reply
 function getSelectionByUser () {
   let url = getPageUrl(),
     createdAt = new Date().toLocaleString(),
     tags = getKnowledgeTags()
 
   let res = {
-    pageId: url,
+    id: url,
     cfxAddress: 'shadow',
-    pageUrl: url,
-    pageTitle: document.title,
+    url: url,
+    title: document.title,
     createdAt,
     tags,
-    // xpath,
+    reply: '',
+    text: '',
   }
-
   var selObj = window.getSelection()
   if (selObj.type == 'None') {
     res = {
       ...res,
       nodeName: '#text',
       textContent: document.title,
-      parentText: document.title,
+      // parentText: document.title,
     }
   } else {
     var range = selObj.getRangeAt(0)
-    var nodeName = range.startContainer.nodeName
+    // var nodeName = range.startContainer.nodeName
     var textContent = range.startContainer.textContent
-    let parentText = range.startContainer.parentElement.innerText
+    // let parentText = range.startContainer.parentElement.innerText
     // let xpath = getElementXpath(range.startContainer.parentElement)
     // _console(xpath)
-    res = { ...res, nodeName: nodeName, textContent: textContent, parentText }
+    res = { ...res, text: textContent }
   }
   return res
 }
 
+/* 输出 {
+  url:{
+    key,type,value
+  }
+}*/
+
 function getComments () {
   let url = getPageUrl()
   chrome.runtime.sendMessage(
-    { cmd: 'get-by-pageId', data: url },
+    { cmd: 'get-by-pageId', data: { url } },
     function (response) {
       // _console('收到来自后台的回复：' + response)
     }
@@ -430,23 +445,23 @@ function displayComments (cms) {
   //   标签
   let tags = {}
   Array.from(cms, (d) => {
+    // console.log('$$$d', d)
     try {
       let json = {
-        textContent: d.textContent,
-        nodeName: d.nodeName,
-        xpath: d.xpath,
+        text: d.text,
+        nodeName: '#text',
         cfxAddress: d.cfxAddress,
-        createdAt: new Date(d.createdAt).getTime(),
+        createdAt: new Date(d.createdAt || new Date()).getTime(),
         tags: d.tags,
         relate: d.relate,
       }
-      if (!textContents[d.textContent])
-        textContents[d.textContent] = {
+      if (!textContents[d.text])
+        textContents[d.text] = {
           data: [],
           replies: {},
         }
-      textContents[d.textContent].data.push(json)
-      textContents[d.textContent].replies[d.reply] = 1
+      textContents[d.text].data.push(json)
+      textContents[d.text].replies[d.reply] = 1
     } catch (error) {
       _console(error)
     }
@@ -484,10 +499,10 @@ function displayComments (cms) {
     data.sort((a, b) => b.createdAt - a.createdAt)
     data[0].count = data.length
     data[0].cfxAddresses = unqueArray(Array.from(data, (d) => d.cfxAddress))
+    // console.log('####', data[0])
     try {
       let json = { ...data[0], replies }
       travelCommit(json)
-      // _console(json)
     } catch (error) {
       _console(error)
     }
@@ -796,7 +811,15 @@ function addBadge (
           <Text size='sm' align='left'>
             <br />
             <Badge size='xs'>点评</Badge>
-            {replies.join('\n')}
+            {Array.from(
+              replies.filter((f) => f),
+              (r) => (
+                <Text key={r}>
+                  {r}
+                  <br />
+                </Text>
+              )
+            )}
           </Text>
         ) : (
           ''
@@ -891,22 +914,43 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   // _console(request)
   let isOpenLogin = false
   if (request.cmd == 'mark-run') {
-    let res = getSelectionByUser()
+    let userData = getSelectionByUser()
+
     // 弹出modal ，让用户输入评论
-    let reply = window.prompt(
-      '输入评论',
-      getKnowledgeReply() || res.textContent
-    )
-    if (reply) {
-      let data = { ...res, reply }
-      // 向bg发送消息
-      chrome.runtime.sendMessage(
-        { cmd: 'mark-result', data: data },
-        function (response) {
-          _console('收到来自后台的回复：' + response)
+    // TODO：notion选择
+    chrome.storage.local.get('notions').then((res) => {
+      let notionsForSelect = []
+      if (res && res.notions) {
+        notionsForSelect = Array.from(Object.values(res.notions), (n) => ({
+          title: n.title,
+          id: n.id,
+          databaseId: n.databaseId,
+          token: n.token,
+          matchKeywords: n.matchKeywords,
+        }))
+      }
+
+      console.log(notionsForSelect, userData)
+      let reply = window.prompt('输入评论', getKnowledgeReply() || res.text)
+      if (reply) {
+        let data = {
+          ...userData,
+          reply,
+          cfxAddress: '',
         }
-      )
-    }
+
+        // 向bg发送消息
+        chrome.runtime.sendMessage(
+          {
+            cmd: 'mark-result',
+            data: data,
+          },
+          function (response) {
+            _console('收到来自后台的回复：' + response)
+          }
+        )
+      }
+    })
   } else if (request.cmd == 'login') {
     // alert('请登录anyweb或者填写钱包地址')
     if (window.confirm('请登录anyweb或者填写钱包地址')) {
@@ -918,10 +962,12 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     }
   } else if (request.cmd == 'mark-push') {
     alert('已提交')
-    // _console(request.data)
-    if (request.data) displayComments(request.data)
+    if (request.data && request.success) displayComments(request.data)
+    if (!request.success) {
+      _console(JSON.stringify(request.info))
+    }
   } else if (request.cmd == 'get-by-pageId-result') {
-    // _console(request.data)
+    console.log(request)
     if (request.data) displayComments(request.data)
   }
   sendResponse('我收到了你的消息！')
