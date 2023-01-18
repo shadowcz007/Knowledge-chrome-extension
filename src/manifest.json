@@ -1,8 +1,11 @@
 {
     "manifest_version": 3,
     "name": "Knowledge",
-    "description": "A chrome extension for Knowledge",
-    "action": {},
+    "description": "A chrome extension for Knowledge | 发现知识，收集整理知识,https://github.com/shadowcz007/Knowledge-chrome-extension",
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": "icon-34.png"
+    },
     "options_page": "options.html",
     "background": {
         "service_worker": "background.bundle.js"

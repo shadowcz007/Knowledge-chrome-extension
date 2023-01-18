@@ -343,10 +343,12 @@ import {
   Avatar,
   HoverCard,
   Text,
-  Rating,
+  Alert,
+  Select,
+  Flex,
   Button,
 } from '@mantine/core'
-import { type } from 'os'
+import { IconX, IconAlertCircle } from '@tabler/icons'
 
 function getPageUrl () {
   return parseUrl(window.location.href)
@@ -798,7 +800,7 @@ function addBadge (
           leftSection={createdAt ? '' : countBtn}
           rightSection={createdAt ? countBtn : ''}
         >
-          {createdAt ? format(createdAt, 'zh_CN') : '相关 '}
+          {createdAt ? format(createdAt, 'zh_CN') : '发现链接*'}
         </Badge>
       </HoverCard.Target>
 
@@ -889,26 +891,91 @@ function update () {
   })
 }
 
-// chrome.storage.local.onChanged.addListener(onGot)
-// let gettingItem = chrome.storage.local.get()
-// gettingItem.then(onGot, onError)
-// function onGot (e) {
-//   //   _console(e)
-//   if (e.data && e.data.newValue) {
-//     // reload
-//     update(e.data.newValue)
-//   } else if (e.data) {
-//     //
-//     update(e.data)
-//   } else if (e.selection) {
-//     // chrome.storage.local.set({
-//     //   selectionRes: getSelectionByUser(),
-//     // })
-//   }
-// }
-// function onError (e) {
-//   _console(e)
-// }
+class Test extends React.Component {
+  constructor (props) {
+    super(props)
+
+    this.state = {
+      val: '11',
+      notions: props.notions,
+    }
+  }
+  render () {
+    let that = this
+    return (
+      <Flex
+        gap='sm'
+        justify='flex-end'
+        align='center'
+        direction='row'
+        wrap='wrap'
+        style={{
+          height: '100%',
+          width: '100%',
+        }}
+      >
+        <Alert
+          icon={<IconAlertCircle size={16} />}
+          title={'title'}
+          color='indigo'
+          withCloseButton
+          variant='filled'
+          onClose={() => div.remove()}
+          style={{
+            height: '100%',
+            width: '100%',
+          }}
+        >
+          <Select
+            label={'label'}
+            placeholder={'placeholder'}
+            data={Array.from(this.state.notions, (n) => {
+              return {
+                label: n.title,
+                value: n.id,
+              }
+            })}
+            value={this.state.val}
+            onChange={(v) => {
+              that.setState({ val: v })
+            }}
+            allowDeselect={true}
+            dropdownPosition='bottom'
+          />
+          <Button
+            onClick={() => {
+              console.log(that.state)
+              // 在这里提交
+              that.props.onClose()
+            }}
+          >
+            OK
+          </Button>
+        </Alert>
+      </Flex>
+    )
+  }
+}
+
+function createPrompt (notions, userData) {
+  let html = `
+  ${Array.from(notions, (n) => `<div>${n.title}</div>`)}
+  <button>HHHHHHHHHHHHH</button>
+  `
+  let div = document.createElement('div')
+  // div.innerHTML = html
+  div.style = `position:fixed;z-index:99999999999999999999;bottom:0;right:0;
+  width:100%;height:100vh`
+  let btn = document.createElement('button')
+  btn.innerText = 'PKKHHGYUKJGG'
+  div.appendChild(btn)
+  btn.addEventListener('click', (e) => {
+    div.remove()
+  })
+
+  render(<Test notions={notions} onClose={() => div.remove()} />, div)
+  document.body.appendChild(div)
+}
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   // _console(request)
@@ -930,26 +997,29 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         }))
       }
 
-      console.log(notionsForSelect, userData)
-      let reply = window.prompt('输入评论', getKnowledgeReply() || res.text)
-      if (reply) {
-        let data = {
-          ...userData,
-          reply,
-          cfxAddress: '',
-        }
+      createPrompt(notionsForSelect, userData)
 
-        // 向bg发送消息
-        chrome.runtime.sendMessage(
-          {
-            cmd: 'mark-result',
-            data: data,
-          },
-          function (response) {
-            _console('收到来自后台的回复：' + response)
-          }
-        )
-      }
+      console.log(notionsForSelect, userData)
+
+      // let reply = window.prompt('输入评论', getKnowledgeReply() || res.text)
+      // if (reply) {
+      //   let data = {
+      //     ...userData,
+      //     reply,
+      //     cfxAddress: '',
+      //   }
+
+      //   // 向bg发送消息
+      //   chrome.runtime.sendMessage(
+      //     {
+      //       cmd: 'mark-result',
+      //       data: data,
+      //     },
+      //     function (response) {
+      //       _console('收到来自后台的回复：' + response)
+      //     }
+      //   )
+      // }
     })
   } else if (request.cmd == 'login') {
     // alert('请登录anyweb或者填写钱包地址')
@@ -977,6 +1047,23 @@ function domContentLoadedDoSomething () {
   _console('DOM loaded')
   window.requestAnimationFrame(() => {
     update().then(() => getComments())
+  })
+
+  chrome.storage.local.get('notions').then((res) => {
+    window._notionsForSelect = []
+    if (res && res.notions) {
+      window._notionsForSelect = Array.from(
+        Object.values(res.notions),
+        (n) => ({
+          title: n.title,
+          id: n.id,
+          databaseId: n.databaseId,
+          token: n.token,
+          matchKeywords: n.matchKeywords,
+        })
+      )
+      console.log(window._notionsForSelect)
+    }
   })
 }
 

@@ -212,13 +212,6 @@ chrome.runtime.onInstalled.addListener(async () => {
 chrome.action.onClicked.addListener(function (tab) {
   // 当点击扩展图标时，执行...
   console.log('browserAction.onClicked')
-  chrome.tabs.create(
-    {
-      url: chrome.runtime.getURL('options.html'),
-    },
-    function (tab) {}
-  )
-  getAllTags().then(({ result, success, info }) => updateTags(result))
 })
 
 // Open a new search tab when the user clicks a context menu
@@ -523,15 +516,19 @@ async function getAllTags () {
     }
   }
 
-  const { result, success, info } = await queryNotion0(
-    {
-      database_id: databaseId,
-      filter,
-      sorts,
-    },
-    token
-  )
-  return { result, success, info }
+  if (Object.keys(filter).length > 0 && sorts.length > 0) {
+    const { result, success, info } = await queryNotion0(
+      {
+        database_id: databaseId,
+        filter,
+        sorts,
+      },
+      token
+    )
+    return { result, success, info }
+  } else {
+    return { result: [], success: false, info: 'null' }
+  }
 }
 
 // 用来初始化字段，验证notion访问是否正常
@@ -719,8 +716,11 @@ chrome.runtime.onMessage.addListener(async function (
         chrome.storage.local.set({
           addNotion: result,
         })
-      }
 
+        // getAllTags()
+        //   .then(({ result, success, info }) => updateTags(result || []))
+        //   .then(() => {})
+      }
       chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         chrome.tabs.sendMessage(
           tabs[0].id,
@@ -736,35 +736,40 @@ chrome.runtime.onMessage.addListener(async function (
       })
     })
   } else if (cmd == 'get-by-pageId') {
-    // 转换下 字段
+    // chrome.runtime.getURL('options.html')
+    // !=chrome.runtime.getURL('options.html')&&url!=chrome.runtime.getURL('newtab.html')
+    const { url } = request.data
 
-    queryByPageId(request.data).then(({ result, info, success }) => {
-      updateTags().then((tags) => {
-        result = Array.from(result, (d) => {
-          d.relate = Array.from(d.tags, (tag) => tags[tag.name]).filter(
-            (f) => f && f.url != d.url
-          )
-          return d
-        })
-        chrome.tabs.query(
-          { active: true, currentWindow: true },
-          function (tabs) {
-            chrome.tabs.sendMessage(
-              tabs[0].id,
-              {
-                cmd: 'get-by-pageId-result',
-                data: result,
-                info,
-                success,
-              },
-              function (response) {
-                console.log(response)
-              }
+    //  判断是http后
+    // 转换下 字段
+    if (url.match('http'))
+      queryByPageId(request.data).then(({ result, info, success }) => {
+        updateTags(result || []).then((tags) => {
+          result = Array.from(result, (d) => {
+            d.relate = Array.from(d.tags, (tag) => tags[tag.name]).filter(
+              (f) => f && f.url != d.url
             )
-          }
-        )
+            return d
+          })
+          chrome.tabs.query(
+            { active: true, currentWindow: true },
+            function (tabs) {
+              chrome.tabs.sendMessage(
+                tabs[0].id,
+                {
+                  cmd: 'get-by-pageId-result',
+                  data: result,
+                  info,
+                  success,
+                },
+                function (response) {
+                  console.log(response)
+                }
+              )
+            }
+          )
+        })
       })
-    })
   } else if (cmd == 'new-reply') {
     if (request.isMy && request.address) {
       // 我的贡献
@@ -813,10 +818,19 @@ chrome.runtime.onMessage.addListener(async function (
       )
     }
 
-    getAllTags().then(({ result, success, info }) => updateTags(result))
+    // getAllTags().then(({ result, success, info }) => updateTags(result))
   } else if (cmd == 'open-login' && isOpenLogin == false) {
     chrome.tabs.create({ url: 'newtab.html' })
     isOpenLogin = true
+  } else if (cmd == 'open-option-page') {
+    chrome.tabs.create(
+      {
+        url: chrome.runtime.getURL('options.html'),
+      },
+      function (tab) {}
+    )
+  } else if (cmd == 'get-all-tags') {
+    getAllTags().then(({ result, success, info }) => updateTags(result || []))
   } else if (cmd == 'find-by-tag' && request.data) {
     queryByTag(request.data).then(({ result, success, info }) => {
       updateTags(result).then((data) => {
