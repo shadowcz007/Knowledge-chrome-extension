@@ -1,7 +1,7 @@
 import React from 'react';
 import './Options.css';
 
-import { ActionIcon, Title,Select,Flex,Space,Badge, Group,TextInput,Button,Alert } from '@mantine/core';
+import { ActionIcon, Title,Select,Flex,Space,Badge, Group,TextInput,Button,Alert, Text } from '@mantine/core';
 import { IconX,IconAlertCircle } from '@tabler/icons';
 import {Md5} from 'ts-md5'
 import { Provider } from '@idealight-labs/anyweb-js-sdk'
@@ -27,13 +27,13 @@ interface MySelectProps {
 const MySelect: React.FC<MySelectProps> = ({data, label, placeholder, value, onChange}:MySelectProps) => {
   
 return <Select
-label={label}
-placeholder={placeholder}
-data={data}
-value={value}
-onChange={onChange}
-allowDeselect={true}
-/>
+        label={label}
+        placeholder={placeholder}
+        data={data}
+        value={value}
+        onChange={onChange}
+        allowDeselect={false}
+        />
 }
 
 interface NotionsProps {
@@ -52,8 +52,8 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
   const [currentNotionProperties, setCurrentNotionProperties] = React.useState( [] as any[])
   const [currentNotionMatchKeywords, setCurrentNotionMatchKeywords] = React.useState( [] as any[])
   const [currentNotionId, setCurrentNotionId] = React.useState('' as any)
-  const [currentNotionDatabaseId,setCurrentNotionDatabaseId]=React.useState('1be3bd9842fb43dbbe2e944870632415' as any)
-  const [currentNotionToken,setCurrentNotionToken]=React.useState('secret_8X2Ryn7H8qsmTQ4c1gEQeP6A6Mw4QZgErwh7SwKKewO' as any)
+  const [currentNotionDatabaseId,setCurrentNotionDatabaseId]=React.useState('' as any)
+  const [currentNotionToken,setCurrentNotionToken]=React.useState('' as any)
   // const [isInit,setIsInit]=React.useState(false)
 
   console.log('initNotions',isInit)
@@ -135,7 +135,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
 
   const setCurrentNotion=(id:string,title:string,token:string,databaseId:string,properties:[],matchKeywords:[])=>{
         return new Promise<void>((res,rej)=>{
-          console.log(currentNotionId!==id,currentNotionId,id)
+          // console.log(currentNotionId!==id,currentNotionId,id)
           if(currentNotionId!==id){
             
             chrome.storage.local
@@ -235,7 +235,6 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
           setCurrentNotionMatchKeywords([])
           setIdSelected('');
         }
-        
         res();
       })
     })
@@ -250,92 +249,17 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
     style={{marginLeft:'24px'}}
     direction='column'
     >
-      <Flex mih={50}
-      gap="md"
-      justify="flex-start"
-      align="flex-end"
-      direction='row'
-      wrap='nowrap'>
-            <TextInput
-            label="Notion数据库地址"
-            withAsterisk
-              placeholder='例如:1be3bd9842fb43dbbe2e944870632415'
-              value={currentNotionDatabaseId}
-              onChange={(event) => {
-                console.log(event.currentTarget.value.trim())
-                setCurrentNotionDatabaseId( event.currentTarget.value.trim())
-              }}
-            />
-            <TextInput
-            label="Notion机器人token"
-            withAsterisk
-              placeholder='例如:secret_8X2Ryn7H8qsmTQ4c1gEQeP6A6Mw4QZgErwh7SwKKewO'
-              value={currentNotionToken}
-              onChange={(event) => {
-                setCurrentNotionToken(event.currentTarget.value.trim()) 
-              }}
-              // ref={that.testRef}
-            />
-
-            <Button
-              onClick={() => {  
-                let id=currentNotionToken + currentNotionDatabaseId;
-                // console.log(currentNotionDatabaseId,currentNotionToken)  
-              if (
-                    currentNotionDatabaseId != undefined &&
-                    currentNotionDatabaseId != null &&
-                    currentNotionToken != undefined &&
-                    currentNotionToken != null&&!notions[id]
-                  ) {
-                    alertCallback({
-                      display:false,
-                      title:'添加中',
-                      text:''
-                    })
-                    // console.log(notions)
-                    // 发到后台
-                    chrome.runtime.sendMessage(
-                      {
-                        cmd: 'add-notion-token',
-                        data: {
-                          token:currentNotionToken,
-                          databaseId:currentNotionDatabaseId,
-                          id
-                        },
-                      },
-                      function (response) {
-                        alertCallback({
-                          display:true,
-                          title:'添加中',
-                          text:`token:${currentNotionToken} databaseId:${currentNotionDatabaseId}`
-                        })
-                        console.log('add-notion-token 收到来自后台的回复：' + response)
-                      }
-                    )
-                  }else if(notions[id]){
-                    alertCallback({
-                      display:true,
-                      title:'已添加',
-                      text:`token:${currentNotionToken} databaseId:${currentNotionDatabaseId}`
-                    })
-                  }
-              }}
-            >
-              添加Notion
-            </Button>
-
-      </Flex>
+      <Title order={4}>/ Notion数据库 <Text fz='xs'>共{Object.keys(notions).length}个</Text></Title>
       
-      <Space h='xl' />
-
-      <Flex  mih={50}
+      <Flex  style={{marginLeft:'24px',marginTop:'12px'}}
+      mih={50}
       gap="md"
       justify="flex-start"
       align="flex-end"
       direction='row'
       wrap='nowrap'>
           <MySelect
-              label={`Notion知识库数量 ${Object.keys(notions).length}`}
+              label={`当前数据库`}
               placeholder='all'
               data={(()=>{
                 let notionsList:any=Array.from(Object.values(notions), (n:any) => ({
@@ -352,15 +276,12 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
               })()}
               value={idSelected}
               onChange={async (id: any) => {
-                
+                 
                   let n:any = notions[id]
+                  // console.log('current!!',n,id)
 
-                  await resetCurrentNotion();
-                  console.log(n,id)
-
-                  // that.setState({
-                  //   addressIsCheck: false
-                  // })
+                  // await resetCurrentNotion();
+                
                   if (n) {
 
                     let nP:any=Object.values(n.properties);
@@ -374,18 +295,22 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
                       });
 
                   } else {
-                    
                     alertCallback({display:true, title:'请添加or选择notion', text:`-`});
                   }
                 
               }}
             />
 
-            <Button onClick={()=>setSetup(true)}>配置字段</Button>
+            <Button variant='outline'
+                    color='dark' onClick={()=>setSetup(true)}>配置字段映射关系</Button>
       </Flex>
-
+       
       <Space h='xl' />
-      <Flex mih={50}
+      <Flex 
+      style={{
+        marginLeft:'44px'
+      }}
+      mih={50}
       gap="md"
       justify="flex-start"
       align="flex-start"
@@ -459,8 +384,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
                 )),
                 <Button
                   key='update-notion-btn'
-                  onClick={() => {
-                    
+                  onClick={() => {     
                     let _notions={...notions};
                     _notions[currentNotionId] = {
                       ..._notions[currentNotionId],
@@ -478,20 +402,100 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
                       })
                       .then(() => {
                         // console.log('notions',notions)
-                        alertCallback({display:true, title:'当前notion', text:`${JSON.stringify(notions[currentNotionId])}`})
+                        alertCallback({display:true, title:'配置完成', text:`${JSON.stringify(notions[currentNotionId])}`})
+                        setSetup(false)
                       })
-                  
-
                   }}
-                >
-                  更新
-                </Button>,
+                >更新</Button>, <Space h='xl' key="space"/>
               ]
             : ''}
          
-
+        
       </Flex>
+   
+      <Title order={5} style={{marginLeft:'24px',marginTop:'12px'}}>添加新的数据库</Title>
+        <Flex 
+        style={{marginLeft:'24px',marginTop:'12px'}}
+        mih={50}
+        gap="md"
+        justify="flex-start"
+        align="flex-end"
+        direction='row'
+        wrap='nowrap'>
 
+            <TextInput
+            miw={320}
+            label="数据库地址"
+            withAsterisk
+              placeholder='例如:1be3bd9842fb43dbbe2e944870632415'
+              value={currentNotionDatabaseId}
+              onChange={(event) => {
+                console.log(event.currentTarget.value.trim())
+                setCurrentNotionDatabaseId( event.currentTarget.value.trim())
+              }}
+            />
+            <TextInput
+            miw={480}
+            label="开放平台token"
+            withAsterisk
+              placeholder='例如:secret_8X2Ryn7H8qsmTQ4c1gEQeP6A6Mw4QZgErwh7SwKKewO'
+              value={currentNotionToken}
+              onChange={(event) => {
+                setCurrentNotionToken(event.currentTarget.value.trim()) 
+              }}
+              // ref={that.testRef}
+            />
+
+          <Button variant='outline'
+                    color='dark'
+              onClick={() => {  
+                let id=currentNotionToken + currentNotionDatabaseId;
+                // console.log(currentNotionDatabaseId,currentNotionToken)  
+              if (
+                    currentNotionDatabaseId != undefined &&
+                    currentNotionDatabaseId != null &&
+                    currentNotionToken != undefined &&
+                    currentNotionToken != null&&!notions[id]
+                  ) {
+                    alertCallback({
+                      display:false,
+                      title:'添加中',
+                      text:''
+                    })
+                    // console.log(notions)
+                    // 发到后台
+                    chrome.runtime.sendMessage(
+                      {
+                        cmd: 'add-notion-token',
+                        data: {
+                          token:currentNotionToken,
+                          databaseId:currentNotionDatabaseId,
+                          id
+                        },
+                      },
+                      function (response) {
+                        alertCallback({
+                          display:true,
+                          title:'添加中',
+                          text:`token:${currentNotionToken} databaseId:${currentNotionDatabaseId}`
+                        })
+                        console.log('add-notion-token 收到来自后台的回复：' + response)
+                      }
+                    )
+                  }else if(notions[id]){
+                    alertCallback({
+                      display:true,
+                      title:'已添加',
+                      text:`token:${currentNotionToken} databaseId:${currentNotionDatabaseId}`
+                    })
+                  }
+              }}
+            >
+              添加
+            </Button>
+            
+      </Flex>
+      <Space h='xl' />
 </Flex>   
   </div>;
 };
@@ -499,8 +503,9 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
 
 
 // 设置标签
+let tagsInit=false;
 const TagsSetup: React.FC = () => {
-  const [texts, setTexts] = React.useState([''])
+  const [texts, setTexts] = React.useState([])
   const [value, setValue] = React.useState('');
 
   const getTags=()=>{
@@ -512,18 +517,20 @@ const TagsSetup: React.FC = () => {
     )
   }
   
-  chrome.storage.local.onChanged.addListener(()=>{
-    chrome.storage.local.get('tags').then(data=>{
-      if(data&&data.tags){
-        let tags=Object.keys(data.tags).sort((a:any,b:any)=>a-b)
-        if(tags.join(',')!=texts.join(',')) setTexts(tags)
-      }
-    })
-    
-  })
+  if(tagsInit==false) {
+    tagsInit=true;
+    chrome.storage.local.onChanged.addListener(()=>{
+      chrome.storage.local.get('tags').then(data=>{
+        console.log(data)
+        if(data&&data.tags&&Object.keys(data.tags).length>0){
+          let tags:any=Object.keys(data.tags).sort((a:any,b:any)=>a-b)
+          if(tags.join(',')!=texts.join(',')) setTexts(tags)
+        }
+      })
+  })}
 
   const updateText=(t: string)=>{
-    let textsNew=Array.from(texts,te=>te.trim()).filter(f=>f);
+    let textsNew:any=Array.from(texts,(te:any)=>te.trim()).filter(f=>f);
     textsNew.push(t.trim());
     setTexts(textsNew);
     // console.log(t)
@@ -539,10 +546,10 @@ const TagsSetup: React.FC = () => {
       event.preventDefault();
       if(event.currentTarget.parentElement) {
         let id=event.currentTarget.parentElement.parentElement?.getAttribute('data-id');
-        let nts=Array.from(Array.from(texts,t=>t.trim()).filter(f=>f),(t,i)=>{
+        let nts:any=Array.from(Array.from(texts,(t:any)=>t.trim()).filter(f=>f),(t,i)=>{
           if(`${t}_${i}`!=id) return t
         }).filter(f=>f);
-        setTexts(nts as [string]);
+        setTexts(nts);
         // console.log(nts)
         chrome.storage.local.set({
           tags:nts
@@ -560,13 +567,16 @@ const TagsSetup: React.FC = () => {
     style={{marginLeft:'24px'}}
     direction='column'
     >
-      <Flex mih={50}
+      <Title order={4}>/ 标签库 <Text fz='xs'>共{texts.length}个</Text></Title>
+      <Flex style={{marginLeft:'24px',marginTop:'12px'}}
+      mih={50}
       gap="md"
       justify="flex-start"
       align="flex-end"
       direction='row'
       wrap='nowrap'>
-        <TextInput
+
+        {/* <TextInput
           placeholder="例如：人工智能"
           label="关键词"
           withAsterisk
@@ -578,17 +588,22 @@ const TagsSetup: React.FC = () => {
         <Button onClick={(event) => {
           event.preventDefault();
           updateText(value.trim());
-        }}>ADD</Button>
+        }}>ADD</Button> */}
           
-          <Button onClick={(event) => {
+          <Button variant='outline'
+                    color='dark'
+                    onClick={(event) => {
           event.preventDefault();
           getTags();
-        }}>UPDATE</Button>
+        }}>加载</Button>
       </Flex>
       <Space h='xl'/>
     <Group>
-      {Array.from(Array.from(texts,t=>t.trim()).filter(f=>f),(t,i)=>{
-        return <Badge variant="outline" sx={{ paddingRight: 3 }} rightSection={removeButton} key={i} data-id={`${t}_${i}`}>
+      {Array.from(Array.from(texts,(t:any)=>t.trim()).filter(f=>f),(t,i)=>{
+        return <Badge 
+        variant="outline" sx={{ paddingRight: 3 }} 
+        // rightSection={removeButton}
+         key={i} data-id={`${t}_${i}`}>
         {t}</Badge>
       })}
     </Group>
@@ -661,90 +676,108 @@ interface AddressProps {
   alertCallback:any;
 }
 
+
 // address
+let addressInit=false;
 const AddressSetup: React.FC<AddressProps> = ({alertCallback}:AddressProps) => {
 
-  const [address,setAddress]=React.useState('cfx:aak6ggzrc7m38e29gew5wvs0ehmhgcu6fy778ce76c');
+  const [address,setAddress]=React.useState('');
+  const [addressIsCheck,setAddressIsCheck]=React.useState(false)
 
   const check=async()=>{
+    addressInit=true;
     let data=await chrome.storage.sync.get('cfxAddress')
     if(data&&data.cfxAddress){
-      if(address!=data.cfxAddress.address) {
-        setAddress(data.cfxAddress.address)
-        if(data.cfxAddress.addressIsCheck){
-          alertCallback({
-            display:true,
-            title:'验证成功',
-            text:''
-          })
-        }
-      }
-      
+      if(address!=data.cfxAddress.address) setAddress(data.cfxAddress.address)
+      if(addressIsCheck!=data.cfxAddress.addressIsCheck)setAddressIsCheck(data.cfxAddress.addressIsCheck)
+      // if(data.cfxAddress.addressIsCheck){
+      //   alertCallback({
+      //     display:true,
+      //     title:'验证成功',
+      //     text:''
+      //   })
+      // }
     }
 
   }
-
-  check();
+  if(addressInit==false) check();
 
   return  <Flex 
   style={{marginLeft:'24px'}}
   direction='column'
   >
+    <Title order={4}>/ 树图钱包</Title>
     <Flex mih={50}
     gap="md"
     justify="flex-start"
     align="flex-end"
     direction='row'
-    wrap='nowrap'>
+    wrap='nowrap' style={{marginLeft:'24px',marginTop:'12px'}}>
   <TextInput
-    placeholder='你的 cfx address'
+  style={{minWidth:'440px'}}
+  withAsterisk
+    label="地址"
+    placeholder='请登陆Anyweb，授权钱包地址'
+    disabled={true}
     value={address}
     onChange={(event) =>{
-      setAddress(event.currentTarget.value.trim())
-      // chrome.storage.sync.set({
-      //   cfxAddress: { address:event.currentTarget.value.trim(), addressIsCheck:false },
-      // })
+      setAddress(event.currentTarget.value)
+      setAddressIsCheck(false)
     }
     }
   />
   
-  <Button onClick={async () =>{
-    let data=await chrome.storage.sync.get('cfxAddress')
-    if(data&&data.cfxAddress){
-      // 验证
-      if(data.cfxAddress.address!=address){
-        alertCallback({
-          display:true,
-          title:'正在验证ing',
-          text:''
-        })
-        let success=await login();
+  <Button variant='outline'
+                    color='dark'
+                    onClick={async () =>{
+    
+                      let success=await login();
+                      if(success){
+                        alertCallback({
+                          display:true,
+                          title:'验证成功',
+                          text:''
+                        })
+                        check();
+                      }else{
+                        alertCallback({
+                          display:true,
+                          title:'验证失败',
+                          text:'稍后再试 or 检查账号'
+                        })
+                      }
+                      
+
+    // let data=await chrome.storage.sync.get('cfxAddress');
+    // if(!(data&&data.cfxAddress))data={
+    //   cfxAddress:{
+    //     address:address,
+    //     addressIsCheck:false
+    //   }
+    // }
+    // console.log(data.cfxAddress)
+    // if(data&&data.cfxAddress){
+    //   // 验证
+    //   if(data.cfxAddress.address&&data.cfxAddress.addressIsCheck==false){
+    //     alertCallback({
+    //       display:true,
+    //       title:'正在验证ing',
+    //       text:''
+    //     })
+    //     let success=await login();
         
-        if(success){
-          alertCallback({
-            display:true,
-            title:'验证成功',
-            text:''
-          })
-        }else{
-          alertCallback({
-            display:true,
-            title:'验证失败',
-            text:'稍后再试 or 检查账号'
-          })
-        }
-      }else if(data.cfxAddress.addressIsCheck){
-        // console.log(data.cfxAddress.addressIsCheck)
-        alertCallback({
-          display:true,
-          title:'验证成功',
-          text:''
-        })
-      }
-    }
+        
+    //   }else if(data.cfxAddress.addressIsCheck){
+    //     // console.log(data.cfxAddress.addressIsCheck)
+    //     alertCallback({
+    //       display:true,
+    //       title:'验证成功',
+    //       text:''
+    //     })
+    //   }
+    // };
     
-    
-    }}>登陆anyweb</Button>
+    }}>Anyweb登陆</Button>{addressIsCheck?<Badge color='green' size='xs'>✅</Badge>:''}
   </Flex></Flex>
 };
 
@@ -830,12 +863,12 @@ const Options: React.FC<Props> = ({ title }: Props) => {
   }
   
   return <div>
-
     <AlertSetup display={myAlert.display} title={myAlert.title} text={myAlert.text} alertCallback={updateAlert}/>
-    <Space h='xl'/>
-    <AddressSetup alertCallback={updateAlert}/>
+    
     <Space h='xl'/>
     <Title order={1} style={{marginLeft:'24px'}}>设置</Title>
+    <Space h='xl'/>
+    <AddressSetup alertCallback={updateAlert}/>
     <Space h='xl'/>
     <NotionsSetup alertCallback={updateAlert}/>
     <Space h='xl'/>

@@ -13,10 +13,46 @@ function initNotion (token) {
   return notion
 }
 
+async function getNotionsMatchId (id) {
+  let sData = await chrome.storage.local.get('notions')
+  if (sData && sData.notions && sData.notions[id]) {
+    let currentNotion = sData.notions[id]
+    return {
+      id: currentNotion.id,
+      title: currentNotion.title,
+      token: currentNotion.token,
+      databaseId: currentNotion.databaseId,
+      matchKeywords: currentNotion.matchKeywords,
+    }
+  } else {
+    return {
+      id: null,
+      title: null,
+      token: null,
+      databaseId: null,
+      matchKeywords: [],
+    }
+  }
+}
+
+async function setCurrentNotion (notion = {}) {
+  if (
+    notion.id &&
+    notion.title &&
+    notion.token &&
+    notion.databaseId &&
+    notion.matchKeywords
+  )
+    await chrome.storage.local.set({
+      currentNotion: notion,
+    })
+}
+
 async function getCurrentNotion () {
   let sData = await chrome.storage.local.get('currentNotion')
   if (sData && sData.currentNotion) {
     return {
+      id: sData.currentNotion.id,
       title: sData.currentNotion.title,
       token: sData.currentNotion.token,
       databaseId: sData.currentNotion.databaseId,
@@ -105,14 +141,17 @@ function changeNotionKeyForTool (properties = {}) {
   return new Promise(async (res, rej) => {
     let currentNotion = await getCurrentNotion()
     // 预处理
-    let key2Tool = {}
+    let key2Tool = {
+      _currentNotion: currentNotion,
+    }
     // console.log(
     //   'changeNotionKeyForTool',
     //   properties,
     //   currentNotion.matchKeywords
     // )
     for (const item of currentNotion.matchKeywords) {
-      key2Tool[item.key] = properties[item.notionProperties['key']]
+      if (item.notionProperties && item.notionProperties['key'])
+        key2Tool[item.key] = properties[item.notionProperties['key']]
     }
     res({ ...key2Tool })
   })
@@ -171,16 +210,15 @@ async function parseData (res) {
   return [{ ...result }]
 }
 
-let cfxAddress,
-  isOpenLogin = false
+let cfxAddress
 
 chrome.runtime.onInstalled.addListener(async () => {
-  // chrome.contextMenus.create({
-  //   id: 'keyword',
-  //   title: '收集关键词',
-  //   type: 'normal',
-  //   contexts: ['selection'],
-  // })
+  chrome.contextMenus.create({
+    id: 'find',
+    title: `${chrome.runtime.getManifest().name} 发现`,
+    type: 'normal',
+    contexts: ['page'],
+  })
 
   // if(buding){}
   // chrome.storage.sync.clear()
@@ -188,7 +226,7 @@ chrome.runtime.onInstalled.addListener(async () => {
 
   chrome.contextMenus.create({
     id: 'mark',
-    title: '标注',
+    title: `${chrome.runtime.getManifest().name} 标注`,
     type: 'normal',
     contexts: ['selection'],
   })
@@ -218,23 +256,21 @@ chrome.action.onClicked.addListener(function (tab) {
 chrome.contextMenus.onClicked.addListener(async (item, tab) => {
   const id = item.menuItemId
   console.log(id, item, tab)
-
-  if (id == 'keyword') {
-    let gettingItem = chrome.storage.local.get()
-    gettingItem.then(onGot, onError)
-
-    function onGot (e) {
-      console.log(e)
-      let data = [...e.data, item.selectionText.trim()]
-
-      chrome.storage.local.set({
-        data: data,
+  if (!tab.url.match('http')) return
+  if (id == 'find') {
+    //  发现页面
+    getAllTags()
+      .then(({ result, success, info }) => updateTags(result || []))
+      .then(() => {
+        // 通知页面进行
+        chrome.tabs.sendMessage(
+          tab.id,
+          { cmd: 'get-by-pageId-run', tabId: tab.id },
+          function (response) {
+            console.log(response)
+          }
+        )
       })
-    }
-
-    function onError (e) {
-      console.log(e)
-    }
   } else if (id == 'mark') {
     // 右键菜单选择了标注
     const data = await chrome.storage.sync.get('cfxAddress')
@@ -242,15 +278,6 @@ chrome.contextMenus.onClicked.addListener(async (item, tab) => {
       cfxAddress = data.cfxAddress.address
 
     if (!cfxAddress) {
-      // chrome.tabs.query({}, function (tabs) {
-      //   // console.log(tabs)
-      //   let isOpen = false
-      //   Array.from(tabs, (t) => {
-      //     if (t.url.match(/chrome-extension.*newtab.html/)) isOpen = true
-      //   })
-      //   if (isOpen == false) chrome.tabs.create({ url: 'newtab.html' })
-      // })
-
       // 通知页面进行标注
       chrome.tabs.sendMessage(
         tab.id,
@@ -331,9 +358,13 @@ function createProperties (datas) {
       properties[key] = {
         url: value,
       }
-    } else if (type == 'multi_select' && value && typeof value == 'string') {
+    } else if (type == 'multi_select' && value && typeof value == 'object') {
+      // value=[1,2]
+      // 去掉空值
       properties[key] = {
-        multi_select: Array.from(value.split(','), (t) => ({ name: t })),
+        multi_select: Array.from(value, (t) => ({ name: t })).filter(
+          (f) => f.name && typeof f.name == 'string' && f.name.trim()
+        ),
       }
     }
   }
@@ -364,7 +395,12 @@ function createFilterForUrl (data) {
       },
     }
   } else if (type == 'url') {
-    //
+    filter = {
+      property: key,
+      url: {
+        contains: value,
+      },
+    }
   } else if (type == 'multi_select') {
     filter = {
       property: key,
@@ -378,7 +414,17 @@ function createFilterForUrl (data) {
 }
 
 async function saveToNotion (data) {
-  const { token, matchKeywords, databaseId } = await getCurrentNotion()
+  const { notionId } = data
+  const { token, matchKeywords, databaseId, title, id } =
+    await getNotionsMatchId(notionId)
+  await setCurrentNotion({
+    token,
+    matchKeywords,
+    databaseId,
+    title,
+    id,
+  })
+  // const { token, matchKeywords, databaseId } = await getCurrentNotion()
   // TODO 替换key
   let items = changeKeyForNotion(data, matchKeywords)
 
@@ -439,7 +485,7 @@ async function queryByCfxAddress (address) {
 
 // {url}
 async function queryByPageId (data = {}) {
-  let { databaseId, token, matchKeywords } = await getCurrentNotion()
+  let { databaseId, token, matchKeywords, title } = await getCurrentNotion()
 
   let newList = changeKeyForNotion(data, matchKeywords)
   const { result, success, info } = await queryNotion0(
@@ -655,24 +701,23 @@ chrome.runtime.onMessage.addListener(async function (
       cfxAddress = data.cfxAddress.address
     if (!cfxAddress) {
       console.log('请登录')
-    } else {
-      saveToNotion({ ...request.data, cfxAddress }).then(
-        ({ result, success, info }) => {
-          // 通知页面
-          chrome.tabs.query(
-            { active: true, currentWindow: true },
-            function (tabs) {
-              chrome.tabs.sendMessage(
-                tabs[0].id,
-                { cmd: 'mark-push', data: result, success, info },
-                function (response) {
-                  console.log(response)
-                }
-              )
-            }
-          )
-        }
-      )
+    } else if (request.data.notionId) {
+      // 钱包地址已经传过来了
+      saveToNotion({ ...request.data }).then(({ result, success, info }) => {
+        // 通知页面
+        chrome.tabs.query(
+          { active: true, currentWindow: true },
+          function (tabs) {
+            chrome.tabs.sendMessage(
+              tabs[0].id,
+              { cmd: 'mark-push', data: result, success, info },
+              function (response) {
+                console.log(response)
+              }
+            )
+          }
+        )
+      })
     }
   } else if (cmd == 'cfx-address') {
     cfxAddress = request.data
@@ -819,9 +864,8 @@ chrome.runtime.onMessage.addListener(async function (
     }
 
     // getAllTags().then(({ result, success, info }) => updateTags(result))
-  } else if (cmd == 'open-login' && isOpenLogin == false) {
-    chrome.tabs.create({ url: 'newtab.html' })
-    isOpenLogin = true
+  } else if (cmd == 'open-login') {
+    chrome.tabs.create({ url: chrome.runtime.getURL('newtab.html') })
   } else if (cmd == 'open-option-page') {
     chrome.tabs.create(
       {

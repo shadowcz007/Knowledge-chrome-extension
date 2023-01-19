@@ -196,7 +196,8 @@ function addMarkForCommit (element, commit, tags) {
       commit.count,
       commit.replies,
       commit.tags,
-      commit.relate
+      commit.relate,
+      commit._currentNotion
     )
   }
 }
@@ -343,10 +344,13 @@ import {
   Avatar,
   HoverCard,
   Text,
-  Alert,
   Select,
   Flex,
   Button,
+  Modal,
+  Space,
+  MultiSelect,
+  Textarea,
 } from '@mantine/core'
 import { IconX, IconAlertCircle } from '@tabler/icons'
 
@@ -368,8 +372,8 @@ function getUrlParam (name) {
 // 字符串，逗号分隔
 function getKnowledgeTags () {
   let t = decodeURI(getUrlParam('knowledgeTags') || '')
-  if (t) return t.toUpperCase()
-  return
+  if (t) return t.toUpperCase().split(',')
+  return []
 }
 
 function getKnowledgeReply () {
@@ -384,14 +388,16 @@ function getKnowledgeReply () {
 //     标签 tags
 //     划选的文字 text
 //     评论 reply
-function getSelectionByUser () {
+async function getSelectionByUser () {
   let url = getPageUrl(),
     createdAt = new Date().toLocaleString(),
     tags = getKnowledgeTags()
 
+  let cfxAddressObj = await getCfxAddress()
+
   let res = {
     id: url,
-    cfxAddress: 'shadow',
+    cfxAddress: cfxAddressObj.addressIsCheck ? cfxAddressObj.address : '',
     url: url,
     title: document.title,
     createdAt,
@@ -416,6 +422,7 @@ function getSelectionByUser () {
     // _console(xpath)
     res = { ...res, text: textContent }
   }
+  res.reply = getKnowledgeReply() || res.text
   return res
 }
 
@@ -429,9 +436,7 @@ function getComments () {
   let url = getPageUrl()
   chrome.runtime.sendMessage(
     { cmd: 'get-by-pageId', data: { url } },
-    function (response) {
-      // _console('收到来自后台的回复：' + response)
-    }
+    function (response) {}
   )
 }
 
@@ -456,6 +461,7 @@ function displayComments (cms) {
         createdAt: new Date(d.createdAt || new Date()).getTime(),
         tags: d.tags,
         relate: d.relate,
+        _currentNotion: d._currentNotion,
       }
       if (!textContents[d.text])
         textContents[d.text] = {
@@ -773,7 +779,8 @@ function addBadge (
   count = 1,
   replies = [],
   tags = [],
-  relate
+  relate,
+  currentNotion
 ) {
   let div2 = document.createElement('div')
   div2.style = `cursor :pointer;display: inline;
@@ -812,7 +819,8 @@ function addBadge (
         {replies && replies.length > 0 ? (
           <Text size='sm' align='left'>
             <br />
-            <Badge size='xs'>点评</Badge>
+            <Badge size='xs'>记录</Badge>
+
             {Array.from(
               replies.filter((f) => f),
               (r) => (
@@ -821,6 +829,16 @@ function addBadge (
                   <br />
                 </Text>
               )
+            )}
+            {currentNotion && currentNotion.title ? (
+              <>
+                <Space h='xl' />
+                <Badge color='gray' size='xs'>
+                  来源: {currentNotion.title}
+                </Badge>
+              </>
+            ) : (
+              ''
             )}
           </Text>
         ) : (
@@ -891,136 +909,270 @@ function update () {
   })
 }
 
-class Test extends React.Component {
+class Notions extends React.Component {
   constructor (props) {
     super(props)
 
+    const currentNotion = props.notions.filter((n) => n.isSelected)[0]
+    let userData = props.userData
+    let tags = []
+    if (userData.tags) {
+      tags = userData.tags
+      tags = Array.from([...tags], (t) => ({
+        label: t,
+        value: t,
+      })).filter((f) => f.value.trim())
+      // userData.tags = ''
+    }
+
     this.state = {
-      val: '11',
+      opened: props.opened,
       notions: props.notions,
+      currentId: currentNotion ? currentNotion.id : '',
+      userData: props.userData,
+      tags: tags,
     }
   }
   render () {
     let that = this
     return (
-      <Flex
-        gap='sm'
-        justify='flex-end'
-        align='center'
-        direction='row'
-        wrap='wrap'
-        style={{
-          height: '100%',
-          width: '100%',
+      <Modal
+        opened={this.state.opened}
+        onClose={() => {
+          that.setState({ opened: false })
+          that.props.onClose()
         }}
+        title='即将保存'
+        centered
+        size='calc(100vw - 98px)'
       >
-        <Alert
-          icon={<IconAlertCircle size={16} />}
-          title={'title'}
-          color='indigo'
-          withCloseButton
-          variant='filled'
-          onClose={() => div.remove()}
-          style={{
-            height: '100%',
-            width: '100%',
-          }}
+        <Flex
+          miw={'60%'}
+          gap='sm'
+          justify='flex-start'
+          align='flex-start'
+          direction='column'
+          wrap='wrap'
+        >
+          <MultiSelect
+            label='标签'
+            data={that.state.tags}
+            placeholder='选择一个或新建'
+            defaultValue={Array.from(that.state.tags, (t) => t.value)}
+            searchable
+            creatable
+            getCreateLabel={(query) => `+ 新建 ${query}`}
+            onChange={(newTags) => {
+              newTags = newTags.filter((f) => f.trim())
+              // console.log(newTags)
+              that.setState({
+                userData: {
+                  ...that.state.userData,
+                  tags: newTags,
+                },
+              })
+            }}
+            onCreate={(query) => {
+              if (query.trim()) {
+                const item = { value: query, label: query }
+                // 新标签
+                if (
+                  that.state.tags.filter((t) => t.value != query).length > 0
+                ) {
+                  that.setState({
+                    tags: [item, ...that.state.tags],
+                  })
+                }
+
+                return item
+              }
+            }}
+          />
+
+          <Textarea
+            style={{ minWidth: '600px' }}
+            label='评论'
+            withAsterisk
+            placeholder='reply'
+            value={that.state.userData.reply}
+            autosize
+            minRows={2}
+            onChange={(event) => {
+              let val = event.currentTarget.value.trim()
+              that.setState({
+                userData: {
+                  ...that.state.userData,
+                  reply: val,
+                },
+              })
+            }}
+          />
+          <Textarea
+            style={{ minWidth: '600px' }}
+            label='标题'
+            withAsterisk
+            placeholder='title'
+            value={that.state.userData.title}
+            autosize
+            maxRows={4}
+            onChange={(event) => {
+              let val = event.currentTarget.value.trim()
+              that.setState({
+                userData: {
+                  ...that.state.userData,
+                  title: val,
+                },
+              })
+            }}
+          />
+        </Flex>
+        <Space h='xl' />
+        <Flex
+          mih={50}
+          gap='md'
+          justify='flex-start'
+          align='flex-start'
+          direction='row'
+          wrap='nowrap'
         >
           <Select
-            label={'label'}
-            placeholder={'placeholder'}
+            label={'当前Notion数据库'}
+            placeholder={'保存到哪里？'}
             data={Array.from(this.state.notions, (n) => {
               return {
                 label: n.title,
                 value: n.id,
               }
             })}
-            value={this.state.val}
+            value={this.state.currentId}
             onChange={(v) => {
-              that.setState({ val: v })
+              that.setState({ currentId: v })
             }}
-            allowDeselect={true}
+            allowDeselect={false}
             dropdownPosition='bottom'
           />
+          <Flex
+            miw={600}
+            gap='sm'
+            justify='flex-start'
+            align='flex-start'
+            direction='column'
+            wrap='wrap'
+          >
+            <Text fz='xs'>待提交</Text>
+            {Array.from(Object.keys(that.state.userData), (key) => {
+              return (
+                <Text
+                  fz='xs'
+                  key={key}
+                >{`- ${key} : ${that.state.userData[key]}`}</Text>
+              )
+            })}
+          </Flex>
+        </Flex>
+        <Flex
+          mih={50}
+          gap='lg'
+          justify='flex-end'
+          align='flex-start'
+          direction='column'
+          wrap='wrap'
+        >
+          <Space h='xl' />
           <Button
             onClick={() => {
               console.log(that.state)
+              // that.state.userData.tags = [...that.state.tags]
               // 在这里提交
               that.props.onClose()
+              that.setState({ opened: false })
+
+              let data = {
+                ...that.state.userData,
+                notionId: that.state.currentId,
+              }
+              // 向bg发送消息
+              chrome.runtime.sendMessage(
+                {
+                  cmd: 'mark-result',
+                  data: data,
+                },
+                function (response) {
+                  _console('收到来自后台的回复：' + response)
+                }
+              )
             }}
           >
-            OK
+            提交
           </Button>
-        </Alert>
-      </Flex>
+        </Flex>
+      </Modal>
     )
   }
 }
 
-function createPrompt (notions, userData) {
-  let html = `
-  ${Array.from(notions, (n) => `<div>${n.title}</div>`)}
-  <button>HHHHHHHHHHHHH</button>
-  `
-  let div = document.createElement('div')
-  // div.innerHTML = html
-  div.style = `position:fixed;z-index:99999999999999999999;bottom:0;right:0;
-  width:100%;height:100vh`
-  let btn = document.createElement('button')
-  btn.innerText = 'PKKHHGYUKJGG'
-  div.appendChild(btn)
-  btn.addEventListener('click', (e) => {
-    div.remove()
-  })
+async function getCfxAddress () {
+  let data = await chrome.storage.sync.get('cfxAddress')
+  if (data && data.cfxAddress) {
+    return data.cfxAddress
+  } else {
+    console.log('请登录')
+  }
+  return
+}
 
-  render(<Test notions={notions} onClose={() => div.remove()} />, div)
+async function getNotions () {
+  let data = await chrome.storage.local.get()
+
+  let notionsForSelect = []
+  if (data && data.notions) {
+    notionsForSelect = Array.from(Object.values(data.notions), (n) => ({
+      title: n.title,
+      id: n.id,
+      databaseId: n.databaseId,
+      token: n.token,
+      matchKeywords: n.matchKeywords,
+    }))
+  }
+  if (data && data.currentNotion) {
+    let currentId = data.currentNotion.id
+    notionsForSelect = Array.from(notionsForSelect, (ns) => {
+      if (ns.id === currentId) {
+        ns.isSelected = true
+      }
+      return ns
+    })
+  }
+  return notionsForSelect
+}
+
+function createPrompt (notions, userData) {
+  let div = document.createElement('div')
+  render(
+    <Notions
+      opened={true}
+      notions={notions}
+      onClose={() => div.remove()}
+      userData={userData}
+    />,
+    div
+  )
   document.body.appendChild(div)
 }
 
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(async function (
+  request,
+  sender,
+  sendResponse
+) {
   // _console(request)
   let isOpenLogin = false
   if (request.cmd == 'mark-run') {
-    let userData = getSelectionByUser()
-
+    let userData = await getSelectionByUser()
+    let notionsForSelect = await getNotions()
     // 弹出modal ，让用户输入评论
-    // TODO：notion选择
-    chrome.storage.local.get('notions').then((res) => {
-      let notionsForSelect = []
-      if (res && res.notions) {
-        notionsForSelect = Array.from(Object.values(res.notions), (n) => ({
-          title: n.title,
-          id: n.id,
-          databaseId: n.databaseId,
-          token: n.token,
-          matchKeywords: n.matchKeywords,
-        }))
-      }
-
-      createPrompt(notionsForSelect, userData)
-
-      console.log(notionsForSelect, userData)
-
-      // let reply = window.prompt('输入评论', getKnowledgeReply() || res.text)
-      // if (reply) {
-      //   let data = {
-      //     ...userData,
-      //     reply,
-      //     cfxAddress: '',
-      //   }
-
-      //   // 向bg发送消息
-      //   chrome.runtime.sendMessage(
-      //     {
-      //       cmd: 'mark-result',
-      //       data: data,
-      //     },
-      //     function (response) {
-      //       _console('收到来自后台的回复：' + response)
-      //     }
-      //   )
-      // }
-    })
+    // notion选择
+    createPrompt(notionsForSelect, userData)
   } else if (request.cmd == 'login') {
     // alert('请登录anyweb或者填写钱包地址')
     if (window.confirm('请登录anyweb或者填写钱包地址')) {
@@ -1036,6 +1188,10 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (!request.success) {
       _console(JSON.stringify(request.info))
     }
+  } else if (request.cmd === 'get-by-pageId-run') {
+    window.requestAnimationFrame(() => {
+      update().then(() => getComments())
+    })
   } else if (request.cmd == 'get-by-pageId-result') {
     console.log(request)
     if (request.data) displayComments(request.data)
@@ -1047,23 +1203,6 @@ function domContentLoadedDoSomething () {
   _console('DOM loaded')
   window.requestAnimationFrame(() => {
     update().then(() => getComments())
-  })
-
-  chrome.storage.local.get('notions').then((res) => {
-    window._notionsForSelect = []
-    if (res && res.notions) {
-      window._notionsForSelect = Array.from(
-        Object.values(res.notions),
-        (n) => ({
-          title: n.title,
-          id: n.id,
-          databaseId: n.databaseId,
-          token: n.token,
-          matchKeywords: n.matchKeywords,
-        })
-      )
-      console.log(window._notionsForSelect)
-    }
   })
 }
 

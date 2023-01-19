@@ -1,5 +1,6 @@
 import React from 'react'
 import { render } from 'react-dom'
+import logo from '../../assets/img/icon-128.png'
 import './index.css'
 
 import {
@@ -61,7 +62,7 @@ function parseData (data) {
       ...us[d.url].createdAt,
       new Date(d.createdAt).getTime(),
     ]
-    console.log(d)
+    // console.log(d)
   })
   return us
 }
@@ -225,6 +226,7 @@ class Newtab2 extends React.Component {
         title: '',
         text: '',
       },
+      notionTitle: '',
     }
 
     this.getData = this.getData.bind(this)
@@ -248,13 +250,15 @@ class Newtab2 extends React.Component {
       }, 5000)
   }
 
-  setAlert (display = false, title, text) {
+  setAlert (display = false, title, text, url = null) {
+    let obj = {
+      display,
+      title,
+      text,
+    }
+    if (url) obj.url = url
     this.setState({
-      alert: {
-        display,
-        title,
-        text,
-      },
+      alert: obj,
     })
   }
 
@@ -353,10 +357,29 @@ class Newtab2 extends React.Component {
           addressIsCheck: data.cfxAddress.address.addressIsCheck,
         })
       } else {
-        that.setAlert(true, '提示', '请登录anyweb或者填写钱包地址')
+        that.setAlert(
+          true,
+          chrome.runtime.getManifest().name +
+            ' * ' +
+            chrome.runtime
+              .getManifest()
+              .description.split(',')[0]
+              .split('|')[1],
+          '请完成配置 --> ',
+          chrome.runtime.getURL('options.html')
+        )
       }
     })
 
+    chrome.storage.local.get('currentNotion').then((sData) => {
+      if (sData && sData.currentNotion) {
+        if (
+          sData.currentNotion.title &&
+          sData.currentNotion.title !== that.state.notionTitle
+        )
+          that.setState({ notionTitle: sData.currentNotion.title })
+      }
+    })
     // chrome.storage.local.onChanged.addListener(() => that.storageChange())
   }
 
@@ -439,38 +462,59 @@ class Newtab2 extends React.Component {
           <Space h='xl' />
           {that.state.alert.display ? (
             <Alert
-              icon={<IconAlertCircle size={16} />}
+              icon={<img src={logo} className='App-logo' alt='logo' />}
               title={that.state.alert.title}
               color='indigo'
               withCloseButton
-              variant='filled'
+              // variant='filled'
               onClose={() => that.setAlert(false)}
             >
-              {that.state.alert.text}
+              <Flex justify='flex-start' align='center'>
+                <Text>{that.state.alert.text}</Text>
+                <Space w='xl' />
+                {that.state.alert.url ? (
+                  <Button
+                    variant='outline'
+                    color='dark'
+                    onClick={() =>
+                      chrome.tabs.create({
+                        url: that.state.alert.url,
+                      })
+                    }
+                  >
+                    配置
+                  </Button>
+                ) : (
+                  ''
+                )}
+              </Flex>
             </Alert>
           ) : (
             ''
           )}
 
-          <Space h='xl' />
-
-          <Flex
-            gap='sm'
-            justify='flex-end'
-            align='center'
-            direction='row'
-            wrap='wrap'
-          >
-            <Button onClick={() => that.checkAddressIsCanGetKnowledge()}>
-              登陆
-            </Button>
-          </Flex>
+          {this.state.address ? (
+            <Flex
+              gap='sm'
+              justify='center'
+              align='center'
+              direction='row'
+              wrap='wrap'
+            >
+              <Text fz='xs'>当前Notion: {that.state.notionTitle}</Text>
+              <Button onClick={() => that.checkAddressIsCanGetKnowledge()}>
+                登陆
+              </Button>
+            </Flex>
+          ) : (
+            ''
+          )}
 
           <Space h='xl' />
         </header>
 
         <Flex
-          bg='#282c34'
+          bg='#eeeeee'
           gap='lg'
           justify='flex-start'
           align='center'
@@ -481,7 +525,7 @@ class Newtab2 extends React.Component {
           }}
         >
           <Flex
-            bg='#282c34'
+            bg='#eeeeee'
             gap='lg'
             justify='flex-start'
             align='center'
@@ -490,7 +534,7 @@ class Newtab2 extends React.Component {
           >
             <Space h='xl' />
             <Flex
-              bg='#282c34'
+              bg='#eeeeee'
               gap='lg'
               justify='flex-start'
               align='center'
@@ -529,7 +573,7 @@ class Newtab2 extends React.Component {
             />
           </Flex>
           <Flex
-            bg='#282c34'
+            bg='#eeeeee'
             gap='lg'
             justify='flex-start'
             align='flex-start'
