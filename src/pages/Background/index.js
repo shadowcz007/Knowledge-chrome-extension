@@ -3,10 +3,7 @@
 
 // background.js
 import { translate } from '@vitalets/google-translate-api'
-// ;(async () => {
-//   const { text } = await translate('Привет мир')
-//   console.log('translate::::', text)
-// })()
+
 
 const { Client, APIErrorCode } = require('@notionhq/client')
 
@@ -239,6 +236,12 @@ chrome.runtime.onInstalled.addListener(async () => {
     contexts: ['selection'],
   })
 
+  chrome.contextMenus.create({
+    id: 'translate',
+    title: `${chrome.runtime.getManifest().name} 翻译`,
+    type: 'normal',
+    contexts: ['selection'],
+  })
   // let gettingItem = chrome.storage.local.get()
   // gettingItem.then(onGot, onError)
 
@@ -306,6 +309,15 @@ chrome.contextMenus.onClicked.addListener(async (item, tab) => {
         }
       )
     }
+  }else if(id=='translate'){
+   // 通知页面返回文字
+   chrome.tabs.sendMessage(
+    tab.id,
+    { cmd: 'translate-run', tabId: tab.id },
+    function (response) {
+      console.log(response)
+    }
+  )
   }
 
   // console.log(item)
@@ -905,6 +917,40 @@ chrome.runtime.onMessage.addListener(async function (
     //     )
     //   })
     // })
+  }else if(cmd==='translate'&& request.data){
+    const data=request.data;
+    let success=false,result,info;
+    try {
+      const { text } = await translate(data, {
+        to: 'zh'
+      })
+      success=true;
+      result={
+        zh:text,
+        en:data
+      };
+    } catch (e) {
+      info=e; 
+    };
+
+    chrome.tabs.query(
+      { active: true, currentWindow: true },
+      function (tabs) {
+        chrome.tabs.sendMessage(
+          tabs[0].id,
+          {
+            cmd: 'translate-result',
+            data: result,
+            success,
+            info,
+          },
+          function (response) {
+            console.log(response)
+          }
+        )
+      }
+    )
+
   }
 
   sendResponse('我是后台，我已收到你的消息：' + JSON.stringify(request))

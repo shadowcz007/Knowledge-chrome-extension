@@ -174,11 +174,7 @@ function getColor (element) {
 }
 
 function addMarkForLinks (element, pageRelate, tags) {
-  // _console(
-  //   !element.getAttribute('data-badge'),
-  //   pageRelate,
-  //   pageRelate.length > 0
-  // )
+  
   if (
     element &&
     !element.getAttribute('data-badge') &&
@@ -259,9 +255,12 @@ function travelCommit (commit) {
       currentNode.textContent &&
       commit.text &&
       commit.text.trim() != '' &&
-      currentNode.textContent.trim() == commit.text.trim()
+      currentNode.textContent.trim() == commit.text.trim()&&
+      currentNode.parentElement&&!currentNode.parentElement.className.match('mantine-Text-root')
     ) {
-      console.log('addMarkForCommit', commit.text)
+      // 在原网页插入，不在插件的内容里插入
+      console.log('addMarkForCommit',commit.text)
+      // if('mantine-Text-root')
       addMarkForCommit(currentNode.parentElement, commit)
     }
 
@@ -386,7 +385,7 @@ import {
   Modal,
   Space,
   MultiSelect,
-  Textarea,
+  Textarea,CopyButton,Alert
 } from '@mantine/core'
 import { IconX, IconAlertCircle } from '@tabler/icons'
 
@@ -441,7 +440,7 @@ async function getSelectionByUser () {
     reply: '',
     text: '',
   }
-  var selObj = window.getSelection()
+  let selObj = window.getSelection()
   if (selObj.type == 'None') {
     res = {
       ...res,
@@ -450,9 +449,10 @@ async function getSelectionByUser () {
       // parentText: document.title,
     }
   } else {
-    var range = selObj.getRangeAt(0)
+    // console.log('selectedText',selectedText)
+    let range = selObj.getRangeAt(0)
     // var nodeName = range.startContainer.nodeName
-    var textContent = range.startContainer.textContent
+    let textContent = range.startContainer.textContent
     // let parentText = range.startContainer.parentElement.innerText
     // let xpath = getElementXpath(range.startContainer.parentElement)
     // _console(xpath)
@@ -460,6 +460,17 @@ async function getSelectionByUser () {
   }
   res.reply = getKnowledgeReply() || res.text
   return res
+}
+
+// 返回用户选择的文本
+function getSelectionText(){
+  let text=''
+  let selObj = window.getSelection()
+  if (selObj.type != 'None') {
+    
+    text = selObj.toString();
+  }
+ return text
 }
 
 /* 输出 {
@@ -483,7 +494,7 @@ function displayComments (cms) {
     document.body.querySelectorAll('a'),
     Object.keys(window._knowledgeTags || []),
     4
-  )
+  );
 
   let textContents = {}
   //   标签
@@ -879,7 +890,7 @@ function addBadge (
                   style={{
                     paddingLeft: '4px',
                     color: '#4a4a4a',
-                    background: 'transparent',
+                    backgroundColor: 'transparent',
                   }}
                 >
                   {r}
@@ -912,7 +923,7 @@ function addBadge (
         )}
 
         {relate && relate.length > 0
-          ? Array.from(relate, (e) => (
+          ? [...Array.from(relate, (e) => (
               <a
                 target='_blank'
                 key={e.pageTitle}
@@ -947,7 +958,9 @@ function addBadge (
                   ''
                 )}
               </a>
-            ))
+            )),
+            // <Button variant='outline' color={'dark'} onClick={()=>console.log(Array.from(relate,r=>r.pageTitle))}>翻译</Button>
+          ]
           : ''}
       </HoverCard.Dropdown>
     </HoverCard>,
@@ -972,6 +985,47 @@ function update () {
       res({})
     }
   })
+}
+
+
+
+class MyAlert extends React.Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      opened:true,
+      title:props.title,
+      texts:props.texts
+    }
+  }
+  render () {
+    let that = this
+    return (<Alert
+      // icon={<img src={logo} className='App-logo' alt='logo' />}
+      title={that.state.title}
+      color='indigo'
+      withCloseButton
+      // variant='filled'
+      onClose={() => that.props.onClose()}
+    >
+      <Flex justify='flex-start' align='flex-start' style={{width:'100%'}}>
+        {Array.from(that.state.texts,(t,i)=><Flex 
+        direction={'column'}
+        key={t+i} 
+        style={{ width: '40%',
+          margin:'0 24px'}}
+        >{Array.from(t.split('\n'),(_t,_i)=><Text key={_i+_t}>{_t}<br/></Text> )}</Flex>)}
+        <Space w='xl' />
+        <CopyButton value={that.state.texts.join('\n')}>
+              {({ copied, copy }) => (
+                <Button variant='outline' color={copied ? 'teal' : 'dark'} onClick={copy}>
+                  {copied ? '已复制到剪切板' : '拷贝'}
+                </Button>
+              )}
+            </CopyButton>
+      </Flex>
+    </Alert>)
+  }
 }
 
 class Notions extends React.Component {
@@ -1138,7 +1192,7 @@ class Notions extends React.Component {
           >
             <Text fz='xs'>待提交</Text>
             {Array.from(Object.keys(that.state.userData), (key) => {
-              return (
+              if(key!='_tags')  return (
                 <Text
                   fz='xs'
                   key={key}
@@ -1159,7 +1213,7 @@ class Notions extends React.Component {
           <Button
             style={{
               color: 'white',
-              'background-color': '#228be6',
+              'backgroundColor': '#228be6',
             }}
             onClick={() => {
               console.log(that.state)
@@ -1227,6 +1281,22 @@ async function getNotions () {
   return notionsForSelect
 }
 
+function createAlert(title,texts){
+  if(document.querySelector('#knowledge-alert-div')) document.querySelector('#knowledge-alert-div').remove()
+  let div = document.createElement('div');
+  div.id="knowledge-alert-div";
+  div.style=`position: fixed;
+  right: 0px;
+  width: 100%;
+  top: 0px;
+  overflow-y: scroll;
+  height: 100vh;;
+  z-index: 99999999999999999999;`
+  render(<MyAlert title={title} texts={texts} onClose={()=>div.remove()}
+  />,div)
+  document.body.appendChild(div)
+}
+
 async function createPrompt (notions, userData) {
   let div = document.createElement('div')
   // TODO
@@ -1253,7 +1323,6 @@ chrome.runtime.onMessage.addListener(async function (
   sendResponse
 ) {
   // _console(request)
-  let isOpenLogin = false
   if (request.cmd == 'mark-run') {
     let userData = await getSelectionByUser()
     let notionsForSelect = await getNotions()
@@ -1262,12 +1331,9 @@ chrome.runtime.onMessage.addListener(async function (
     await createPrompt(notionsForSelect, userData)
   } else if (request.cmd == 'login') {
     // alert('请登录anyweb或者填写钱包地址')
-    if (window.confirm('请登录anyweb或者填写钱包地址')) {
-      if (isOpenLogin == false)
+    if (window.confirm('请登录anyweb填写钱包地址')) {
         chrome.runtime.sendMessage({ cmd: 'open-login' }, function (response) {
-          _console('收到来自后台的回复：' + response)
-          isOpenLogin = true
-        })
+          _console('收到来自后台的回复：' + response) })
     }
   } else if (request.cmd == 'mark-push') {
     alert('已提交')
@@ -1282,6 +1348,18 @@ chrome.runtime.onMessage.addListener(async function (
   } else if (request.cmd == 'get-by-pageId-result') {
     console.log(request)
     if (request.data) displayComments(request.data)
+  }else if(request.cmd == 'translate-run'){
+    let text=getSelectionText();
+    chrome.runtime.sendMessage({ cmd: 'translate' ,data:text}, function (response) {
+      _console('收到来自后台的回复：' + response) })
+  }else if(request.cmd=='translate-result'){
+    const { data,
+      success,
+      info}=request;
+      if(success){
+        _console(data);
+        createAlert('翻译结果',[data.en,data.zh])
+      }
   }
   sendResponse('我收到了你的消息！')
 })

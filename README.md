@@ -26,9 +26,8 @@ DIY 一个 web3 的知识采集工具。
   chrome.runtime.onMessage
   chrome.storage.local.onChanged
 
-- bug:
-  Ignored call to 'prompt()'. The document is sandboxed, and the 'allow-modals' keyword is not set
-  https://techcrunch.com/2022/09/06/lineupsupplys-app-turns-music-festival-posters-into-spotify-playlists/
+- 翻译
+https://github.com/vitalets/google-translate-api
 
 ## Installing and Running
 
