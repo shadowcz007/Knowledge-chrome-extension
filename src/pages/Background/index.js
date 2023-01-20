@@ -230,15 +230,17 @@ chrome.runtime.onInstalled.addListener(async () => {
   // chrome.storage.local.clear()
 
   chrome.contextMenus.create({
+    // parentId:0,
     id: 'mark',
-    title: `${chrome.runtime.getManifest().name} 标注`,
+    title: `标注`,
     type: 'normal',
     contexts: ['selection'],
   })
 
   chrome.contextMenus.create({
+    // parentId:1,
     id: 'translate',
-    title: `${chrome.runtime.getManifest().name} 翻译`,
+    title: `翻译`,
     type: 'normal',
     contexts: ['selection'],
   })
