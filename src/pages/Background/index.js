@@ -1,5 +1,13 @@
 // console.log('This is the background page.')
 // console.log('Put the background scripts here.', chrome.contextMenus)
+
+// background.js
+import { translate } from '@vitalets/google-translate-api'
+// ;(async () => {
+//   const { text } = await translate('Привет мир')
+//   console.log('translate::::', text)
+// })()
+
 const { Client, APIErrorCode } = require('@notionhq/client')
 
 // const { notionToken: token, notionDatabaseId: databaseId } =
@@ -258,6 +266,8 @@ chrome.contextMenus.onClicked.addListener(async (item, tab) => {
   console.log(id, item, tab)
   if (!tab.url.match('http')) return
   if (id == 'find') {
+    // 可以弹出notion数据库的选择
+
     //  发现页面
     getAllTags()
       .then(({ result, success, info }) => updateTags(result || []))
@@ -304,26 +314,22 @@ chrome.contextMenus.onClicked.addListener(async (item, tab) => {
   // chrome.tabs.create({ url: url.href, index: tab.index + 1 })
 })
 
-function updateTags (data = []) {
+function updateTags (items = []) {
   let tags = {}
-  return new Promise((res, rej) => {
-    chrome.storage.local.get('tags').then((r, _) => {
-      if (r && r.tags) tags = { ...r.tags }
-      if (data && data.length > 0) {
-        Array.from(data, (d) => {
-          Array.from(d.tags, (tag) => {
-            tags[tag.name] = d
-          })
+  return new Promise(async (res, rej) => {
+    let data = await chrome.storage.local.get('tags')
+    if (data && data.tags) tags = { ...data.tags }
+    if (items && items.length > 0) {
+      Array.from(items, (d) => {
+        Array.from(d.tags, (tag) => {
+          tags[tag.name] = d
         })
-        chrome.storage.local
-          .set({
-            tags,
-          })
-          .then(() => res(tags))
-      } else {
-        res(tags)
-      }
-    })
+      })
+      await chrome.storage.local.set({
+        tags,
+      })
+    }
+    res(tags)
   })
 }
 
@@ -377,7 +383,7 @@ function createProperties (datas) {
 
 function createFilterForUrl (data) {
   let filter = {}
-
+  // if(data)
   const { key, type, value } = data
 
   if (type == 'title') {
@@ -491,7 +497,7 @@ async function queryByPageId (data = {}) {
   const { result, success, info } = await queryNotion0(
     {
       database_id: databaseId,
-      filter: createFilterForUrl(newList[0]),
+      filter: newList[0] ? createFilterForUrl(newList[0]) : {},
     },
     token
   )
@@ -874,29 +880,31 @@ chrome.runtime.onMessage.addListener(async function (
       function (tab) {}
     )
   } else if (cmd == 'get-all-tags') {
-    getAllTags().then(({ result, success, info }) => updateTags(result || []))
-  } else if (cmd == 'find-by-tag' && request.data) {
-    queryByTag(request.data).then(({ result, success, info }) => {
-      updateTags(result).then((data) => {
-        chrome.tabs.query(
-          { active: true, currentWindow: true },
-          function (tabs) {
-            chrome.tabs.sendMessage(
-              tabs[0].id,
-              {
-                cmd: 'find-by-tag-result',
-                data: data,
-                success,
-                info,
-              },
-              function (response) {
-                console.log(response)
-              }
-            )
-          }
-        )
-      })
+    getAllTags().then(async ({ result, success, info }) => {
+      await updateTags(result || [])
     })
+  } else if (cmd == 'find-by-tag' && request.data) {
+    // queryByTag(request.data).then(({ result, success, info }) => {
+    //   updateTags(result).then((data) => {
+    //     chrome.tabs.query(
+    //       { active: true, currentWindow: true },
+    //       function (tabs) {
+    //         chrome.tabs.sendMessage(
+    //           tabs[0].id,
+    //           {
+    //             cmd: 'find-by-tag-result',
+    //             data: data,
+    //             success,
+    //             info,
+    //           },
+    //           function (response) {
+    //             console.log(response)
+    //           }
+    //         )
+    //       }
+    //     )
+    //   })
+    // })
   }
 
   sendResponse('我是后台，我已收到你的消息：' + JSON.stringify(request))

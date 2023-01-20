@@ -1,7 +1,7 @@
 import React from 'react';
 import './Options.css';
 
-import { ActionIcon, Title,Select,Flex,Space,Badge, Group,TextInput,Button,Alert, Text } from '@mantine/core';
+import { ActionIcon, Title,Select,Flex,Space,Badge, Group,TextInput,Button,Alert, Text,LoadingOverlay } from '@mantine/core';
 import { IconX,IconAlertCircle } from '@tabler/icons';
 import {Md5} from 'ts-md5'
 import { Provider } from '@idealight-labs/anyweb-js-sdk'
@@ -21,10 +21,11 @@ interface MySelectProps {
   placeholder:string;
   data:any;
   value:string;
-  onChange:any
+  onChange:any;
+  allowDeselect:boolean
 }
 
-const MySelect: React.FC<MySelectProps> = ({data, label, placeholder, value, onChange}:MySelectProps) => {
+const MySelect: React.FC<MySelectProps> = ({data, label, placeholder, value, onChange,allowDeselect}:MySelectProps) => {
   
 return <Select
         label={label}
@@ -32,7 +33,7 @@ return <Select
         data={data}
         value={value}
         onChange={onChange}
-        allowDeselect={false}
+        allowDeselect={allowDeselect||false}
         />
 }
 
@@ -56,7 +57,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
   const [currentNotionToken,setCurrentNotionToken]=React.useState('' as any)
   // const [isInit,setIsInit]=React.useState(false)
 
-  console.log('initNotions',isInit)
+  // console.log('initNotions',isInit)
 
   if(isInit===false){
     isInit=true;
@@ -98,6 +99,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
 
           chrome.storage.local
             .set({
+              addNotion: null,
               notions: _notions,
               currentNotion: {
                 databaseId,
@@ -107,8 +109,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
                 matchKeywords:nMatchKeywords,
               },
             })
-            .then(async () => {
-              await chrome.storage.local.set({ addNotion: null })
+            .then(() => {
               setNotions(_notions)
               setIdSelected(id);
               setCurrentNotionId(id)
@@ -162,7 +163,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
                   text:`${title} \n\n  键值对 ${Array.from(
                     properties,
                         (p:any) => `${p.key} - ${p.type}`
-                      )}`}
+                      )}`,loadingDisplay:false}
                   );
   
                 res()
@@ -259,6 +260,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
       direction='row'
       wrap='nowrap'>
           <MySelect
+              allowDeselect={false}
               label={`当前数据库`}
               placeholder='all'
               data={(()=>{
@@ -295,7 +297,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
                       });
 
                   } else {
-                    alertCallback({display:true, title:'请添加or选择notion', text:`-`});
+                    alertCallback({display:true, title:'请添加or选择notion', text:`-`,loadingDisplay:false});
                   }
                 
               }}
@@ -322,6 +324,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
             ? [
                 Array.from(currentNotionMatchKeywords, (mKey) => (
                   <MySelect
+                  allowDeselect={true}
                     key={mKey.key}
                     label={mKey.name}
                     placeholder={mKey.name + ' ' + mKey.key}
@@ -402,7 +405,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
                       })
                       .then(() => {
                         // console.log('notions',notions)
-                        alertCallback({display:true, title:'配置完成', text:`${JSON.stringify(notions[currentNotionId])}`})
+                        alertCallback({display:true, title:'配置完成', text:`${JSON.stringify(notions[currentNotionId])}`,loadingDisplay:false})
                         setSetup(false)
                       })
                   }}
@@ -430,7 +433,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
               placeholder='例如:1be3bd9842fb43dbbe2e944870632415'
               value={currentNotionDatabaseId}
               onChange={(event) => {
-                console.log(event.currentTarget.value.trim())
+                // console.log(event.currentTarget.value.trim())
                 setCurrentNotionDatabaseId( event.currentTarget.value.trim())
               }}
             />
@@ -455,12 +458,12 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
                     currentNotionDatabaseId != undefined &&
                     currentNotionDatabaseId != null &&
                     currentNotionToken != undefined &&
-                    currentNotionToken != null&&!notions[id]
+                    currentNotionToken != null&&!notions[id]&&currentNotionDatabaseId&&currentNotionToken
                   ) {
                     alertCallback({
                       display:false,
                       title:'添加中',
-                      text:''
+                      text:'',loadingDisplay:true
                     })
                     // console.log(notions)
                     // 发到后台
@@ -477,7 +480,8 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
                         alertCallback({
                           display:true,
                           title:'添加中',
-                          text:`token:${currentNotionToken} databaseId:${currentNotionDatabaseId}`
+                          text:`token:${currentNotionToken} databaseId:${currentNotionDatabaseId}`,
+                          loadingDisplay:true
                         })
                         console.log('add-notion-token 收到来自后台的回复：' + response)
                       }
@@ -486,7 +490,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
                     alertCallback({
                       display:true,
                       title:'已添加',
-                      text:`token:${currentNotionToken} databaseId:${currentNotionDatabaseId}`
+                      text:`token:${currentNotionToken} databaseId:${currentNotionDatabaseId}`,loadingDisplay:false
                     })
                   }
               }}
@@ -504,29 +508,55 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
 
 // 设置标签
 let tagsInit=false;
-const TagsSetup: React.FC = () => {
+
+interface TagsSetupProps {
+  alertCallback:any;
+}
+const TagsSetup: React.FC<TagsSetupProps> = ({alertCallback}:TagsSetupProps) => {
   const [texts, setTexts] = React.useState([])
   const [value, setValue] = React.useState('');
 
   const getTags=()=>{
+    alertCallback({
+          display:false,
+          title:'',
+          text:'',loadingDisplay:true
+        })
     chrome.runtime.sendMessage(
       { "cmd": 'get-all-tags'},
       function (response) {
         console.log('收到来自后台的回复：' + response)
+        setTimeout(()=>{
+          alertCallback({
+            display:false,
+            title:'',
+            text:'',loadingDisplay:false
+          })
+        },3500)
       }
     )
+  }
+
+  const getTagsFromLocal=()=>{
+    chrome.storage.local.get('tags').then(data=>{
+      // console.log(data)
+      if(data&&data.tags&&Object.keys(data.tags).length>0){
+        let tags:any=Object.keys(data.tags).sort((a:any,b:any)=>a-b)
+        if(tags.join(',')!=texts.join(',')) setTexts(tags)
+      }
+      alertCallback({
+        display:false,
+        title:'',
+        text:'',loadingDisplay:false
+      })
+    })
   }
   
   if(tagsInit==false) {
     tagsInit=true;
+    getTagsFromLocal();
     chrome.storage.local.onChanged.addListener(()=>{
-      chrome.storage.local.get('tags').then(data=>{
-        console.log(data)
-        if(data&&data.tags&&Object.keys(data.tags).length>0){
-          let tags:any=Object.keys(data.tags).sort((a:any,b:any)=>a-b)
-          if(tags.join(',')!=texts.join(',')) setTexts(tags)
-        }
-      })
+      getTagsFromLocal()
   })}
 
   const updateText=(t: string)=>{
@@ -601,7 +631,7 @@ const TagsSetup: React.FC = () => {
     <Group>
       {Array.from(Array.from(texts,(t:any)=>t.trim()).filter(f=>f),(t,i)=>{
         return <Badge 
-        variant="outline" sx={{ paddingRight: 3 }} 
+        variant="outline" sx={{ paddingRight: 8,paddingLeft:8 }} 
         // rightSection={removeButton}
          key={i} data-id={`${t}_${i}`}>
         {t}</Badge>
@@ -730,20 +760,24 @@ const AddressSetup: React.FC<AddressProps> = ({alertCallback}:AddressProps) => {
   <Button variant='outline'
                     color='dark'
                     onClick={async () =>{
-    
+                      alertCallback({
+                        display:false,
+                        title:'',
+                        text:'',loadingDisplay:true
+                      })
                       let success=await login();
                       if(success){
                         alertCallback({
                           display:true,
                           title:'验证成功',
-                          text:''
+                          text:'',loadingDisplay:false
                         })
                         check();
                       }else{
                         alertCallback({
                           display:true,
                           title:'验证失败',
-                          text:'稍后再试 or 检查账号'
+                          text:'稍后再试 or 检查账号',loadingDisplay:false
                         })
                       }
                       
@@ -819,7 +853,7 @@ const Options: React.FC<Props> = ({ title }: Props) => {
 
   const [myAlert, setAlert] = React.useState({display:false,title:'x',text:'--'} as any)
   const [addressIsCheck,setAddressIsCheck]=React.useState(false)
-  
+  const [loading,setLoading]=React.useState(true)
   
   chrome.runtime.onMessage.addListener(function (
     request,
@@ -828,43 +862,45 @@ const Options: React.FC<Props> = ({ title }: Props) => {
   ) {
     if (request.cmd == 'check-cfx-address-result') {
       if (request.success) {
-        let data = request.data
-        if (data && data.length > 10) {
-          // 贡献了10条以上才能看
-          chrome.storage.sync.set({
-            cfxAddress: { address: request.address, addressIsCheck: true },
-          })
-          setAddressIsCheck(true)
-        } else {
-          setAddressIsCheck(false)
-          setAlert({display:true, title:'提示', text:'贡献了10条以上才能看'})
-        }
+
+        chrome.storage.sync.set({
+          cfxAddress: { address: request.address, addressIsCheck: true },
+        })
+        setAddressIsCheck(true)
+
+        setAlert({display:false, title:'', text:'',loadingDisplay:false})
+
       } else {
-        setAlert({display:true, title:'提示', text:`${JSON.stringify(request.info)}`})
+        setAlert({display:true, title:'提示', text:`${JSON.stringify(request.info)}`,loadingDisplay:false})
       }
     } else if (request.cmd == 'add-notion-token-result') {
-      console.log(request)
+      // console.log(request)
       if (request.success == false) {
-        setAlert({display:true, title:'提示', text:`失败,请稍后再试 ${request.info}`})
+        setAlert({display:true, title:'提示', text:`失败,请稍后再试 ${request.info}`,loadingDisplay:false})
       } else {
-        setAlert({display:true, title:'提示', text:'添加成功'})
-        console.log(myAlert)
+        setAlert({display:true, title:'提示', text:'添加成功',loadingDisplay:false})
+        // console.log(myAlert)
       }
     }
     // that.setLoading(false)
     sendResponse('from options')
   })
 
-  const updateAlert=(data: { display: any; title: any; text: any; })=>{
-    let {display,title,text}=data;
-    console.log(data,myAlert,display!=myAlert.display&&title!=myAlert.title&&text!=myAlert.text)
-    
+  const updateAlert=(data: { display: any; title: any; text: any;loadingDisplay:any })=>{
+    let {display,title,text,loadingDisplay}=data;
+    // console.log(data,myAlert,display!=myAlert.display&&title!=myAlert.title&&text!=myAlert.text)
     if(display!=myAlert.display||title!=myAlert.title||text!=myAlert.text) setAlert({display,title,text})
+    if(loadingDisplay==true && loading==false) {
+      setLoading(true);
+      setTimeout(()=>setLoading(false),5000)
+    }
+    if(loadingDisplay==false) setLoading(false)
+
   }
   
   return <div>
+    <LoadingOverlay visible={loading} />
     <AlertSetup display={myAlert.display} title={myAlert.title} text={myAlert.text} alertCallback={updateAlert}/>
-    
     <Space h='xl'/>
     <Title order={1} style={{marginLeft:'24px'}}>设置</Title>
     <Space h='xl'/>
@@ -872,7 +908,7 @@ const Options: React.FC<Props> = ({ title }: Props) => {
     <Space h='xl'/>
     <NotionsSetup alertCallback={updateAlert}/>
     <Space h='xl'/>
-    <TagsSetup />
+    <TagsSetup alertCallback={updateAlert}/>
   </div>;
 };
 

@@ -24,6 +24,16 @@ import {
 
 import { IconAlertCircle } from '@tabler/icons'
 
+function getAppInfo () {
+  return {
+    name: chrome.runtime.getManifest().name,
+    description: chrome.runtime
+      .getManifest()
+      .description.split(',')[0]
+      .split('|')[1],
+  }
+}
+
 // console.log(chrome.runtime.getManifest().config.anywebId)
 
 function createDay (n) {
@@ -97,7 +107,9 @@ class UsersRank extends React.Component {
       date = this.props.date,
       title = this.props.title
     return (
-      <Container size={440} px={12}>
+      <Container size={440}>
+        <Title order={4}>概览</Title>
+        <Space h='xs' />
         <Card shadow='sm' p='lg' radius='md'>
           <Space h='xs' />
           <Card.Section>
@@ -158,8 +170,23 @@ class KnowledgeCard extends React.Component {
   render () {
     let c = this.props.data
     return (
-      <Container size={440} px={12} key={c.title + c.createdAt}>
-        <Card shadow='sm' p='lg' radius='md'>
+      <Container
+        size={440}
+        px={12}
+        key={c.title + c.createdAt}
+        style={{
+          minWidth: '440px',
+          padding: '24px',
+        }}
+      >
+        <Card
+          shadow='sm'
+          p='lg'
+          radius='md'
+          style={{
+            padding: '32px',
+          }}
+        >
           <a
             href={c.url}
             target='_blank'
@@ -191,7 +218,10 @@ class KnowledgeCard extends React.Component {
           <Space h='xl' />
           {c.replies ? (
             <Text size='sm' color='dimmed' align='left'>
-              <Badge size='xs'>点评</Badge>
+              <Badge size='xs' style={{ marginRight: '12px' }}>
+                记录
+              </Badge>
+
               {c.replies}
             </Text>
           ) : (
@@ -199,13 +229,17 @@ class KnowledgeCard extends React.Component {
           )}
           <Space h='xl' />
           <CopyButton
-            value={`/${Array.from(c.tags, (t) => t.name).join(' ')} \n${
-              c.content
-            } \n${c.replies}\n -${c.title}\n${c.url} `}
+            value={`${Array.from(c.tags, (t) => t.name).join('#')} \n \n${
+              c.replies
+            } \n \n -${c.title}\n${c.url} `}
           >
             {({ copied, copy }) => (
-              <Button color={copied ? 'teal' : 'blue'} onClick={copy}>
-                {copied ? 'Copied' : 'Copy'}
+              <Button
+                variant='outline'
+                color={copied ? 'teal' : 'dark'}
+                onClick={copy}
+              >
+                {copied ? '已复制到剪切板' : '拷贝'}
               </Button>
             )}
           </CopyButton>
@@ -227,6 +261,7 @@ class Newtab2 extends React.Component {
         text: '',
       },
       notionTitle: '',
+      displayLoginBtn: true,
     }
 
     this.getData = this.getData.bind(this)
@@ -282,8 +317,6 @@ class Newtab2 extends React.Component {
         address: that.state.address,
       },
       function (response) {
-        // that.setState({ loading: true })
-        // console.log('new-reply 收到来自后台的回复：' + response)
         that.setAlert(true, '正在获取', '请耐心等待')
       }
     )
@@ -291,7 +324,14 @@ class Newtab2 extends React.Component {
 
   checkAddressIsCanGetKnowledge () {
     // console.log(this.state)
-    const { address } = this.state
+    const { address, notionTitle } = this.state
+    if (!notionTitle)
+      return this.setAlert(
+        true,
+        'Notion数据库',
+        '请配置',
+        chrome.runtime.getURL('options.html')
+      )
     this.setState({ urls: {} })
     this.setLoading(true)
     // 检查是否钱包地址有贡献
@@ -316,7 +356,7 @@ class Newtab2 extends React.Component {
       //获取知识库内容 - 结果
       if (request.cmd == 'new-reply-result') {
         let res = request.data
-        console.log('new-reply-result', res)
+        // console.log('new-reply-result', res)
         if (request.success) {
           that.setState({
             urls: parseData(res),
@@ -326,6 +366,7 @@ class Newtab2 extends React.Component {
           that.setAlert(true, '获取失败', `${JSON.stringify(request.info)}`)
         }
       } else if (request.cmd == 'check-cfx-address-result') {
+        // console.log(request)
         if (request.success) {
           let data = request.data
 
@@ -337,9 +378,10 @@ class Newtab2 extends React.Component {
             that.setState({
               urls: parseData(data),
               addressIsCheck: true,
+              displayLoginBtn: false,
             })
           } else {
-            that.setState({ addressIsCheck: false })
+            that.setState({ addressIsCheck: false, displayLoginBtn: false })
             that.setAlert(true, '提示', '贡献了10条以上才能看')
           }
         } else {
@@ -357,14 +399,10 @@ class Newtab2 extends React.Component {
           addressIsCheck: data.cfxAddress.address.addressIsCheck,
         })
       } else {
+        const { name, description } = getAppInfo()
         that.setAlert(
           true,
-          chrome.runtime.getManifest().name +
-            ' * ' +
-            chrome.runtime
-              .getManifest()
-              .description.split(',')[0]
-              .split('|')[1],
+          name + ' * ' + description,
           '请完成配置 --> ',
           chrome.runtime.getURL('options.html')
         )
@@ -399,7 +437,11 @@ class Newtab2 extends React.Component {
           cards.push({
             address: Object.keys(data.address),
             content: data.content.join('\n'),
-            replies: data.replies.join('\n'),
+            replies: Array.from(
+              data.replies,
+              (reply, i) =>
+                `${data.replies.length > 2 ? ' ' + (i + 1) + '- ' : ''}${reply}`
+            ).join('\n'),
             title: data.title,
             url: url,
             createdAt: createDay(data.createdAt[0]),
@@ -440,9 +482,9 @@ class Newtab2 extends React.Component {
   extractData (cards) {
     // console.log(cards)
     return Array.from(cards || [], (c, i) => {
-      return `${i + 1}- #${Array.from(c.tags, (t) => t.name).join('#')}\n${
-        c.content
-      }\n\n*${c.replies}\n\n${c.title}\n${c.url}\n\n`
+      return `${i + 1}- #${Array.from(c.tags, (t) => t.name).join('#')}\n \n*${
+        c.replies
+      }\n\n${c.title}\n${c.url}\n\n`
     }).join('')
   }
 
@@ -454,6 +496,13 @@ class Newtab2 extends React.Component {
     let that = this
     const { userAddressRank, cards } = that.parseData()
     const date = createDay()
+
+    // 分成4组
+    let cardsSplitThree = []
+    for (let i = 0; i < cards.length; i += cards.length / 4) {
+      cardsSplitThree.push(cards.slice(i, i + cards.length / 4))
+    }
+    // console.log('cardsSplitThree', cards, cardsSplitThree)
 
     return (
       <div className='App'>
@@ -493,19 +542,31 @@ class Newtab2 extends React.Component {
             ''
           )}
 
-          {this.state.address ? (
-            <Flex
-              gap='sm'
-              justify='center'
-              align='center'
-              direction='row'
-              wrap='wrap'
+          {this.state.address && this.state.displayLoginBtn ? (
+            <Alert
+              icon={<img src={logo} className='App-logo' alt='logo' />}
+              title={(() => {
+                const { name, description } = getAppInfo()
+                return name + ' * ' + description
+              })()}
+              color='indigo'
             >
-              <Text fz='xs'>当前Notion: {that.state.notionTitle}</Text>
-              <Button onClick={() => that.checkAddressIsCanGetKnowledge()}>
-                登陆
-              </Button>
-            </Flex>
+              <Flex justify='flex-start' align='center'>
+                <Text>
+                  {that.state.notionTitle
+                    ? `当前Notion: ` + that.state.notionTitle
+                    : '请配置Notion数据库'}
+                </Text>
+                <Space w='xl' />
+                <Button
+                  variant='outline'
+                  color='dark'
+                  onClick={() => that.checkAddressIsCanGetKnowledge()}
+                >
+                  🚀 登陆
+                </Button>
+              </Flex>
+            </Alert>
           ) : (
             ''
           )}
@@ -517,31 +578,35 @@ class Newtab2 extends React.Component {
           bg='#eeeeee'
           gap='lg'
           justify='flex-start'
-          align='center'
+          align='flex-start'
           direction='column'
           wrap='wrap'
           style={{
+            paddingLeft: '44px',
             display: that.state.addressIsCheck ? 'flex' : 'none',
           }}
         >
+          <Space h='xl' />
           <Flex
             bg='#eeeeee'
             gap='lg'
             justify='flex-start'
-            align='center'
+            align='flex-start'
             direction='column'
             wrap='wrap'
           >
-            <Space h='xl' />
             <Flex
-              bg='#eeeeee'
-              gap='lg'
-              justify='flex-start'
-              align='center'
+              style={{ marginLeft: '14px' }}
+              mih={50}
+              gap='md'
+              justify='flex-end'
+              align='flex-start'
               direction='row'
-              wrap='wrap'
+              wrap='nowrap'
             >
+              <Title order={2}>知识库</Title>
               <MySelect
+                label='选择范围'
                 placeholder='all'
                 defaultValue='my'
                 data={[
@@ -554,38 +619,66 @@ class Newtab2 extends React.Component {
                   that.setLoading(false)
                   that.getData(event)
                 }}
-              ></MySelect>
-
-              <CopyButton value={that.extractData(cards)}>
-                {({ copied, copy }) => (
-                  <Button color={copied ? 'teal' : 'blue'} onClick={copy}>
-                    {copied ? 'Copied' : 'Copy'}
-                  </Button>
-                )}
-              </CopyButton>
+              />
             </Flex>
-
+            <Space h='xl' />
             <UsersRank
               count={cards.length}
               users={userAddressRank}
               date={date}
-              title={this.state.currentNotionTitle || ' - '}
+              title={this.state.notionTitle || ' - '}
             />
           </Flex>
+
           <Flex
-            bg='#eeeeee'
             gap='lg'
-            justify='flex-start'
+            justify='flex-end'
+            align='flex-end'
+            direction='row'
+            wrap='nowrap'
+          >
+            <Title
+              order={4}
+              style={{
+                marginLeft: '14px',
+              }}
+            >
+              知识卡片
+            </Title>
+
+            <CopyButton value={that.extractData(cards)}>
+              {({ copied, copy }) => (
+                <Button color={copied ? 'teal' : 'blue'} onClick={copy}>
+                  {copied ? '已复制到剪切板' : '拷贝全部'}
+                </Button>
+              )}
+            </CopyButton>
+          </Flex>
+
+          <Flex
+            // bg='#eeeeee'
+            gap='lg'
+            justify='center'
             align='flex-start'
             direction='row'
             wrap='wrap'
           >
-            <Space h='xl' />
-            {Array.from(cards, (c, i) => {
-              return <KnowledgeCard data={c} key={c.title + i} />
-            })}
-            <Space h='xl' />
+            {Array.from(cardsSplitThree, (cards, i) => (
+              <Flex
+                gap='lg'
+                justify='flex-start'
+                align='flex-start'
+                direction='column'
+                wrap='wrap'
+                key={i}
+              >
+                {Array.from(cards, (c, j) => {
+                  return <KnowledgeCard data={c} key={c.title + j} />
+                })}
+              </Flex>
+            ))}
           </Flex>
+          <Space h='xl' />
         </Flex>
       </div>
     )

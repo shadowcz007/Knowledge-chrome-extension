@@ -3,6 +3,40 @@
 // _console('Must reload extension for modifications to take effect.')
 // printLine("Using the 'printLine' function from the Print Module")
 
+// 格式化字符串的功能
+// 1. Superheroes
+// 2. Supervillains
+// 3. Powers
+// 4. Action
+// 5. Adventure
+// 6. Fantasy
+// 7. Heroes
+// 8. Villains
+String.prototype.format = function (start = '', end = '') {
+  let ids = {}
+  let tx = this.split('\n')
+  Array.from(
+    tx,
+    (t) =>
+      (ids[
+        (
+          start +
+          ' ' +
+          t.replace(/.*\./gi, '').trim().toLowerCase() +
+          ' ' +
+          end
+        ).trim()
+      ] = 1)
+  )
+  return Object.keys(ids).join('\n')
+}
+// 去重
+Array.prototype.unque = function () {
+  let json = {}
+  this.forEach((t) => (json[t] = t))
+  return Object.values(json)
+}
+
 const _console = (t) => {
   if (typeof t === 'string') {
     console.log(`%c${t}`, 'background:yellow;padding:4px;color:black')
@@ -224,8 +258,10 @@ function travelCommit (commit) {
       currentNode.nodeName == '#text' &&
       currentNode.textContent &&
       commit.text &&
+      commit.text.trim() != '' &&
       currentNode.textContent.trim() == commit.text.trim()
     ) {
+      console.log('addMarkForCommit', commit.text)
       addMarkForCommit(currentNode.parentElement, commit)
     }
 
@@ -434,10 +470,11 @@ async function getSelectionByUser () {
 
 function getComments () {
   let url = getPageUrl()
-  chrome.runtime.sendMessage(
-    { cmd: 'get-by-pageId', data: { url } },
-    function (response) {}
-  )
+  if (url.match('http') && chrome && chrome.runtime)
+    chrome.runtime.sendMessage(
+      { cmd: 'get-by-pageId', data: { url } },
+      function (response) {}
+    )
 }
 
 function displayComments (cms) {
@@ -745,14 +782,27 @@ function addRating () {
       // span.innerText = event.clientX + ', ' + event.clientY
 
       window.requestAnimationFrame(() => {
-        div2.style.setProperty('display', 'inline')
-        div2.style.setProperty('top', event.clientY - 12 + 'px')
-        div2.style.setProperty('left', event.clientX - 24 + 'px')
-        chrome.storage.local.set({
-          markPosition: {
-            top: event.clientY - 12 + 'px',
-            left: event.clientX - 24 + 'px',
-          },
+        let top = event.clientY - 12 + 'px',
+          left = event.clientX - 24 + 'px'
+        if (div2.style.display != 'inline') {
+          div2.style.setProperty('display', 'inline')
+        }
+        if (div2.style.top != top) div2.style.setProperty('top', top)
+        if (div2.style.left != left) div2.style.setProperty('left', left)
+        chrome.storage.local.get('markPosition').then((data) => {
+          if (
+            data &&
+            data.markPosition &&
+            data.markPosition.top != top &&
+            data.markPosition.left != left
+          ) {
+            chrome.storage.local.set({
+              markPosition: {
+                top,
+                left,
+              },
+            })
+          }
         })
       })
       // TODO 记录下来
@@ -824,7 +874,14 @@ function addBadge (
             {Array.from(
               replies.filter((f) => f),
               (r) => (
-                <Text key={r}>
+                <Text
+                  key={r}
+                  style={{
+                    paddingLeft: '4px',
+                    color: '#4a4a4a',
+                    background: 'transparent',
+                  }}
+                >
                   {r}
                   <br />
                 </Text>
@@ -901,11 +958,19 @@ function addBadge (
 // 发现有价值的url
 function update () {
   return new Promise((res, rej) => {
-    chrome.storage.local.get('tags').then(({ tags }, _) => {
-      if (tags) window._knowledgeTags = { ...tags }
-      // _console(window._knowledgeTags)
-      res(window._knowledgeTags)
-    })
+    if (
+      window.location.protocol.match('http') &&
+      chrome.storage &&
+      chrome.storage.local
+    ) {
+      chrome.storage.local.get('tags').then(({ tags }, _) => {
+        if (tags) window._knowledgeTags = { ...tags }
+        // _console(window._knowledgeTags)
+        res(window._knowledgeTags)
+      })
+    } else {
+      res({})
+    }
   })
 }
 
@@ -915,10 +980,19 @@ class Notions extends React.Component {
 
     const currentNotion = props.notions.filter((n) => n.isSelected)[0]
     let userData = props.userData
-    let tags = []
+    let tags = [],
+      _tags = []
     if (userData.tags) {
       tags = userData.tags
       tags = Array.from([...tags], (t) => ({
+        label: t,
+        value: t,
+      })).filter((f) => f.value.trim())
+      // userData.tags = ''
+    }
+    if (userData._tags) {
+      _tags = userData._tags
+      _tags = Array.from([..._tags], (t) => ({
         label: t,
         value: t,
       })).filter((f) => f.value.trim())
@@ -930,7 +1004,8 @@ class Notions extends React.Component {
       notions: props.notions,
       currentId: currentNotion ? currentNotion.id : '',
       userData: props.userData,
-      tags: tags,
+      tags,
+      _tags,
     }
   }
   render () {
@@ -945,6 +1020,7 @@ class Notions extends React.Component {
         title='即将保存'
         centered
         size='calc(100vw - 98px)'
+        zIndex={99999999999999999}
       >
         <Flex
           miw={'60%'}
@@ -956,7 +1032,7 @@ class Notions extends React.Component {
         >
           <MultiSelect
             label='标签'
-            data={that.state.tags}
+            data={that.state._tags}
             placeholder='选择一个或新建'
             defaultValue={Array.from(that.state.tags, (t) => t.value)}
             searchable
@@ -1058,6 +1134,7 @@ class Notions extends React.Component {
             align='flex-start'
             direction='column'
             wrap='wrap'
+            maw={720}
           >
             <Text fz='xs'>待提交</Text>
             {Array.from(Object.keys(that.state.userData), (key) => {
@@ -1080,6 +1157,10 @@ class Notions extends React.Component {
         >
           <Space h='xl' />
           <Button
+            style={{
+              color: 'white',
+              'background-color': '#228be6',
+            }}
             onClick={() => {
               console.log(that.state)
               // that.state.userData.tags = [...that.state.tags]
@@ -1146,8 +1227,14 @@ async function getNotions () {
   return notionsForSelect
 }
 
-function createPrompt (notions, userData) {
+async function createPrompt (notions, userData) {
   let div = document.createElement('div')
+  // TODO
+  // 读取本地的标签缓存
+  let data = await chrome.storage.local.get('tags')
+  if (data && data.tags) {
+    userData._tags = [...userData.tags, ...Object.keys(data.tags)].unque()
+  }
   render(
     <Notions
       opened={true}
@@ -1172,7 +1259,7 @@ chrome.runtime.onMessage.addListener(async function (
     let notionsForSelect = await getNotions()
     // 弹出modal ，让用户输入评论
     // notion选择
-    createPrompt(notionsForSelect, userData)
+    await createPrompt(notionsForSelect, userData)
   } else if (request.cmd == 'login') {
     // alert('请登录anyweb或者填写钱包地址')
     if (window.confirm('请登录anyweb或者填写钱包地址')) {
