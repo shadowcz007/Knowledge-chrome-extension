@@ -9,8 +9,14 @@ import { Provider } from '@idealight-labs/anyweb-js-sdk'
 
 async function exportNotionSetupJson(){
   let data=await chrome.storage.local.get();
-let json=data.notions[data.currentNotion.id];
-return json
+  let user=await chrome.storage.sync.get();
+  if(user&&user.cfxAddress&&user.cfxAddress.address&&user.cfxAddress.addressIsCheck&&data.currentNotion&&data.currentNotion.id&&data.notions){
+    let json=data.notions[data.currentNotion.id];
+    json={...json,cfxAddress:user.cfxAddress.address};
+    json._version=getId(JSON.stringify(json));
+    return json
+  }
+
 }
 
 function createURLForJson(json: any){
@@ -35,9 +41,12 @@ function downloadFile(url: any,filename: string) {
 
 async function downloadNotionSetup(){
  let json= await exportNotionSetupJson()
- let url=createURLForJson(json)
- downloadFile(url,json.title+'.json')
- window.URL.revokeObjectURL(url);
+ if(json){
+  let url=createURLForJson(json)
+  downloadFile(url,json.title+'.json')
+  window.URL.revokeObjectURL(url);
+ }
+ return json
 }
 
 const getId=(t:string)=>{
@@ -198,7 +207,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
                         (p:any) => `${p.key} - ${p.type}`
                       )}`,loadingDisplay:false}
                   );
-                  console.log( setup,currentNotionTitle,currentNotionProperties,currentNotionProperties.length)
+                  // console.log( setup,currentNotionTitle,currentNotionProperties,currentNotionProperties.length)
                 res()
                 // chrome.storage.local.set({ addNotion: null })
               });
@@ -342,7 +351,10 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
 
                     }}>配置字段映射关系</Button>
                     <Button variant='outline'
-                    color='dark' onClick={async()=>await  downloadNotionSetup()}>导出配置</Button>
+                    color='dark' onClick={async()=>{
+                     let json= await  downloadNotionSetup();
+                      if(!json) alertCallback({display:true, title:'导出失败', text:`请检查钱包地址和当前Notion数据库配置`,loadingDisplay:false});
+                    }}>导出配置</Button>
       </Flex>
        
       <Space h='xl' />
