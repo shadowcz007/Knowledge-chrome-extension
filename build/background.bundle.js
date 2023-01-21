@@ -2700,6 +2700,15 @@ chrome.runtime.onMessage.addListener(async function (request, sender, sendRespon
         console.log(response);
       });
     });
+  } else if (cmd === 'download-something') {
+
+    //   let json=await exportNotionSetupJson();
+    //   console.log(json)
+    //   chrome.downloads.download({
+    //     url: url,
+    //     filename: json.title+'.json',
+    //     saveAs: true
+    // });
   }
   sendResponse('我是后台，我已收到你的消息：' + JSON.stringify(request));
 });
@@ -2998,7 +3007,7 @@ module.exports = JSON.parse('{"100":"Continue","101":"Switching Protocols","102"
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("88ce6ec7dc8cf95f1d47")
+/******/ 		__webpack_require__.h = () => ("eb238e445240cb818646")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

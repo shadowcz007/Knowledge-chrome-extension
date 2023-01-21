@@ -54,6 +54,7 @@
         "activeTab",
         "tabs",
         "storage",
-        "contextMenus"
+        "contextMenus",
+        "downloads"
     ]
 }

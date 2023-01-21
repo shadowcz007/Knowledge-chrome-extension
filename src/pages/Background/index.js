@@ -953,10 +953,20 @@ chrome.runtime.onMessage.addListener(async function (
       }
     )
 
+  }else if(cmd==='download-something'){
+     
+  //   let json=await exportNotionSetupJson();
+  //   console.log(json)
+  //   chrome.downloads.download({
+  //     url: url,
+  //     filename: json.title+'.json',
+  //     saveAs: true
+  // });
   }
 
   sendResponse('我是后台，我已收到你的消息：' + JSON.stringify(request))
 })
+
 
 // chrome.tabs.onUpdated.addListener(function (tabId, info) {
 //   if (info.status === 'complete') {

@@ -50341,7 +50341,10 @@ class Newtab2 extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       withCloseButton: true
       // variant='filled'
       ,
-      onClose: () => that.setAlert(false)
+      onClose: () => that.setAlert(false),
+      style: {
+        zIndex: 999999999999999999
+      }
     }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.Flex, {
       justify: "flex-start",
       align: "center"
@@ -56140,7 +56143,7 @@ function combine (array, callback) {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("88ce6ec7dc8cf95f1d47")
+/******/ 		__webpack_require__.h = () => ("eb238e445240cb818646")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

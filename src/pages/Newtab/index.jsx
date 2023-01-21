@@ -517,6 +517,7 @@ class Newtab2 extends React.Component {
               withCloseButton
               // variant='filled'
               onClose={() => that.setAlert(false)}
+              style={{zIndex:999999999999999999}}
             >
               <Flex justify='flex-start' align='center'>
                 <Text>{that.state.alert.text}</Text>

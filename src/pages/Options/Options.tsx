@@ -1,11 +1,44 @@
 import React from 'react';
 import './Options.css';
 
-import { ActionIcon, Title,Select,Flex,Space,Badge, Group,TextInput,Button,Alert, Text,LoadingOverlay } from '@mantine/core';
-import { IconX,IconAlertCircle } from '@tabler/icons';
+import { ActionIcon, Title,Select,Flex,Space,Badge, Group,TextInput,Button,Alert, Text,LoadingOverlay,FileInput } from '@mantine/core';
+import { IconX,IconAlertCircle,IconUpload } from '@tabler/icons';
+ 
 import {Md5} from 'ts-md5'
 import { Provider } from '@idealight-labs/anyweb-js-sdk'
 
+async function exportNotionSetupJson(){
+  let data=await chrome.storage.local.get();
+let json=data.notions[data.currentNotion.id];
+return json
+}
+
+function createURLForJson(json: any){
+  let blob = new Blob([JSON.stringify(json, null, 2)],
+  {type : 'application/json'});
+  let url:any= window.URL.createObjectURL(blob);
+  
+  return url
+}
+
+function downloadFile(url: any,filename: string) {
+  if (!url) return
+  let link = document.createElement('a') //创建a标签
+  link.style.display = 'none'  //使其隐藏
+  link.href = url //赋予文件下载地址
+  link.setAttribute('download',filename) //设置下载属性 以及文件名
+  document.body.appendChild(link) //a标签插至页面中
+  link.click() //强制触发a标签事件
+  document.body.removeChild(link);
+  
+}
+
+async function downloadNotionSetup(){
+ let json= await exportNotionSetupJson()
+ let url=createURLForJson(json)
+ downloadFile(url,json.title+'.json')
+ window.URL.revokeObjectURL(url);
+}
 
 const getId=(t:string)=>{
   return Md5.hashStr(t)
@@ -134,7 +167,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
   }
   
 
-  const setCurrentNotion=(id:string,title:string,token:string,databaseId:string,properties:[],matchKeywords:[])=>{
+  const setCurrentNotion=(id:string,title:string,token:string,databaseId:string,properties:never[],matchKeywords:[])=>{
         return new Promise<void>((res,rej)=>{
           // console.log(currentNotionId!==id,currentNotionId,id)
           if(currentNotionId!==id){
@@ -165,7 +198,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
                         (p:any) => `${p.key} - ${p.type}`
                       )}`,loadingDisplay:false}
                   );
-  
+                  console.log( setup,currentNotionTitle,currentNotionProperties,currentNotionProperties.length)
                 res()
                 // chrome.storage.local.set({ addNotion: null })
               });
@@ -242,8 +275,8 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
     
   }
 
-  // console.log('stats notions',notions,setup,currentNotionTitle,
-  // currentNotionProperties)
+  console.log('stats notions',notions,setup,currentNotionTitle,
+  currentNotionProperties,currentNotionMatchKeywords)
   return <div> 
 <Space h='xl' />
 <Flex 
@@ -304,7 +337,12 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
             />
 
             <Button variant='outline'
-                    color='dark' onClick={()=>setSetup(true)}>配置字段映射关系</Button>
+                    color='dark' onClick={()=>{
+                      setSetup(true)
+
+                    }}>配置字段映射关系</Button>
+                    <Button variant='outline'
+                    color='dark' onClick={async()=>await  downloadNotionSetup()}>导出配置</Button>
       </Flex>
        
       <Space h='xl' />
@@ -418,6 +456,46 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
    
       <Title order={5} style={{marginLeft:'24px',marginTop:'12px'}}>添加新的数据库</Title>
         <Flex 
+        justify="flex-start"
+        align="flex-start"
+        direction='column'
+        >
+          <FileInput style={{marginLeft:'24px',marginTop:'12px',marginBottom:'12px'}}
+          accept='application/json'
+      placeholder="打开知识库配置文件"
+      label="快速导入"
+      description="访问 github.com/shadowcz007 获取"
+      variant="filled"
+      icon={<IconUpload size={14} />}
+      onChange={(file:any)=>{
+         
+        let reader = new FileReader();
+        reader.readAsText(file, "UTF-8");
+        reader.onload = function (e:any) {
+          let file_string:any = e.target.result;
+          let json=JSON.parse(file_string);
+          let properties=json.properties
+          // setCurrentNotionId('')
+          if(json.id&&json.title&&json.token&&json.databaseId&&properties&&json.matchKeywords) {
+            
+            setCurrentNotion(json.id,
+            json.title ,
+            json.token ,
+            json.databaseId ,
+            Object.values(properties) ,
+            json.matchKeywords )
+
+          }else{
+              alertCallback({
+                display:true,
+                title:'添加失败',
+                text:'检查文件',loadingDisplay:false
+              })
+            }
+        } 
+      }}
+    /> 
+        <Flex 
         style={{marginLeft:'24px',marginTop:'12px'}}
         mih={50}
         gap="md"
@@ -499,6 +577,8 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
             </Button>
             
       </Flex>
+        </Flex>
+        
       <Space h='xl' />
 </Flex>   
   </div>;
