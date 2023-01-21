@@ -232,18 +232,18 @@ chrome.runtime.onInstalled.addListener(async () => {
   chrome.contextMenus.create({
     // parentId:0,
     id: 'mark',
-    title: `标注`,
+    title: `${chrome.runtime.getManifest().name} 标注`,
     type: 'normal',
     contexts: ['selection'],
   })
 
-  chrome.contextMenus.create({
-    // parentId:1,
-    id: 'translate',
-    title: `翻译`,
-    type: 'normal',
-    contexts: ['selection'],
-  })
+  // chrome.contextMenus.create({
+  //   // parentId:1,
+  //   id: 'translate',
+  //   title: `翻译`,
+  //   type: 'normal',
+  //   contexts: ['selection'],
+  // })
   // let gettingItem = chrome.storage.local.get()
   // gettingItem.then(onGot, onError)
 
@@ -935,23 +935,34 @@ chrome.runtime.onMessage.addListener(async function (
       info=e; 
     };
 
-    chrome.tabs.query(
-      { active: true, currentWindow: true },
-      function (tabs) {
-        chrome.tabs.sendMessage(
-          tabs[0].id,
-          {
-            cmd: 'translate-result',
-            data: result,
-            success,
-            info,
-          },
-          function (response) {
-            console.log(response)
-          }
-        )
-      }
-    )
+    if(request.storageOnChanged){
+      chrome.storage.local.set({
+        'translate':{
+          ...result,success,info
+        }
+      })
+    }else{
+      chrome.tabs.query(
+        { active: true, currentWindow: true },
+        function (tabs) {
+          chrome.tabs.sendMessage(
+            tabs[0].id,
+            {
+              cmd: 'translate-result',
+              data: result,
+              success,
+              info,
+            },
+            function (response) {
+              console.log(response)
+            }
+          )
+        }
+      )
+    }
+    
+
+    
 
   }else if(cmd==='download-something'){
      

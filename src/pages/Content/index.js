@@ -385,9 +385,10 @@ import {
   Modal,
   Space,
   MultiSelect,
-  Textarea,CopyButton,Alert
+  Textarea,CopyButton,Alert,Menu
 } from '@mantine/core'
-import { IconX, IconAlertCircle } from '@tabler/icons'
+import { IconSettings, IconMessageCircle } from '@tabler/icons'
+import { doc } from 'prettier'
 
 function getPageUrl () {
   return parseUrl(window.location.href)
@@ -467,7 +468,6 @@ function getSelectionText(){
   let text=''
   let selObj = window.getSelection()
   if (selObj.type != 'None') {
-    
     text = selObj.toString();
   }
  return text
@@ -989,6 +989,59 @@ function update () {
 
 
 
+
+
+class MyMenu extends React.Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      title:props.title,
+      text:props.text,
+      result:''
+    }
+  }
+
+  
+
+  render () {
+    let that = this
+    chrome.storage.local.onChanged.addListener(()=>{
+      chrome.storage.local.get('translate').then(res=>{
+        if(res&&res.translate){
+          if(res.translate.en==that.state.text&&that.state.result==""){
+            that.setState({
+              result:res.translate.zh
+            })
+          }
+          if(res.translate.success==false){
+            console.log('稍后再试翻译',res.translate.info)
+          }
+        }
+      })
+    })
+    return (<Flex 
+    direction='column'
+    align='flex-start'
+    justify='flex-start'
+    style={{maxWidth:'600px',backgroundColor:'#eee',padding:'12px',zIndex: 999999999999999}}
+    >
+      <Flex direction='row' >
+        <Text fz={'sm'}>{that.state.text}</Text>
+       <Text fz={'sm'} style={{maxWidth:'320px',marginLeft:'24px'}}>{that.state.result}</Text>
+      </Flex>
+      <Space h='xl'/>
+      <Button  variant='outline'
+                    color='dark' onClick={()=>{
+
+                      chrome.runtime.sendMessage({ cmd: 'translate',data:that.state.text,storageOnChanged:true}, function (response) {
+                        _console('收到来自后台的回复：' + response) })
+
+                    }}>翻译</Button>
+      </Flex>)
+  }
+}
+
+
 class MyAlert extends React.Component {
   constructor (props) {
     super(props)
@@ -1402,3 +1455,30 @@ document.addEventListener('scroll', (event) => {
     )
   }
 })
+
+document.addEventListener("selectionchange", () => {
+  const selection = window.getSelection();
+  let id="knowledge-e-menu-div"
+  let div=document.querySelector('#'+id);
+  
+  if (selection.type != 'None') {
+    const oRange = selection.getRangeAt(0)
+    const oRect = oRange.getBoundingClientRect()
+    const text = selection.toString()
+
+    let startContainer = oRange.startContainer
+    // console.log(startContainer.parentElement)
+    if(startContainer.parentElement.className.match("mantine-Text-root"))return
+    if(div) div.remove();
+    div=document.createElement('div');
+    div.id=id;
+      document.body.appendChild(div)
+      render(<MyMenu text={text}/>,div)
+      let divRect=getElementViewPosition(div)
+      // console.log(oRect,divRect)
+    if(text.trim().length>1)  div.style=`position: fixed;
+    left: ${Math.max(0,oRect.x)}px;
+    top: ${Math.max(0,oRect.y-divRect.height-24)}px;z-index: 9999999999999;`
+  }
+  
+});
