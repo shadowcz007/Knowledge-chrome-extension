@@ -50106,7 +50106,9 @@ class Newtab2 extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
         title: '',
         text: ''
       },
-      notionTitle: '',
+      currentNotion: {},
+      notions: {},
+      // notionTitle: '',
       displayLoginBtn: true
     };
     this.getData = this.getData.bind(this);
@@ -50160,9 +50162,9 @@ class Newtab2 extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
     // console.log(this.state)
     const {
       address,
-      notionTitle
+      currentNotion
     } = this.state;
-    if (!notionTitle) return this.setAlert(true, 'Notion数据库', '请配置', chrome.runtime.getURL('options.html'));
+    if (!currentNotion.id) return this.setAlert(true, 'Notion数据库', '请配置', chrome.runtime.getURL('options.html'));
     this.setState({
       urls: {}
     });
@@ -50238,10 +50240,11 @@ class Newtab2 extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
         that.setAlert(true, name + ' * ' + description, '请完成配置 --> ', chrome.runtime.getURL('options.html'));
       }
     });
-    chrome.storage.local.get('currentNotion').then(sData => {
-      if (sData && sData.currentNotion) {
-        if (sData.currentNotion.title && sData.currentNotion.title !== that.state.notionTitle) that.setState({
-          notionTitle: sData.currentNotion.title
+    chrome.storage.local.get().then(data => {
+      if (data && data.currentNotion && data.notions && data.notions[data.currentNotion.id]) {
+        that.setState({
+          notions: data.notions,
+          currentNotion: data.currentNotion
         });
       }
     });
@@ -50321,8 +50324,8 @@ class Newtab2 extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
 
     // 分成4组
     let cardsSplitThree = [];
-    for (let i = 0; i < cards.length; i += cards.length / 4) {
-      cardsSplitThree.push(cards.slice(i, i + cards.length / 4));
+    for (let i = 0; i < cards.length; i += cards.length / 3) {
+      cardsSplitThree.push(cards.slice(i, i + cards.length / 3));
     }
     console.log('cardsSplitThree', cards, cardsSplitThree);
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
@@ -50360,6 +50363,9 @@ class Newtab2 extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
         url: that.state.alert.url
       })
     }, "\u914D\u7F6E") : '')) : '', this.state.address && this.state.displayLoginBtn ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Alert, {
+      style: {
+        overflow: 'unset'
+      },
       icon: /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("img", {
         src: _assets_img_icon_128_png__WEBPACK_IMPORTED_MODULE_2__,
         className: "App-logo",
@@ -50375,8 +50381,39 @@ class Newtab2 extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       color: "indigo"
     }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.Flex, {
       justify: "flex-start",
-      align: "center"
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_11__.Text, null, that.state.notionTitle ? `当前Notion: ` + that.state.notionTitle : '请配置Notion数据库'), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Space, {
+      align: "flex-end"
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Select, {
+      label: '当前Notion',
+      placeholder: '请配置Notion数据库',
+      data: (() => {
+        let items = [];
+        for (const id in that.state.notions) {
+          items.push({
+            label: that.state.notions[id].title,
+            value: id
+          });
+        }
+        return items;
+      })(),
+      dropdownPosition: "bottom",
+      value: that.state.currentNotion.id,
+      onChange: async newId => {
+        let cn = that.state.notions[newId];
+        await chrome.storage.local.set({
+          currentNotion: {
+            'databaseId': cn.databaseId,
+            'id': cn.id,
+            'matchKeywords': cn.matchKeywords,
+            'title': cn.title,
+            'token': cn.token
+          }
+        });
+        that.setState({
+          currentNotion: cn
+        });
+      },
+      allowDeselect: false
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Space, {
       w: "xl"
     }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_13__.Button, {
       variant: "outline",
@@ -50443,7 +50480,7 @@ class Newtab2 extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       count: cards.length,
       users: userAddressRank,
       date: date,
-      title: this.state.notionTitle || ' - '
+      title: this.state.currentNotion.title || ' - '
     })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.Flex, {
       gap: "lg",
       justify: "flex-end",
@@ -56146,7 +56183,7 @@ function combine (array, callback) {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("746af3a98b8d28d2ed82")
+/******/ 		__webpack_require__.h = () => ("0cecc9ac034fd1452c80")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

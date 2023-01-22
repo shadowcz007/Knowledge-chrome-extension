@@ -260,7 +260,9 @@ class Newtab2 extends React.Component {
         title: '',
         text: '',
       },
-      notionTitle: '',
+      currentNotion:{},
+      notions:{},
+      // notionTitle: '',
       displayLoginBtn: true,
     }
 
@@ -324,8 +326,8 @@ class Newtab2 extends React.Component {
 
   checkAddressIsCanGetKnowledge () {
     // console.log(this.state)
-    const { address, notionTitle } = this.state
-    if (!notionTitle)
+    const { address, currentNotion } = this.state
+    if (!currentNotion.id)
       return this.setAlert(
         true,
         'Notion数据库',
@@ -409,13 +411,10 @@ class Newtab2 extends React.Component {
       }
     })
 
-    chrome.storage.local.get('currentNotion').then((sData) => {
-      if (sData && sData.currentNotion) {
-        if (
-          sData.currentNotion.title &&
-          sData.currentNotion.title !== that.state.notionTitle
-        )
-          that.setState({ notionTitle: sData.currentNotion.title })
+    chrome.storage.local.get().then((data) => {
+       
+      if (data && data.currentNotion&&data.notions&&data.notions[data.currentNotion.id]) {
+        that.setState({ notions:data.notions,currentNotion:data.currentNotion })
       }
     })
     // chrome.storage.local.onChanged.addListener(() => that.storageChange())
@@ -491,6 +490,7 @@ class Newtab2 extends React.Component {
 
   componentDidMount () {
     this.init()
+   
   }
 
   render () {
@@ -500,8 +500,8 @@ class Newtab2 extends React.Component {
 
     // 分成4组
     let cardsSplitThree = []
-    for (let i = 0; i < cards.length; i += cards.length / 4) {
-      cardsSplitThree.push(cards.slice(i, i + cards.length / 4))
+    for (let i = 0; i < cards.length; i += cards.length / 3) {
+      cardsSplitThree.push(cards.slice(i, i + cards.length / 3))
     }
     console.log('cardsSplitThree', cards, cardsSplitThree)
 
@@ -546,6 +546,7 @@ class Newtab2 extends React.Component {
 
           {this.state.address && this.state.displayLoginBtn ? (
             <Alert
+              style={{overflow:'unset'}}
               icon={<img src={logo} className='App-logo' alt='logo' />}
               title={(() => {
                 const { name, description } = getAppInfo()
@@ -553,12 +554,35 @@ class Newtab2 extends React.Component {
               })()}
               color='indigo'
             >
-              <Flex justify='flex-start' align='center'>
-                <Text>
-                  {that.state.notionTitle
-                    ? `当前Notion: ` + that.state.notionTitle
-                    : '请配置Notion数据库'}
-                </Text>
+              <Flex justify='flex-start' align='flex-end' >
+              <Select
+                label={'当前Notion'}
+                placeholder={'请配置Notion数据库'}
+                data={(()=>{
+                  let items=[];
+                  for (const id in that.state.notions) {
+                    items.push({
+                      label:that.state.notions[id].title,
+                      value:id
+                    })
+                  }
+                  return items
+                })()}
+                dropdownPosition='bottom'
+                value={that.state.currentNotion.id}
+                onChange={async (newId)=>{
+                  let cn=that.state.notions[newId];
+                  await chrome.storage.local.set({
+                    currentNotion:{
+                      'databaseId':cn.databaseId, 'id':cn.id, 'matchKeywords':cn.matchKeywords, 'title':cn.title, 'token':cn.token
+                    }
+                  })
+
+                  that.setState({currentNotion:cn})
+                }}
+                allowDeselect={false}
+                />
+               
                 <Space w='xl' />
                 <Button
                   variant='outline'
@@ -628,7 +652,7 @@ class Newtab2 extends React.Component {
               count={cards.length}
               users={userAddressRank}
               date={date}
-              title={this.state.notionTitle || ' - '}
+              title={this.state.currentNotion.title || ' - '}
             />
           </Flex>
 

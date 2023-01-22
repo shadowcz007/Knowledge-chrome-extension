@@ -52139,9 +52139,9 @@ function travelCommit(commit) {
   while (currentNode) {
     // text
     // 对比#text和commit的匹配
-    if (currentNode.nodeName == '#text' && currentNode.textContent && commit.text && commit.text.trim() != '' && currentNode.textContent.trim() == commit.text.trim() && currentNode.parentElement && !currentNode.parentElement.className.match('mantine-Text-root')) {
+    if (currentNode.nodeName == '#text' && currentNode.textContent && commit.text && commit.text.trim() != '' && currentNode.textContent.trim() == commit.text.trim() && currentNode.parentElement && !currentNode.parentElement.className.match('mantine-')) {
       // 在原网页插入，不在插件的内容里插入
-      console.log('addMarkForCommit', commit.text);
+      console.log('addMarkForCommit', commit.text, currentNode.parentElement.className);
       // if('mantine-Text-root')
       addMarkForCommit(currentNode.parentElement, commit);
     }
@@ -53186,6 +53186,7 @@ chrome.runtime.onMessage.addListener(async function (request, sender, sendRespon
 });
 function domContentLoadedDoSomething() {
   _console('DOM loaded');
+  document.body.setAttribute('contenteditable', true);
   window.requestAnimationFrame(() => {
     update().then(() => getComments());
   });
@@ -53211,18 +53212,24 @@ document.addEventListener('scroll', event => {
   }
 });
 document.addEventListener("selectionchange", () => {
+  // console.log('selectionchange')
+  // TODO iframe的处理， https://huggingface.co/spaces/lambdalabs/image-mixer-demo
   const selection = window.getSelection();
   let id = "knowledge-e-menu-div";
   let div = document.querySelector('#' + id);
+  console.log(selection.type);
   if (selection.type != 'None') {
     const oRange = selection.getRangeAt(0);
     const oRect = oRange.getBoundingClientRect();
     const text = selection.toString();
     let startContainer = oRange.startContainer;
     // console.log(startContainer.parentElement)
-    if (startContainer.parentElement.className.match("mantine-Text-root")) return;
+    if (startContainer.parentElement.className.match("mantine-")) return;
     if (div) div.remove();
     div = document.createElement('div');
+    div.style.color = `#4a4a4a`;
+    div.style.zIndex = 9999999999999;
+    div.style.position = 'fixed';
     div.id = id;
     document.body.appendChild(div);
     (0,react_dom__WEBPACK_IMPORTED_MODULE_1__.render)( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(MyMenu, {
@@ -53230,9 +53237,13 @@ document.addEventListener("selectionchange", () => {
     }), div);
     let divRect = getElementViewPosition(div);
     // console.log(oRect,divRect)
-    if (text.trim().length > 1) div.style = `position: fixed;
-    left: ${Math.max(0, oRect.x)}px;
-    top: ${Math.max(0, oRect.y - divRect.height - 24)}px;z-index: 9999999999999;`;
+    if (text.trim().length > 2 && text.trim().length < 1500) {
+      div.style.display = 'block';
+      div.style.left = `${Math.max(0, oRect.x)}px`;
+      div.style.top = `${Math.max(0, oRect.y - divRect.height - 24)}px`;
+    } else {
+      div.style.display = 'none';
+    }
   }
 });
 ;
@@ -56769,7 +56780,7 @@ function combine (array, callback) {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("746af3a98b8d28d2ed82")
+/******/ 		__webpack_require__.h = () => ("0cecc9ac034fd1452c80")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */
