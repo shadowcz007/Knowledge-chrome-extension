@@ -2387,19 +2387,38 @@ async function queryNotionDataBase(token, databaseId) {
 }
 async function queryNotEmptyOfReply(timestamp = null) {
   // if (isQueryNotEmptyOfReply == false) {
-
-  let sorts = [{
-    property: 'createdAt',
-    direction: 'descending'
-  }];
+  let {
+    databaseId,
+    token,
+    matchKeywords,
+    title
+  } = await getCurrentNotion();
+  let matchKeywordsMap = {};
+  for (const mk of matchKeywords) {
+    if (mk.notionProperties && mk.notionProperties.key) {
+      matchKeywordsMap[mk.key] = {
+        ...mk.notionProperties
+      };
+    }
+  }
+  let sorts;
+  if (matchKeywordsMap['createdAt']) {
+    sorts = [{
+      property: matchKeywordsMap['createdAt'].key,
+      direction: 'descending'
+    }];
+  }
   let filter = {
-    and: [{
-      property: 'reply',
+    and: []
+  };
+  if (matchKeywordsMap['reply']) {
+    filter.and.push({
+      property: matchKeywordsMap['reply'].key,
       rich_text: {
         is_not_empty: true
       }
-    }]
-  };
+    });
+  }
   if (timestamp == 'this_week') {
     filter.and.push({
       timestamp: 'created_time',
@@ -2407,10 +2426,12 @@ async function queryNotEmptyOfReply(timestamp = null) {
         this_week: {}
       }
     });
-    sorts = [{
-      property: 'tags',
-      direction: 'ascending'
-    }];
+    if (matchKeywordsMap['tags']) {
+      sorts = [{
+        property: matchKeywordsMap['tags'].key,
+        direction: 'ascending'
+      }];
+    }
   } else if (timestamp == 'past_week') {
     filter.and.push({
       timestamp: 'created_time',
@@ -2418,24 +2439,23 @@ async function queryNotEmptyOfReply(timestamp = null) {
         past_week: {}
       }
     });
-    sorts = [{
-      property: 'tags',
-      direction: 'ascending'
-    }];
+    if (matchKeywordsMap['tags']) {
+      sorts = [{
+        property: matchKeywordsMap['tags'].key,
+        direction: 'ascending'
+      }];
+    }
   }
-  let {
-    databaseId,
-    token
-  } = await getCurrentNotion();
+  let json = {
+    database_id: databaseId
+  };
+  if (filter) json[filter] = filter;
+  if (sorts) json[sorts] = sorts;
   const {
     result,
     success,
     info
-  } = await queryNotion0({
-    database_id: databaseId,
-    filter: filter,
-    sorts: sorts
-  }, token);
+  } = await queryNotion0(json, token);
   return {
     result,
     success,
@@ -3018,7 +3038,7 @@ module.exports = JSON.parse('{"100":"Continue","101":"Switching Protocols","102"
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("042500cd656d522eefa9")
+/******/ 		__webpack_require__.h = () => ("746af3a98b8d28d2ed82")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

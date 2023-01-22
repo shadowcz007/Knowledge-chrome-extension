@@ -49887,13 +49887,14 @@ function createDay(n) {
 function unqueArray(arr) {
   let obj = {};
   for (const a of arr) {
-    obj[a] = 1;
+    if (a) obj[a] = 1;
   }
   return Object.keys(obj);
 }
 function parseData(data) {
   let us = {};
   Array.from(data, d => {
+    if (!d.url) d.url = '-';
     if (!us[d.url]) us[d.url] = {
       address: {},
       title: d.title,
@@ -50025,8 +50026,9 @@ class KnowledgeCard extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
     let c = this.props.data;
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_4__.Container, {
       size: 440,
-      px: 12,
-      key: c.title + c.createdAt,
+      px: 12
+      // key={(new Date()).getTime()}
+      ,
       style: {
         minWidth: '440px',
         padding: '24px'
@@ -50053,7 +50055,7 @@ class KnowledgeCard extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
         size: "xs",
         color: t.color
       }, t.name)) : '',
-      text: c.url
+      text: c.url || ''
     }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_9__.Group, {
       position: "apart",
       mt: "md",
@@ -50072,7 +50074,9 @@ class KnowledgeCard extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       style: {
         marginRight: '12px'
       }
-    }, "\u8BB0\u5F55"), c.replies) : '', /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Space, {
+    }, "\u8BB0\u5F55"), Array.from(c.replies, (cr, i) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_11__.Text, {
+      key: i
+    }, cr))) : '', /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Space, {
       h: "xl"
     }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.CopyButton, {
       value: `${Array.from(c.tags, t => t.name).join('#')} \n \n${c.replies} \n \n -${c.title}\n${c.url} `
@@ -50259,7 +50263,7 @@ class Newtab2 extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
           cards.push({
             address: Object.keys(data.address),
             content: data.content.join('\n'),
-            replies: Array.from(data.replies, (reply, i) => `${data.replies.length > 2 ? ' ' + (i + 1) + '- ' : ''}${reply}`).join('\n'),
+            replies: Array.from(data.replies, (reply, i) => `${data.replies.length > 2 ? ' ' + (i + 1) + '- ' : ''}${reply}`),
             title: data.title,
             url: url,
             createdAt: createDay(data.createdAt[0]),
@@ -50274,7 +50278,7 @@ class Newtab2 extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
     }
     let userAddressRank = [];
     for (const key in userAddress) {
-      userAddressRank.push({
+      if (key && key.trim()) userAddressRank.push({
         address: key,
         count: userAddress[key]
       });
@@ -50320,8 +50324,7 @@ class Newtab2 extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
     for (let i = 0; i < cards.length; i += cards.length / 4) {
       cardsSplitThree.push(cards.slice(i, i + cards.length / 4));
     }
-    // console.log('cardsSplitThree', cards, cardsSplitThree)
-
+    console.log('cardsSplitThree', cards, cardsSplitThree);
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
       className: "App"
     }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.LoadingOverlay, {
@@ -50478,7 +50481,7 @@ class Newtab2 extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
     }, Array.from(cards, (c, j) => {
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(KnowledgeCard, {
         data: c,
-        key: c.title + j
+        key: j
       });
     })))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Space, {
       h: "xl"
@@ -56143,7 +56146,7 @@ function combine (array, callback) {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("042500cd656d522eefa9")
+/******/ 		__webpack_require__.h = () => ("746af3a98b8d28d2ed82")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

@@ -47,7 +47,7 @@ function createDay (n) {
 function unqueArray (arr) {
   let obj = {}
   for (const a of arr) {
-    obj[a] = 1
+    if(a) obj[a] = 1
   }
   return Object.keys(obj)
 }
@@ -55,6 +55,7 @@ function unqueArray (arr) {
 function parseData (data) {
   let us = {}
   Array.from(data, (d) => {
+    if(!d.url) d.url='-'
     if (!us[d.url])
       us[d.url] = {
         address: {},
@@ -173,7 +174,7 @@ class KnowledgeCard extends React.Component {
       <Container
         size={440}
         px={12}
-        key={c.title + c.createdAt}
+        // key={(new Date()).getTime()}
         style={{
           minWidth: '440px',
           padding: '24px',
@@ -205,7 +206,7 @@ class KnowledgeCard extends React.Component {
                       ))
                     : ''
                 }
-                text={c.url}
+                text={c.url||''}
               />
             </Card.Section>
           </a>
@@ -221,8 +222,7 @@ class KnowledgeCard extends React.Component {
               <Badge size='xs' style={{ marginRight: '12px' }}>
                 记录
               </Badge>
-
-              {c.replies}
+              {Array.from(c.replies,(cr,i)=><Text key={i}>{cr}</Text>)}
             </Text>
           ) : (
             ''
@@ -428,6 +428,7 @@ class Newtab2 extends React.Component {
     // console.log(this.state.urls)
 
     for (const url in this.state.urls) {
+     
       if (url && this.state.urls[url]) {
         let data = this.state.urls[url]
         if (!data.createdAt) data.createdAt = []
@@ -441,7 +442,7 @@ class Newtab2 extends React.Component {
               data.replies,
               (reply, i) =>
                 `${data.replies.length > 2 ? ' ' + (i + 1) + '- ' : ''}${reply}`
-            ).join('\n'),
+            ),
             title: data.title,
             url: url,
             createdAt: createDay(data.createdAt[0]),
@@ -458,7 +459,7 @@ class Newtab2 extends React.Component {
 
     let userAddressRank = []
     for (const key in userAddress) {
-      userAddressRank.push({
+      if(key&&key.trim())  userAddressRank.push({
         address: key,
         count: userAddress[key],
       })
@@ -502,7 +503,7 @@ class Newtab2 extends React.Component {
     for (let i = 0; i < cards.length; i += cards.length / 4) {
       cardsSplitThree.push(cards.slice(i, i + cards.length / 4))
     }
-    // console.log('cardsSplitThree', cards, cardsSplitThree)
+    console.log('cardsSplitThree', cards, cardsSplitThree)
 
     return (
       <div className='App'>
@@ -674,7 +675,7 @@ class Newtab2 extends React.Component {
                 key={i}
               >
                 {Array.from(cards, (c, j) => {
-                  return <KnowledgeCard data={c} key={c.title + j} />
+                  return <KnowledgeCard data={c} key={j} />
                 })}
               </Flex>
             ))}
