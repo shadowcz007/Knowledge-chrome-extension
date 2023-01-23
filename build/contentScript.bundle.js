@@ -51932,9 +51932,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Space/Space.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Divider/Divider.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Flex/Flex.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Button/Button.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Alert/Alert.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/CopyButton/CopyButton.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Alert/Alert.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/CopyButton/CopyButton.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Button/Button.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Modal/Modal.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/MultiSelect/MultiSelect.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Textarea/Textarea.js");
@@ -52743,25 +52743,11 @@ class MyMenu extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
     this.state = {
       title: props.title,
       text: props.text,
-      result: ''
+      result: props.result
     };
   }
   render() {
     let that = this;
-    chrome.storage.local.onChanged.addListener(() => {
-      chrome.storage.local.get('translate').then(res => {
-        if (res && res.translate) {
-          if (res.translate.en == that.state.text && that.state.result == "") {
-            that.setState({
-              result: res.translate.zh
-            });
-          }
-          if (res.translate.success == false) {
-            console.log('稍后再试翻译', res.translate.info);
-          }
-        }
-      });
-    });
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_11__.Flex, {
       direction: "column",
       align: "flex-start",
@@ -52770,33 +52756,19 @@ class MyMenu extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
         maxWidth: '600px',
         backgroundColor: '#eee',
         padding: '12px',
-        zIndex: 999999999999999
+        borderRadius: '12px'
       }
     }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_11__.Flex, {
       direction: "row"
     }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_6__.Text, {
-      fz: 'sm'
-    }, that.state.text), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_6__.Text, {
       fz: 'sm',
       style: {
-        maxWidth: '320px',
+        maxWidth: '440px',
         marginLeft: '24px'
       }
-    }, that.state.result)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_9__.Space, {
-      h: "xl"
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Button, {
-      variant: "outline",
-      color: "dark",
-      onClick: () => {
-        chrome.runtime.sendMessage({
-          cmd: 'translate',
-          data: that.state.text,
-          storageOnChanged: true
-        }, function (response) {
-          _console('收到来自后台的回复：' + response);
-        });
-      }
-    }, "\u7FFB\u8BD1"));
+    }, that.state.result), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_6__.Text, {
+      fz: 'sm'
+    }, that.state.text)));
   }
   // @ts-ignore
   __reactstandin__regenerateByEval(key, code) {
@@ -52815,7 +52787,7 @@ class MyAlert extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
   }
   render() {
     let that = this;
-    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_13__.Alert
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Alert
     // icon={<img src={logo} className='App-logo' alt='logo' />}
     , {
       title: that.state.title,
@@ -52841,12 +52813,12 @@ class MyAlert extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       key: _i + _t
     }, _t, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("br", null))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_9__.Space, {
       w: "xl"
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.CopyButton, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_13__.CopyButton, {
       value: that.state.texts.join('\n')
     }, ({
       copied,
       copy
-    }) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Button, {
+    }) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
       variant: "outline",
       color: copied ? 'teal' : 'dark',
       onClick: copy
@@ -53034,7 +53006,7 @@ class Notions extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       wrap: "wrap"
     }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_9__.Space, {
       h: "xl"
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Button, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
       style: {
         color: 'white',
         'backgroundColor': '#228be6'
@@ -53157,9 +53129,10 @@ chrome.runtime.onMessage.addListener(async function (request, sender, sendRespon
       _console(JSON.stringify(request.info));
     }
   } else if (request.cmd === 'get-by-pageId-run') {
-    window.requestAnimationFrame(() => {
-      update().then(() => getComments());
-    });
+    domContentLoadedDoSomething();
+    // window.requestAnimationFrame(() => {
+    //   update().then(() => getComments())
+    // })
   } else if (request.cmd == 'get-by-pageId-result') {
     console.log(request);
     if (request.data) displayComments(request.data);
@@ -53181,12 +53154,93 @@ chrome.runtime.onMessage.addListener(async function (request, sender, sendRespon
       _console(data);
       createAlert('翻译结果', [data.en, data.zh]);
     }
+  } else if (request.cmd == 'page-set-contenteditable') {
+    pageSetContenteditable();
+    _console(request.data);
   }
+  ;
   sendResponse('我收到了你的消息！');
 });
+
+// 页面的功能控制
+function pageSetContenteditable() {
+  if (document.body.getAttribute('contenteditable')) {
+    document.body.removeAttribute('contenteditable');
+  } else {
+    document.body.setAttribute('contenteditable', true);
+  }
+}
+
+// 翻译的style
+function translateEn() {
+  const treeWalker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  // console.log('##commit', commit)
+  // const nodeList = []
+  let currentNode = treeWalker.currentNode;
+  while (currentNode) {
+    // text
+    // 对比#text和commit的匹配
+    if (currentNode.parentElement && ['FONT'].includes(currentNode.parentElement.nodeName)) {
+      console.log(currentNode.parentElement.nodeName);
+      let textElement = currentNode.parentElement.parentElement.parentElement;
+      textElement.setAttribute('data-hover-text', textElement.innerText.trim());
+      if (!textElement.classList.contains('knowlege-translate-hovertext')) textElement.classList.add('knowlege-translate-hovertext');
+      // currentNode.parentElement.parentElement.parentElement.setAttribute('data-hover-text')
+    }
+    // nodeList.push(currentNode)
+    currentNode = treeWalker.nextNode();
+  }
+  let style = document.createElement("style");
+  style.type = "text/css";
+  style.id = 'knowlege-translate';
+  style.appendChild(document.createTextNode(`
+  .knowlege-translate-hovertext {
+    border-bottom:2px solid gray
+  }
+  `));
+
+  // document.createTextNode(`
+  // .knowlege-translate-hovertext {
+  //   position: relative;
+  //   border-bottom: 1px dotted black;
+  // }
+
+  // .knowlege-translate-hovertext:before {
+  //   content: attr(data-hover-text);
+  //   visibility: hidden;
+  //   opacity: 0;
+  //   width: max-content;
+  //   max-width: 720px;
+  //   background-color: black;
+  //   color: #fff;
+  //   text-align: left;
+  //   border-radius: 5px;
+  //   padding: 5px 0;
+  //   transition: opacity 1s ease-in-out;
+  //   position: absolute;
+  //   z-index: 1;
+  //   left: 0;
+  //   top: 110%;
+  //   font-size: 14px;
+  //   padding: 12px;
+  // }
+
+  // .knowlege-translate-hovertext:hover:before {
+  //   opacity: 1;
+  //   visibility: visible;
+  // }
+  // `)
+
+  let head = document.getElementsByTagName("head")[0];
+  if (!head.querySelector('#knowlege-translate')) head.appendChild(style);
+}
 function domContentLoadedDoSomething() {
   _console('DOM loaded');
-  document.body.setAttribute('contenteditable', true);
+  translateEn();
   window.requestAnimationFrame(() => {
     update().then(() => getComments());
   });
@@ -53221,10 +53275,18 @@ document.addEventListener("selectionchange", () => {
   if (selection.type != 'None') {
     const oRange = selection.getRangeAt(0);
     const oRect = oRange.getBoundingClientRect();
-    const text = selection.toString();
+    let text = selection.toString(),
+      result = '',
+      isHover = false;
     let startContainer = oRange.startContainer;
-    // console.log(startContainer.parentElement)
+    console.log(startContainer.parentElement);
     if (startContainer.parentElement.className.match("mantine-")) return;
+    if (startContainer.parentElement && startContainer.parentElement.className.match('knowlege-translate-hovertext')) {
+      // 保留了翻译结果
+      result = startContainer.parentElement.getAttribute('data-hover-text');
+      text = startContainer.parentElement.innerText;
+      isHover = true;
+    }
     if (div) div.remove();
     div = document.createElement('div');
     div.style.color = `#4a4a4a`;
@@ -53233,11 +53295,12 @@ document.addEventListener("selectionchange", () => {
     div.id = id;
     document.body.appendChild(div);
     (0,react_dom__WEBPACK_IMPORTED_MODULE_1__.render)( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(MyMenu, {
-      text: text
+      text: text,
+      result: result
     }), div);
     let divRect = getElementViewPosition(div);
     // console.log(oRect,divRect)
-    if (text.trim().length > 2 && text.trim().length < 1500) {
+    if (isHover) {
       div.style.display = 'block';
       div.style.left = `${Math.max(0, oRect.x)}px`;
       div.style.top = `${Math.max(0, oRect.y - divRect.height - 24)}px`;
@@ -53246,6 +53309,9 @@ document.addEventListener("selectionchange", () => {
     }
   }
 });
+
+// _console('KNOWLEDGE')
+// _console(window.location.href)
 ;
 (function () {
   var reactHotLoader = typeof reactHotLoaderGlobal !== 'undefined' ? reactHotLoaderGlobal.default : undefined;
@@ -53288,6 +53354,8 @@ document.addEventListener("selectionchange", () => {
   reactHotLoader.register(getNotions, "getNotions", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
   reactHotLoader.register(createAlert, "createAlert", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
   reactHotLoader.register(createPrompt, "createPrompt", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
+  reactHotLoader.register(pageSetContenteditable, "pageSetContenteditable", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
+  reactHotLoader.register(translateEn, "translateEn", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
   reactHotLoader.register(domContentLoadedDoSomething, "domContentLoadedDoSomething", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
 })();
 ;
@@ -56780,7 +56848,7 @@ function combine (array, callback) {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("0cecc9ac034fd1452c80")
+/******/ 		__webpack_require__.h = () => ("4309a60bcfc95f4b047f")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

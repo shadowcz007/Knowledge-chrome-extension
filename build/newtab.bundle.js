@@ -50108,6 +50108,7 @@ class Newtab2 extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       },
       currentNotion: {},
       notions: {},
+      tags: {},
       // notionTitle: '',
       displayLoginBtn: true
     };
@@ -50222,6 +50223,9 @@ class Newtab2 extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
         } else {
           that.setAlert(true, '提示', `${JSON.stringify(request.info)}`);
         }
+      } else if (request.cmd == 'find-by-tag-result') {
+        // 标签搜索结果
+        console.log(request.data);
       }
       that.setLoading(false);
       sendResponse('new-tab-onMessage');
@@ -50245,6 +50249,11 @@ class Newtab2 extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
         that.setState({
           notions: data.notions,
           currentNotion: data.currentNotion
+        });
+      }
+      if (data && data.tags) {
+        that.setState({
+          tags: data.tags
         });
       }
     });
@@ -50483,6 +50492,60 @@ class Newtab2 extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       title: this.state.currentNotion.title || ' - '
     })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.Flex, {
       gap: "lg",
+      justify: "flex-start",
+      align: "flex-start",
+      direction: "column",
+      wrap: "nowrap"
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_5__.Title, {
+      order: 4,
+      style: {
+        marginLeft: '14px'
+      }
+    }, "\u6807\u7B7E\u96C6"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_9__.Group, {
+      style: {
+        marginLeft: '24px'
+      }
+    }, (() => {
+      let ts = [];
+      let tags = Object.keys(this.state.tags);
+      for (const tag of tags) {
+        if (this.state.tags[tag] && this.state.tags[tag]._currentNotion && this.state.currentNotion && this.state.tags[tag]._currentNotion.id == this.state.currentNotion.id) {
+          ts.push({
+            name: tag.trim(),
+            _currentNotion: this.state.tags[tag]._currentNotion
+          });
+        }
+      }
+      return Array.from(ts, (t, i) => {
+        return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_6__.Badge, {
+          style: {
+            userSelect: 'none',
+            cursor: 'pointer'
+          },
+          variant: "outline",
+          sx: {
+            paddingRight: 8,
+            paddingLeft: 8
+          }
+          // rightSection={removeButton}
+          ,
+          onClick: () => {
+            // console.log(t.name)
+            that.setLoading(true);
+            that.setState({
+              urls: {}
+            });
+            chrome.runtime.sendMessage({
+              cmd: 'find-by-tag',
+              data: t.name,
+              pageSize: 30
+            });
+          },
+          key: i
+        }, t.name);
+      });
+    })())), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.Flex, {
+      gap: "lg",
       justify: "flex-end",
       align: "flex-end",
       direction: "row",
@@ -50507,13 +50570,13 @@ class Newtab2 extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       justify: "center",
       align: "flex-start",
       direction: "row",
-      wrap: "wrap"
+      wrap: "nowrap"
     }, Array.from(cardsSplitThree, (cards, i) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.Flex, {
       gap: "lg",
       justify: "flex-start",
       align: "flex-start",
       direction: "column",
-      wrap: "wrap",
+      wrap: "nowrap",
       key: i
     }, Array.from(cards, (c, j) => {
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(KnowledgeCard, {
@@ -56183,7 +56246,7 @@ function combine (array, callback) {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("0cecc9ac034fd1452c80")
+/******/ 		__webpack_require__.h = () => ("4309a60bcfc95f4b047f")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

@@ -997,46 +997,21 @@ class MyMenu extends React.Component {
     this.state = {
       title:props.title,
       text:props.text,
-      result:''
+      result:props.result
     }
   }
-
-  
-
   render () {
     let that = this
-    chrome.storage.local.onChanged.addListener(()=>{
-      chrome.storage.local.get('translate').then(res=>{
-        if(res&&res.translate){
-          if(res.translate.en==that.state.text&&that.state.result==""){
-            that.setState({
-              result:res.translate.zh
-            })
-          }
-          if(res.translate.success==false){
-            console.log('稍后再试翻译',res.translate.info)
-          }
-        }
-      })
-    })
     return (<Flex 
     direction='column'
     align='flex-start'
     justify='flex-start'
-    style={{maxWidth:'600px',backgroundColor:'#eee',padding:'12px',zIndex: 999999999999999}}
+    style={{maxWidth:'600px',backgroundColor:'#eee',padding:'12px',borderRadius:'12px'}}
     >
       <Flex direction='row' >
-        <Text fz={'sm'}>{that.state.text}</Text>
-       <Text fz={'sm'} style={{maxWidth:'320px',marginLeft:'24px'}}>{that.state.result}</Text>
+      <Text fz={'sm'} style={{maxWidth:'440px',marginLeft:'24px'}}>{that.state.result}</Text> 
+      <Text fz={'sm'}>{that.state.text}</Text>
       </Flex>
-      <Space h='xl'/>
-      <Button  variant='outline'
-                    color='dark' onClick={()=>{
-
-                      chrome.runtime.sendMessage({ cmd: 'translate',data:that.state.text,storageOnChanged:true}, function (response) {
-                        _console('收到来自后台的回复：' + response) })
-
-                    }}>翻译</Button>
       </Flex>)
   }
 }
@@ -1395,9 +1370,10 @@ chrome.runtime.onMessage.addListener(async function (
       _console(JSON.stringify(request.info))
     }
   } else if (request.cmd === 'get-by-pageId-run') {
-    window.requestAnimationFrame(() => {
-      update().then(() => getComments())
-    })
+    domContentLoadedDoSomething()
+    // window.requestAnimationFrame(() => {
+    //   update().then(() => getComments())
+    // })
   } else if (request.cmd == 'get-by-pageId-result') {
     console.log(request)
     if (request.data) displayComments(request.data)
@@ -1413,13 +1389,102 @@ chrome.runtime.onMessage.addListener(async function (
         _console(data);
         createAlert('翻译结果',[data.en,data.zh])
       }
-  }
+  }else if(request.cmd=='page-set-contenteditable'){
+    pageSetContenteditable()
+    _console(request.data);
+  };
+
   sendResponse('我收到了你的消息！')
 })
 
+
+// 页面的功能控制
+function pageSetContenteditable(){
+  if(document.body.getAttribute('contenteditable')){ document.body.removeAttribute('contenteditable')}else{
+    document.body.setAttribute('contenteditable',true);
+  }
+}
+
+// 翻译的style
+function translateEn(){
+  const treeWalker = document.createTreeWalker(
+    document.body,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode (node) {
+        return NodeFilter.FILTER_ACCEPT
+      },
+    }
+  )
+  // console.log('##commit', commit)
+  // const nodeList = []
+  let currentNode = treeWalker.currentNode
+  while (currentNode) {
+    // text
+    // 对比#text和commit的匹配
+     if(currentNode.parentElement&&['FONT'].includes(currentNode.parentElement.nodeName)) {
+        console.log(currentNode.parentElement.nodeName)
+        let textElement=currentNode.parentElement.parentElement.parentElement;
+        textElement.setAttribute('data-hover-text',textElement.innerText.trim())
+        if(!textElement.classList.contains('knowlege-translate-hovertext')) textElement.classList.add('knowlege-translate-hovertext')
+        // currentNode.parentElement.parentElement.parentElement.setAttribute('data-hover-text')
+     }
+    // nodeList.push(currentNode)
+    currentNode = treeWalker.nextNode()
+  }
+
+
+  let style = document.createElement("style");
+  style.type = "text/css";
+  style.id='knowlege-translate';
+  style.appendChild(document.createTextNode(`
+  .knowlege-translate-hovertext {
+    border-bottom:2px solid gray
+  }
+  `));
+
+  // document.createTextNode(`
+  // .knowlege-translate-hovertext {
+  //   position: relative;
+  //   border-bottom: 1px dotted black;
+  // }
+  
+  // .knowlege-translate-hovertext:before {
+  //   content: attr(data-hover-text);
+  //   visibility: hidden;
+  //   opacity: 0;
+  //   width: max-content;
+  //   max-width: 720px;
+  //   background-color: black;
+  //   color: #fff;
+  //   text-align: left;
+  //   border-radius: 5px;
+  //   padding: 5px 0;
+  //   transition: opacity 1s ease-in-out;
+  //   position: absolute;
+  //   z-index: 1;
+  //   left: 0;
+  //   top: 110%;
+  //   font-size: 14px;
+  //   padding: 12px;
+  // }
+  
+  // .knowlege-translate-hovertext:hover:before {
+  //   opacity: 1;
+  //   visibility: visible;
+  // }
+  // `)
+  
+  let head = document.getElementsByTagName("head")[0];
+
+  if(!head.querySelector('#knowlege-translate'))head.appendChild(style);
+
+}
+ 
+
 function domContentLoadedDoSomething () {
   _console('DOM loaded')
-  document.body.setAttribute('contenteditable',true)
+  translateEn()
   window.requestAnimationFrame(() => {
     update().then(() => getComments())
   })
@@ -1467,11 +1532,18 @@ document.addEventListener("selectionchange", () => {
   if (selection.type != 'None') {
     const oRange = selection.getRangeAt(0)
     const oRect = oRange.getBoundingClientRect()
-    const text = selection.toString()
+    let text = selection.toString(),result='',isHover=false;
 
     let startContainer = oRange.startContainer
-    // console.log(startContainer.parentElement)
+    console.log(startContainer.parentElement)
     if(startContainer.parentElement.className.match("mantine-"))return
+    if(startContainer.parentElement&&
+      startContainer.parentElement.className.match('knowlege-translate-hovertext')){
+        // 保留了翻译结果
+        result=startContainer.parentElement.getAttribute('data-hover-text');
+        text=startContainer.parentElement.innerText;
+        isHover=true;
+      }
     if(div) div.remove();
     div=document.createElement('div');
     div.style.color=`#4a4a4a`
@@ -1479,10 +1551,10 @@ document.addEventListener("selectionchange", () => {
     div.style.position='fixed';
     div.id=id;
       document.body.appendChild(div)
-      render(<MyMenu text={text}/>,div)
+      render(<MyMenu text={text} result={result}/>,div)
       let divRect=getElementViewPosition(div)
       // console.log(oRect,divRect)
-    if(text.trim().length>2&&text.trim().length<1500)  {
+    if(isHover)  {
       div.style.display='block';
       div.style.left=`${Math.max(0,oRect.x)}px`;
       div.style.top=`${Math.max(0,oRect.y-divRect.height-24)}px`;
@@ -1490,5 +1562,8 @@ document.addEventListener("selectionchange", () => {
       div.style.display='none'
     }
   }
-  
+
 });
+
+// _console('KNOWLEDGE')
+// _console(window.location.href)

@@ -262,6 +262,7 @@ class Newtab2 extends React.Component {
       },
       currentNotion:{},
       notions:{},
+      tags:{},
       // notionTitle: '',
       displayLoginBtn: true,
     }
@@ -389,6 +390,9 @@ class Newtab2 extends React.Component {
         } else {
           that.setAlert(true, '提示', `${JSON.stringify(request.info)}`)
         }
+      }else if(request.cmd=='find-by-tag-result'){
+        // 标签搜索结果
+        console.log(request.data)
       }
       that.setLoading(false)
       sendResponse('new-tab-onMessage')
@@ -412,9 +416,11 @@ class Newtab2 extends React.Component {
     })
 
     chrome.storage.local.get().then((data) => {
-       
       if (data && data.currentNotion&&data.notions&&data.notions[data.currentNotion.id]) {
         that.setState({ notions:data.notions,currentNotion:data.currentNotion })
+      }
+      if (data && data.tags) {
+        that.setState({tags:data.tags })
       }
     })
     // chrome.storage.local.onChanged.addListener(() => that.storageChange())
@@ -658,6 +664,56 @@ class Newtab2 extends React.Component {
 
           <Flex
             gap='lg'
+            justify='flex-start'
+            align='flex-start'
+            direction='column'
+            wrap='nowrap'
+            
+          >
+            <Title
+              order={4}
+              style={{
+                marginLeft: '14px',
+              }}
+            >
+              标签集
+            </Title>
+            <Group style={{ marginLeft: '24px' }}>{
+                (()=>{
+                  let ts=[];
+                  let tags=Object.keys(this.state.tags);
+                  for (const tag of tags) {
+                    if(this.state.tags[tag]&&this.state.tags[tag]._currentNotion&& this.state.currentNotion&&
+                      this.state.tags[tag]._currentNotion.id==this.state.currentNotion.id){
+                      ts.push({
+                        name:tag.trim(),
+                        _currentNotion:this.state.tags[tag]._currentNotion
+                      })
+                    }
+                  }
+                  return Array.from(ts,(t,i)=>{
+                    return <Badge style={{userSelect: 'none',
+                      cursor: 'pointer'}}
+                    variant="outline" sx={{ paddingRight: 8,paddingLeft:8 }} 
+                    // rightSection={removeButton}
+                    onClick={()=>{
+                      // console.log(t.name)
+                      that.setLoading(true)
+                      that.setState({urls:{}})
+                      chrome.runtime.sendMessage({
+                        cmd:'find-by-tag',data:t.name,pageSize:30
+                      })
+                    }}
+                    key={i}>
+                    {t.name}</Badge>
+                  })
+                })()
+              }
+              
+                  </Group>
+            </Flex>
+          <Flex
+            gap='lg'
             justify='flex-end'
             align='flex-end'
             direction='row'
@@ -687,7 +743,7 @@ class Newtab2 extends React.Component {
             justify='center'
             align='flex-start'
             direction='row'
-            wrap='wrap'
+            wrap='nowrap'
           >
             {Array.from(cardsSplitThree, (cards, i) => (
               <Flex
@@ -695,7 +751,7 @@ class Newtab2 extends React.Component {
                 justify='flex-start'
                 align='flex-start'
                 direction='column'
-                wrap='wrap'
+                wrap='nowrap'
                 key={i}
               >
                 {Array.from(cards, (c, j) => {

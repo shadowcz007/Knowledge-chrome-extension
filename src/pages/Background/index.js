@@ -225,6 +225,13 @@ chrome.runtime.onInstalled.addListener(async () => {
     contexts: ['page'],
   })
 
+  // chrome.contextMenus.create({
+  //   id: 'page-set-contenteditable',
+  //   title: `${chrome.runtime.getManifest().name} 全文编辑`,
+  //   type: 'normal',
+  //   contexts: ['page'],
+  // })
+
   // if(buding){}
   // chrome.storage.sync.clear()
   // chrome.storage.local.clear()
@@ -520,24 +527,45 @@ async function queryByPageId (data = {}) {
 }
 
 async function queryByTag (tag, page_size = 5) {
-  let { databaseId, token } = await getCurrentNotion()
+  let { databaseId, token,matchKeywords } = await getCurrentNotion()
 
-  let sorts = [
+  
+  let keys = changeKeyForNotion(
     {
-      property: 'createdAt',
-      direction: 'descending',
+      createdAt: 'createdAt',
+      tags: 'tags',
     },
-  ]
+    matchKeywords
+  )
+
+  let sorts = [],
+    filter = {}
+
+  //TODO 需要测试下，更换tags和createAt字段名 对不对
+  let createdAtKey = keys.filter((f) => f.value === 'createdAt')
+  if (createdAtKey[0] && createdAtKey[0].key) {
+    sorts = [
+      {
+        property: createdAtKey[0].key,
+        direction: 'descending',
+      },
+    ]
+  }
+
+  let tagsKey = keys.filter((f) => f.value === 'tags')
+  if (tagsKey[0] && tagsKey[0].key && tagsKey[0].type == 'multi_select') {
+    filter = {
+      property: tagsKey[0].key,
+      multi_select: {
+        contains: tag,
+      },
+    }
+  }
 
   const { result, success, info } = await queryNotion0(
     {
       database_id: databaseId,
-      filter: {
-        property: 'tags',
-        multi_select: {
-          contains: tag,
-        },
-      },
+      filter,
       sorts,
       page_size,
     },
@@ -923,27 +951,29 @@ chrome.runtime.onMessage.addListener(async function (
       await updateTags(result || [])
     })
   } else if (cmd == 'find-by-tag' && request.data) {
-    // queryByTag(request.data).then(({ result, success, info }) => {
-    //   updateTags(result).then((data) => {
-    //     chrome.tabs.query(
-    //       { active: true, currentWindow: true },
-    //       function (tabs) {
-    //         chrome.tabs.sendMessage(
-    //           tabs[0].id,
-    //           {
-    //             cmd: 'find-by-tag-result',
-    //             data: data,
-    //             success,
-    //             info,
-    //           },
-    //           function (response) {
-    //             console.log(response)
-    //           }
-    //         )
-    //       }
-    //     )
-    //   })
-    // })
+
+    queryByTag(request.data,request.pageSize).then(({ result, success, info }) => {
+      
+        chrome.tabs.query(
+          { active: true, currentWindow: true },
+          function (tabs) {
+            chrome.tabs.sendMessage(
+              tabs[0].id,
+              {
+                cmd: 'new-reply-result',
+                data: result,
+                success,
+                info,
+              },
+              function (response) {
+                console.log(response)
+              }
+            )
+          }
+        )
+      
+    })
+
   }else if(cmd==='translate'&& request.data){
     const data=request.data;
     let success=false,result,info;
