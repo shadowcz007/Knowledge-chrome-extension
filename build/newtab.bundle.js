@@ -50428,13 +50428,26 @@ class Newtab2 extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       variant: "outline",
       color: "dark",
       onClick: () => that.checkAddressIsCanGetKnowledge()
-    }, "\uD83D\uDE80 \u767B\u9646")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.Flex, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_11__.Text, null, "PDF\u6D4F\u89C8\u5668"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_13__.Button, {
+    }, "\uD83D\uDE80 \u767B\u9646")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.Flex, {
+      justify: "flex-end",
+      align: "flex-start",
+      direction: "column",
+      style: {
+        marginTop: '24px'
+      }
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_11__.Text, null, "\u5FEB\u6377\u529F\u80FD"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Space, {
+      h: "xs"
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_13__.Button, {
       variant: "outline",
       color: "dark",
       onClick: () => chrome.tabs.create({
         url: 'https://mozilla.github.io/pdf.js/web/viewer.html?file='
       })
-    }, "PDF\u6D4F\u89C8\u5668"))) : '', /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Space, {
+    }, "PDF\u6D4F\u89C8\u5668"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_11__.Text, {
+      style: {
+        marginTop: '12px'
+      }
+    }, '全文翻译选择翻译为中文 -> 右键选择 发现 -> 全文翻译切换回英文 -> 点击显示中英翻译结果'))) : '', /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Space, {
       h: "xl"
     })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.Flex, {
       bg: "#eeeeee",
@@ -56252,7 +56265,7 @@ function combine (array, callback) {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("2774f482b6f3b75d6cae")
+/******/ 		__webpack_require__.h = () => ("a554930863d3eb27ff84")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

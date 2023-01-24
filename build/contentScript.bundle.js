@@ -51932,12 +51932,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Space/Space.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Divider/Divider.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Flex/Flex.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Alert/Alert.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Textarea/Textarea.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/CopyButton/CopyButton.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Button/Button.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Modal/Modal.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/MultiSelect/MultiSelect.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Textarea/Textarea.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Alert/Alert.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Modal/Modal.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/MultiSelect/MultiSelect.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Select/Select.js");
 /* harmony import */ var prettier__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! prettier */ "./node_modules/prettier/standalone.js");
 /* harmony import */ var prettier__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(prettier__WEBPACK_IMPORTED_MODULE_3__);
@@ -51970,7 +51970,7 @@ String.prototype.format = function (start = '', end = '') {
   return Object.keys(ids).join('\n');
 };
 String.prototype.format2 = function () {
-  return this.replace(/\n/ig, '').split('.').join('.\n');
+  return this.replace(/\n/ig, '').split('.').join('.\n\n');
 };
 
 // 去重
@@ -52780,6 +52780,74 @@ class MyMenu extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
     this[key] = eval(code);
   }
 }
+class MyPdfRead extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      title: props.title,
+      text: props.text,
+      result: props.result
+    };
+  }
+  render() {
+    let that = this;
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_11__.Flex, {
+      direction: "column",
+      align: "flex-start",
+      justify: "flex-start",
+      style: {
+        maxWidth: '600px',
+        backgroundColor: '#eee',
+        padding: '12px',
+        borderRadius: '12px'
+      }
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Textarea, {
+      placeholder: "\u91C7\u96C6\u540E\u53EF\u4F7F\u7528\u7FFB\u8BD1\u5DE5\u5177\u540E\u7F16\u8F91",
+      label: "\u8BC4\u8BBA",
+      autosize: true,
+      value: this.state.text,
+      minRows: 2,
+      onChange: event => {
+        let val = event.currentTarget.value.trim().format2();
+        that.setState({
+          text: val
+        });
+        localStorage.setItem('_pdf_current_input_', val);
+        console.log(val, this.state.ref);
+      }
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_9__.Space, {
+      h: "xl"
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_13__.CopyButton, {
+      value: that.state.text
+    }, ({
+      copied,
+      copy
+    }) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
+      variant: "outline",
+      color: copied ? 'teal' : 'dark',
+      onClick: copy
+    }, copied ? '已复制到剪切板' : '拷贝')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
+      onClick: () => {
+        // 加载缓存
+        let loadBtn = document.createElement('button');
+        loadBtn.innerText = '加载缓存';
+        loadBtn.addEventListener('click', e => {
+          let items = [];
+          console.log(localStorage);
+          try {
+            items = JSON.parse(localStorage.getItem('_pdf_'));
+          } catch (error) {}
+          text.innerText = items.join('\n\n');
+        });
+      }
+    }));
+  }
+  // @ts-ignore
+  __reactstandin__regenerateByEval(key, code) {
+    // @ts-ignore
+    this[key] = eval(code);
+  }
+}
 class MyAlert extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
   constructor(props) {
     super(props);
@@ -52791,7 +52859,7 @@ class MyAlert extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
   }
   render() {
     let that = this;
-    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Alert
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Alert
     // icon={<img src={logo} className='App-logo' alt='logo' />}
     , {
       title: that.state.title,
@@ -52870,7 +52938,7 @@ class Notions extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
   }
   render() {
     let that = this;
-    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Modal, {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.Modal, {
       opened: this.state.opened,
       onClose: () => {
         that.setState({
@@ -52889,7 +52957,7 @@ class Notions extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       align: "flex-start",
       direction: "column",
       wrap: "wrap"
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.MultiSelect, {
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_17__.MultiSelect, {
       label: "\u6807\u7B7E",
       data: that.state._tags,
       placeholder: "\u9009\u62E9\u4E00\u4E2A\u6216\u65B0\u5EFA",
@@ -52922,7 +52990,7 @@ class Notions extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
           return item;
         }
       }
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_17__.Textarea, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Textarea, {
       style: {
         minWidth: '600px'
       },
@@ -52941,7 +53009,7 @@ class Notions extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
           }
         });
       }
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_17__.Textarea, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Textarea, {
       style: {
         minWidth: '600px'
       },
@@ -53270,22 +53338,25 @@ document.addEventListener('scroll', event => {
     Array.from(document.querySelectorAll('p'), p => p.innerText = decodeURI(p.innerText));
   }
 });
-document.addEventListener("selectionchange", () => {
+document.addEventListener("selectionchange", event => {
   // console.log('selectionchange')
   // TODO iframe的处理， https://huggingface.co/spaces/lambdalabs/image-mixer-demo
   const selection = window.getSelection();
   let id = "knowledge-e-menu-div";
   let div = document.querySelector('#' + id);
   console.log(selection.type);
-  if (selection.type != 'None') {
+  if (selection.type == 'Range') {
     const oRange = selection.getRangeAt(0);
     const oRect = oRange.getBoundingClientRect();
     let text = selection.toString(),
       result = '',
       isHover = false;
     let startContainer = oRange.startContainer;
-    console.log(startContainer.parentElement);
+    console.log(startContainer.parentElement, text, event);
+    // 排除插件的ui
     if (startContainer.parentElement.className.match("mantine-")) return;
+
+    // 翻译保留原文功能
     if (startContainer.parentElement && startContainer.parentElement.className.match('knowlege-translate-hovertext')) {
       // 保留了翻译结果
       result = startContainer.parentElement.getAttribute('data-hover-text');
@@ -53312,6 +53383,33 @@ document.addEventListener("selectionchange", () => {
     } else {
       div.style.display = 'none';
     }
+
+    // pdf 划选复制
+    let pdfTextDiv = document.querySelector('#knowlege-pdf-read-new-text');
+    if (pdfTextDiv && window.location.href.match('https://mozilla.github.io/pdf.js/web/viewer.html')) {
+      if (startContainer.parentElement.className.match("knowlege-pdf-read") || startContainer.parentElement.parentElement.className.match("knowlege-pdf-read") || text.format2().length < 2) return;
+      if (pdfTextDiv.getAttribute('is-select') != 'on') return;
+      pdfTextDiv.innerText = text.format2();
+    }
+  } else if (selection.type == 'Caret') {
+    let pdfTextDiv = document.querySelector('#knowlege-pdf-read-new-text');
+    let t = (pdfTextDiv.getAttribute('copy-text') || '').trim();
+    // document.execCommand('insertText', false, 'pasteText');
+    if (selection.anchorNode.className.match('internal') && t.length > 0) {
+      document.execCommand('insertText', false, t);
+      // console.log(selection.anchorNode.parentElement,selection.anchorNode.parentElement.className)
+      pdfTextDiv.setAttribute('copy-text', '');
+      // let filename=document.querySelector('#fileNameField').innerText;
+      let items = [];
+      try {
+        items = JSON.parse(localStorage.getItem('_pdf_'));
+        items.push(t);
+      } catch (error) {
+        console.log(error);
+        items = [t];
+      }
+      localStorage.setItem('_pdf_', JSON.stringify(items));
+    }
   }
 });
 
@@ -53320,49 +53418,100 @@ document.addEventListener("selectionchange", () => {
 function createPDFDiv() {
   let div = document.createElement('div');
   div.id = "knowlege-pdf-read-new";
+  div.className = 'knowlege-pdf-read';
   div.style = `position: fixed;
   width: 420px;
   height: 100vh;
   top: 32px;
   color: black;
-  left: 0;
-  background-color: #eee;
+  right: 0;
+  background-color: #eee;display:none;
   z-index: 999;`;
   if (!document.querySelector('#' + div.id) && window.location.href.match('https://mozilla.github.io/pdf.js/web/viewer.html')) {
     document.body.appendChild(div);
-    let btn = document.createElement('button');
-    btn.innerText = '打开PDF';
-    btn.addEventListener('click', e => {
-      document.body.querySelector('#openFile').click();
-    });
-    div.appendChild(btn);
+
+    // toolbarViewerRight
+    let toolbarViewerRight = document.body.querySelector('#toolbarViewerRight');
+
+    // div.appendChild(loadBtn);
+    // toolbarViewerRight.insertAdjacentElement('afterbegin', loadBtn);
+
     let copyBtn = document.createElement('button');
-    copyBtn.innerText = '拷贝';
-    copyBtn.addEventListener('click', e => {
-      _console(text.innerText);
-    });
-    div.appendChild(copyBtn);
-    let text = document.createElement('div');
-    text.class = "text";
-    text.style.height = '100%';
-    text.setAttribute('contentEditable', true);
-    div.appendChild(text);
-    //  去除格式
-    text.addEventListener("paste", function (event) {
-      event.stopPropagation();
-      event.preventDefault();
-      var text = '';
-      if (event.clipboardData && event.clipboardData.getData) {
-        text = event.clipboardData.getData('text/plain');
-      }
-      ;
-      // console.log(event.clipboardData)
-      if (document.queryCommandSupported('insertText')) {
-        text = text.format2();
-        document.execCommand('insertText', false, text);
+    copyBtn.innerText = '拷贝并标注';
+    copyBtn.addEventListener('click', async e => {
+      _console(text.innerText.trim());
+      let t = text.innerText.trim();
+      text.setAttribute('copy-text', t);
+      try {
+        await navigator.clipboard.writeText(t);
+        console.log('Content copied to clipboard');
+      } catch (err) {
+        console.error('Failed to copy: ', err);
       }
     });
+    // div.appendChild(copyBtn);
+    toolbarViewerRight.insertAdjacentElement('afterbegin', copyBtn);
+
+    // 收集开关
+    let selectBtn = document.createElement('button');
+    selectBtn.innerText = '开始收集';
+    selectBtn.addEventListener('click', async e => {
+      if (div.getAttribute('is-select') == 'on') {
+        div.setAttribute('is-select', 'off');
+        div.style.display = 'none';
+        selectBtn.innerText = '开始收集';
+      } else {
+        div.setAttribute('is-select', 'on');
+        div.style.display = 'block';
+        selectBtn.innerText = '收集ing';
+      }
+    });
+    // div.appendChild(selectBtn);
+    toolbarViewerRight.insertAdjacentElement('afterbegin', selectBtn);
+    (0,react_dom__WEBPACK_IMPORTED_MODULE_1__.render)( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(MyPdfRead, {
+      text: ''
+    }), div);
+    // let text=document.createElement('div');
+    // text.id="knowlege-pdf-read-new-text";
+    // text.className='knowlege-pdf-read';
+    // text.style=`height: 100%;overflow-y: scroll;
+    // padding: 24px;
+    // outline: none;
+    // border: none;`
+    // text.setAttribute('contentEditable',true);
+    // div.appendChild(text);
+    // //  去除格式
+    // text.addEventListener("paste", function(event) {
+    //   event.stopPropagation();
+    //   event.preventDefault();
+    //     let pasteText = '';
+    //     if (event.clipboardData && event.clipboardData.getData) {
+    //       pasteText = event.clipboardData.getData('text/plain');
+    //     };
+    //     // console.log(event.clipboardData)
+    //     if (document.queryCommandSupported('insertText')) {
+    //         pasteText=pasteText.format2();
+    //         document.execCommand('insertText', false, pasteText);
+    //         text.innerText=text.innerText;
+    //     }
+    // });
   }
+
+  // 样式修改 for .freeTextEditor.internal
+
+  let style = document.createElement("style");
+  style.type = "text/css";
+  style.id = 'knowlege-pdf-read-new';
+  style.appendChild(document.createTextNode(`
+  .freeTextEditor .internal {
+    background: #eee !important;
+    padding: 8px;
+    border-radius: 4px;
+    font-weight: 300;
+  }
+  `));
+  let head = document.getElementsByTagName("head")[0];
+  if (!head.querySelector('#knowlege-pdf-read-new')) head.appendChild(style);
 }
 
 // _console('KNOWLEDGE')
@@ -53404,6 +53553,7 @@ function createPDFDiv() {
   reactHotLoader.register(addBadge, "addBadge", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
   reactHotLoader.register(update, "update", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
   reactHotLoader.register(MyMenu, "MyMenu", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
+  reactHotLoader.register(MyPdfRead, "MyPdfRead", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
   reactHotLoader.register(MyAlert, "MyAlert", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
   reactHotLoader.register(Notions, "Notions", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
   reactHotLoader.register(getCfxAddress, "getCfxAddress", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
@@ -56905,7 +57055,7 @@ function combine (array, callback) {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("2774f482b6f3b75d6cae")
+/******/ 		__webpack_require__.h = () => ("a554930863d3eb27ff84")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

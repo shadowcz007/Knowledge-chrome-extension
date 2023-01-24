@@ -599,8 +599,14 @@ class Newtab2 extends React.Component {
                   🚀 登陆
                 </Button>
               </Flex>
-              <Flex >
-                <Text>PDF浏览器</Text>
+             
+              <Flex justify='flex-end'
+              align='flex-start'
+              direction='column' 
+              style={{marginTop:'24px'}}>
+                 
+                <Text>快捷功能</Text>
+                <Space h="xs" />
                   <Button
                     variant='outline'
                     color='dark'
@@ -612,6 +618,7 @@ class Newtab2 extends React.Component {
                   >
                     PDF浏览器
                   </Button> 
+                  <Text style={{marginTop:'12px'}}>{'全文翻译选择翻译为中文 -> 右键选择 发现 -> 全文翻译切换回英文 -> 点击显示中英翻译结果'}</Text>
               </Flex>
             </Alert>
           ) : (

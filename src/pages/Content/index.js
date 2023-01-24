@@ -33,7 +33,7 @@ String.prototype.format = function (start = '', end = '') {
 }
 
 String.prototype.format2=function(){
- return this.replace(/\n/ig,'').split('.').join('.\n');
+ return this.replace(/\n/ig,'').split('.').join('.\n\n');
 }
 
 // 去重
@@ -1027,6 +1027,69 @@ class MyMenu extends React.Component {
 }
 
 
+class MyPdfRead extends React.Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      title:props.title,
+      text:props.text,
+      result:props.result,
+       
+    }
+
+    
+
+  }
+  render () {
+    let that = this
+    return (<Flex 
+    direction='column'
+    align='flex-start'
+    justify='flex-start'
+    style={{maxWidth:'600px',backgroundColor:'#eee',padding:'12px',borderRadius:'12px'}}
+    >
+      
+    <Textarea
+      placeholder="采集后可使用翻译工具后编辑"
+      label="评论" autosize value={this.state.text}
+      minRows={2}
+      onChange={event=>{
+        let val = event.currentTarget.value.trim().format2()
+        that.setState({
+          text:val
+        });
+        localStorage.setItem('_pdf_current_input_',val)
+        console.log(val,this.state.ref)
+      }}
+    
+    />
+    <Space h='xl' />
+        <CopyButton value={that.state.text}>
+              {({ copied, copy }) => (
+                <Button variant='outline' color={copied ? 'teal' : 'dark'} onClick={copy}>
+                  {copied ? '已复制到剪切板' : '拷贝'}
+                </Button>
+              )}
+            </CopyButton>
+
+            <Button onClick={()=>{
+               // 加载缓存
+    let loadBtn=document.createElement('button');
+    loadBtn.innerText='加载缓存'
+    loadBtn.addEventListener('click',e=>{
+      let items=[];
+      console.log(localStorage)
+      try {
+        items=JSON.parse(localStorage.getItem('_pdf_'));
+      } catch (error) {
+      }
+      text.innerText=items.join('\n\n')
+    });
+            }}></Button>
+      </Flex>)
+  }
+}
+
 class MyAlert extends React.Component {
   constructor (props) {
     super(props)
@@ -1485,6 +1548,7 @@ function translateEn(){
   // }
   // `)
   
+
   let head = document.getElementsByTagName("head")[0];
 
   if(!head.querySelector('#knowlege-translate'))head.appendChild(style);
@@ -1533,21 +1597,25 @@ document.addEventListener('scroll', (event) => {
   }
 })
 
-document.addEventListener("selectionchange", () => {
+document.addEventListener("selectionchange", event => {
   // console.log('selectionchange')
   // TODO iframe的处理， https://huggingface.co/spaces/lambdalabs/image-mixer-demo
   const selection = window.getSelection();
   let id="knowledge-e-menu-div"
   let div=document.querySelector('#'+id);
   console.log(selection.type)
-  if (selection.type != 'None') {
+  if (selection.type =='Range') {
     const oRange = selection.getRangeAt(0)
     const oRect = oRange.getBoundingClientRect()
     let text = selection.toString(),result='',isHover=false;
 
     let startContainer = oRange.startContainer
-    console.log(startContainer.parentElement)
+    console.log(startContainer.parentElement,text,event)
+    // 排除插件的ui
     if(startContainer.parentElement.className.match("mantine-"))return
+    
+    
+    // 翻译保留原文功能
     if(startContainer.parentElement&&
       startContainer.parentElement.className.match('knowlege-translate-hovertext')){
         // 保留了翻译结果
@@ -1572,6 +1640,35 @@ document.addEventListener("selectionchange", () => {
     }else{
       div.style.display='none'
     }
+
+    // pdf 划选复制
+    let pdfTextDiv=document.querySelector('#knowlege-pdf-read-new-text');
+    if(pdfTextDiv&&window.location.href.match('https://mozilla.github.io/pdf.js/web/viewer.html')){
+      if(startContainer.parentElement.className.match("knowlege-pdf-read") ||startContainer.parentElement.parentElement.className.match("knowlege-pdf-read")|| text.format2().length<2)return
+      if(pdfTextDiv.getAttribute('is-select')!='on') return
+      pdfTextDiv.innerText=text.format2();
+    }
+  }else if(selection.type=='Caret'){
+
+    let pdfTextDiv=document.querySelector('#knowlege-pdf-read-new-text');
+    let t=(pdfTextDiv.getAttribute('copy-text')||'').trim();
+    // document.execCommand('insertText', false, 'pasteText');
+    if(selection.anchorNode.className.match('internal')&&t.length>0){
+      document.execCommand('insertText', false, t);
+      // console.log(selection.anchorNode.parentElement,selection.anchorNode.parentElement.className)
+      pdfTextDiv.setAttribute('copy-text','');
+      // let filename=document.querySelector('#fileNameField').innerText;
+      let items=[];
+      try {
+        items=JSON.parse(localStorage.getItem('_pdf_'));
+        items.push(t)
+      } catch (error) {
+        console.log(error)
+        items=[t]
+      }
+      localStorage.setItem('_pdf_',JSON.stringify(items))
+    }
+
   }
 
 });
@@ -1582,53 +1679,105 @@ function createPDFDiv(){
 
   let div=document.createElement('div');
   div.id="knowlege-pdf-read-new";
+  div.className='knowlege-pdf-read'
   div.style=`position: fixed;
   width: 420px;
   height: 100vh;
   top: 32px;
   color: black;
-  left: 0;
-  background-color: #eee;
+  right: 0;
+  background-color: #eee;display:none;
   z-index: 999;`;
  
   if(!document.querySelector('#'+div.id)&&window.location.href.match('https://mozilla.github.io/pdf.js/web/viewer.html')){
     document.body.appendChild(div);
-    let btn=document.createElement('button');
-    btn.innerText='打开PDF'
-    btn.addEventListener('click',e=>{
-      document.body.querySelector('#openFile').click()
-    });
-    div.appendChild(btn);
+
+    // toolbarViewerRight
+    let toolbarViewerRight= document.body.querySelector('#toolbarViewerRight')
+    
+   
+    // div.appendChild(loadBtn);
+    // toolbarViewerRight.insertAdjacentElement('afterbegin', loadBtn);
 
     let copyBtn=document.createElement('button');
-    copyBtn.innerText='拷贝'
-    copyBtn.addEventListener('click',e=>{
-      _console(text.innerText)
-    });
-    div.appendChild(copyBtn);
-
-
-    let text=document.createElement('div');
-    text.class="text";
-    text.style.height='100%'
-    text.setAttribute('contentEditable',true);
-    div.appendChild(text);
-    //  去除格式
-    text.addEventListener("paste", function(event) {
-      event.stopPropagation();
-      event.preventDefault();
-        var text = '';
-        if (event.clipboardData && event.clipboardData.getData) {
-            text = event.clipboardData.getData('text/plain');
-        };
-        // console.log(event.clipboardData)
-        if (document.queryCommandSupported('insertText')) {
-            text=text.format2();
-            document.execCommand('insertText', false, text);
+    copyBtn.innerText='拷贝并标注'
+    copyBtn.addEventListener('click',async e=>{
+      _console(text.innerText.trim())
+      let t=text.innerText.trim();
+      text.setAttribute('copy-text',t)
+        try {
+          await navigator.clipboard.writeText(t);
+          console.log('Content copied to clipboard');
+        } catch (err) {
+          console.error('Failed to copy: ', err);
         }
     });
+    // div.appendChild(copyBtn);
+    toolbarViewerRight.insertAdjacentElement('afterbegin', copyBtn);
+
+// 收集开关
+    let selectBtn=document.createElement('button');
+    selectBtn.innerText='开始收集'
+    selectBtn.addEventListener('click',async e=>{
+      if(div.getAttribute('is-select')=='on') {
+        div.setAttribute('is-select','off')
+        div.style.display='none'
+        selectBtn.innerText='开始收集'
+      }else{
+        div.setAttribute('is-select','on')
+        div.style.display='block'
+        selectBtn.innerText='收集ing'
+      }
+    });
+    // div.appendChild(selectBtn);
+    toolbarViewerRight.insertAdjacentElement('afterbegin', selectBtn);
+
+    render(<MyPdfRead text={''}/>,div)
+    // let text=document.createElement('div');
+    // text.id="knowlege-pdf-read-new-text";
+    // text.className='knowlege-pdf-read';
+    // text.style=`height: 100%;overflow-y: scroll;
+    // padding: 24px;
+    // outline: none;
+    // border: none;`
+    // text.setAttribute('contentEditable',true);
+    // div.appendChild(text);
+    // //  去除格式
+    // text.addEventListener("paste", function(event) {
+    //   event.stopPropagation();
+    //   event.preventDefault();
+    //     let pasteText = '';
+    //     if (event.clipboardData && event.clipboardData.getData) {
+    //       pasteText = event.clipboardData.getData('text/plain');
+    //     };
+    //     // console.log(event.clipboardData)
+    //     if (document.queryCommandSupported('insertText')) {
+    //         pasteText=pasteText.format2();
+    //         document.execCommand('insertText', false, pasteText);
+    //         text.innerText=text.innerText;
+    //     }
+    // });
+ 
 
   }
+
+  // 样式修改 for .freeTextEditor.internal
+  
+  let style = document.createElement("style");
+  style.type = "text/css";
+  style.id='knowlege-pdf-read-new';
+  style.appendChild(document.createTextNode(`
+  .freeTextEditor .internal {
+    background: #eee !important;
+    padding: 8px;
+    border-radius: 4px;
+    font-weight: 300;
+  }
+  `));
+
+  let head = document.getElementsByTagName("head")[0];
+
+  if(!head.querySelector('#knowlege-pdf-read-new'))head.appendChild(style);
 
 }
 
