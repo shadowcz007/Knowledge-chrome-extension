@@ -19,7 +19,8 @@ import {
 } from '@mantine/core'
 import { IconSettings, IconMessageCircle } from '@tabler/icons'
 import { addStyle } from './modules/myStyle'
-
+import {getUserInfo} from './modules/twitter'
+console.log(getUserInfo)
 // 格式化字符串的功能
 // 1. Superheroes
 // 2. Supervillains
@@ -464,7 +465,8 @@ async function getSelectionByUser () {
     // _console(xpath)
     res = { ...res, text: textContent }
   }
-  res.reply = getKnowledgeReply() || res.text
+  res.reply = getKnowledgeReply() || getUserInfo() ||res.text
+  
   return res
 }
 
@@ -1063,11 +1065,11 @@ class MyPdfRead extends React.Component {
   
   getPDFAnnotations(){
     const {count}=this.extractCurrentPageNum()
-    var pages=new Array(count);
+    var pages=(new Array(count)).fill([]);
     try {
       pages=JSON.parse(localStorage.getItem('_pdf_all_pages_'))
     } catch (error) {
-      pages=new Array(count);
+      pages=(new Array(count)).fill([]);
     }
     return pages
   }
@@ -1088,13 +1090,13 @@ class MyPdfRead extends React.Component {
     var pages=this.getPDFAnnotations();
     let pagesElement=document.body.querySelectorAll('.page');
    if(pages.length==pagesElement.length){
-
-   }
     for (let index = 0; index < pagesElement.length; index++) {
-      pages[index]=[...pages[index],Array.from(pagesElement[index].querySelectorAll('.freeTextEditor'),text=>text.innerText)]
+      pages[index]=[...pages[index],...Array.from(pagesElement[index].querySelectorAll('.freeTextEditor'),text=>text.innerText)]
       pages[index]=pages[index].unque();
     }
     localStorage.setItem('_pdf_all_pages_',JSON.stringify(pages))
+   }
+    
   }
 
   init(){
@@ -1133,7 +1135,8 @@ class MyPdfRead extends React.Component {
         if(pdfTextDiv&&window.location.href.match('https://mozilla.github.io/pdf.js/web/viewer.html')){
           
           if(startContainer.parentElement.className.match("knowlege-pdf-read") ||startContainer.parentElement.parentElement.className.match("knowlege-pdf-read")|| text.format2().length<2)return
-          // if(pdfTextDiv.getAttribute('is-select')!='on') return
+          if(startContainer.parentElement.className.match('internal')) return
+          if(startContainer.parentElement.parentElement&&startContainer.parentElement.parentElement.className.match('freeTextEditor')) return
   
           pdfTextDiv.querySelector('textarea').value=text.format2();
         }
