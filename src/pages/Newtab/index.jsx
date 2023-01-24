@@ -496,7 +496,6 @@ class Newtab2 extends React.Component {
 
   componentDidMount () {
     this.init()
-   
   }
 
   render () {
