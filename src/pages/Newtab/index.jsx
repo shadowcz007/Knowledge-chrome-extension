@@ -2,12 +2,12 @@ import React from 'react'
 import { render } from 'react-dom'
 import logo from '../../assets/img/icon-128.png'
 import './index.css'
-
+ 
 import {
   CopyButton,
   Badge,
   Group,
-  TextInput,
+  FileInput,
   Button,
   Card,
   Title,
@@ -22,7 +22,7 @@ import {
   Alert,
 } from '@mantine/core'
 
-import { IconAlertCircle } from '@tabler/icons'
+import { IconUpload } from '@tabler/icons'
 
 function getAppInfo () {
   return {
@@ -550,6 +550,7 @@ class Newtab2 extends React.Component {
             ''
           )}
 
+
           {this.state.address && this.state.displayLoginBtn ? (
             <Alert
               style={{overflow:'unset'}}
@@ -561,33 +562,33 @@ class Newtab2 extends React.Component {
               color='indigo'
             >
               <Flex justify='flex-start' align='flex-end' >
-              <Select
-                label={'当前Notion'}
-                placeholder={'请配置Notion数据库'}
-                data={(()=>{
-                  let items=[];
-                  for (const id in that.state.notions) {
-                    items.push({
-                      label:that.state.notions[id].title,
-                      value:id
-                    })
-                  }
-                  return items
-                })()}
-                dropdownPosition='bottom'
-                value={that.state.currentNotion.id}
-                onChange={async (newId)=>{
-                  let cn=that.state.notions[newId];
-                  await chrome.storage.local.set({
-                    currentNotion:{
-                      'databaseId':cn.databaseId, 'id':cn.id, 'matchKeywords':cn.matchKeywords, 'title':cn.title, 'token':cn.token
+                <Select
+                  label={'当前Notion'}
+                  placeholder={'请配置Notion数据库'}
+                  data={(()=>{
+                    let items=[];
+                    for (const id in that.state.notions) {
+                      items.push({
+                        label:that.state.notions[id].title,
+                        value:id
+                      })
                     }
-                  })
+                    return items
+                  })()}
+                  dropdownPosition='bottom'
+                  value={that.state.currentNotion.id}
+                  onChange={async (newId)=>{
+                    let cn=that.state.notions[newId];
+                    await chrome.storage.local.set({
+                      currentNotion:{
+                        'databaseId':cn.databaseId, 'id':cn.id, 'matchKeywords':cn.matchKeywords, 'title':cn.title, 'token':cn.token
+                      }
+                    })
 
-                  that.setState({currentNotion:cn})
-                }}
-                allowDeselect={false}
-                />
+                    that.setState({currentNotion:cn})
+                  }}
+                  allowDeselect={false}
+                  />
                
                 <Space w='xl' />
                 <Button
@@ -597,6 +598,20 @@ class Newtab2 extends React.Component {
                 >
                   🚀 登陆
                 </Button>
+              </Flex>
+              <Flex >
+                <Text>PDF浏览器</Text>
+                  <Button
+                    variant='outline'
+                    color='dark'
+                    onClick={() =>
+                      chrome.tabs.create({
+                        url: 'https://mozilla.github.io/pdf.js/web/viewer.html?file=',
+                      })
+                    }
+                  >
+                    PDF浏览器
+                  </Button> 
               </Flex>
             </Alert>
           ) : (

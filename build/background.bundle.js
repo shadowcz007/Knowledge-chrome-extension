@@ -2634,6 +2634,7 @@ chrome.runtime.onMessage.addListener(async function (request, sender, sendRespon
         success,
         info
       }) => {
+        updateTags(result || []);
         chrome.tabs.query({
           active: true,
           currentWindow: true
@@ -2656,6 +2657,7 @@ chrome.runtime.onMessage.addListener(async function (request, sender, sendRespon
         info
       }) => {
         // isQueryNotEmptyOfReply = false
+        updateTags(result || []);
         chrome.tabs.query({
           active: true,
           currentWindow: true
@@ -2682,12 +2684,12 @@ chrome.runtime.onMessage.addListener(async function (request, sender, sendRespon
       url: chrome.runtime.getURL('options.html')
     }, function (tab) {});
   } else if (cmd == 'get-all-tags') {
-    getAllTags().then(async ({
+    getAllTags().then(({
       result,
       success,
       info
     }) => {
-      await updateTags(result || []);
+      updateTags(result || []);
     });
   } else if (cmd == 'find-by-tag' && request.data) {
     queryByTag(request.data, request.pageSize).then(({
@@ -2695,6 +2697,7 @@ chrome.runtime.onMessage.addListener(async function (request, sender, sendRespon
       success,
       info
     }) => {
+      updateTags(result || []);
       chrome.tabs.query({
         active: true,
         currentWindow: true
@@ -3059,7 +3062,7 @@ module.exports = JSON.parse('{"100":"Continue","101":"Switching Protocols","102"
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("4309a60bcfc95f4b047f")
+/******/ 		__webpack_require__.h = () => ("2774f482b6f3b75d6cae")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

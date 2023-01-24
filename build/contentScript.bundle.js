@@ -51969,6 +51969,10 @@ String.prototype.format = function (start = '', end = '') {
   Array.from(tx, t => ids[(start + ' ' + t.replace(/.*\./gi, '').trim().toLowerCase() + ' ' + end).trim()] = 1);
   return Object.keys(ids).join('\n');
 };
+String.prototype.format2 = function () {
+  return this.replace(/\n/ig, '').split('.').join('.\n');
+};
+
 // 去重
 Array.prototype.unque = function () {
   let json = {};
@@ -53241,6 +53245,7 @@ function translateEn() {
 function domContentLoadedDoSomething() {
   _console('DOM loaded');
   translateEn();
+  createPDFDiv();
   window.requestAnimationFrame(() => {
     update().then(() => getComments());
   });
@@ -53310,8 +53315,59 @@ document.addEventListener("selectionchange", () => {
   }
 });
 
+// https://mozilla.github.io/pdf.js/web/viewer.html?file=
+// pdf 
+function createPDFDiv() {
+  let div = document.createElement('div');
+  div.id = "knowlege-pdf-read-new";
+  div.style = `position: fixed;
+  width: 420px;
+  height: 100vh;
+  top: 32px;
+  color: black;
+  left: 0;
+  background-color: #eee;
+  z-index: 999;`;
+  if (!document.querySelector('#' + div.id) && window.location.href.match('https://mozilla.github.io/pdf.js/web/viewer.html')) {
+    document.body.appendChild(div);
+    let btn = document.createElement('button');
+    btn.innerText = '打开PDF';
+    btn.addEventListener('click', e => {
+      document.body.querySelector('#openFile').click();
+    });
+    div.appendChild(btn);
+    let copyBtn = document.createElement('button');
+    copyBtn.innerText = '拷贝';
+    copyBtn.addEventListener('click', e => {
+      _console(text.innerText);
+    });
+    div.appendChild(copyBtn);
+    let text = document.createElement('div');
+    text.class = "text";
+    text.style.height = '100%';
+    text.setAttribute('contentEditable', true);
+    div.appendChild(text);
+    //  去除格式
+    text.addEventListener("paste", function (event) {
+      event.stopPropagation();
+      event.preventDefault();
+      var text = '';
+      if (event.clipboardData && event.clipboardData.getData) {
+        text = event.clipboardData.getData('text/plain');
+      }
+      ;
+      // console.log(event.clipboardData)
+      if (document.queryCommandSupported('insertText')) {
+        text = text.format2();
+        document.execCommand('insertText', false, text);
+      }
+    });
+  }
+}
+
 // _console('KNOWLEDGE')
 // _console(window.location.href)
+// console.log(pdfjsLib)
 ;
 (function () {
   var reactHotLoader = typeof reactHotLoaderGlobal !== 'undefined' ? reactHotLoaderGlobal.default : undefined;
@@ -53357,6 +53413,7 @@ document.addEventListener("selectionchange", () => {
   reactHotLoader.register(pageSetContenteditable, "pageSetContenteditable", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
   reactHotLoader.register(translateEn, "translateEn", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
   reactHotLoader.register(domContentLoadedDoSomething, "domContentLoadedDoSomething", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
+  reactHotLoader.register(createPDFDiv, "createPDFDiv", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
 })();
 ;
 (function () {
@@ -56848,7 +56905,7 @@ function combine (array, callback) {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("4309a60bcfc95f4b047f")
+/******/ 		__webpack_require__.h = () => ("2774f482b6f3b75d6cae")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

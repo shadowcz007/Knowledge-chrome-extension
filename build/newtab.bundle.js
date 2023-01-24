@@ -50428,7 +50428,13 @@ class Newtab2 extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       variant: "outline",
       color: "dark",
       onClick: () => that.checkAddressIsCanGetKnowledge()
-    }, "\uD83D\uDE80 \u767B\u9646"))) : '', /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Space, {
+    }, "\uD83D\uDE80 \u767B\u9646")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.Flex, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_11__.Text, null, "PDF\u6D4F\u89C8\u5668"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_13__.Button, {
+      variant: "outline",
+      color: "dark",
+      onClick: () => chrome.tabs.create({
+        url: 'https://mozilla.github.io/pdf.js/web/viewer.html?file='
+      })
+    }, "PDF\u6D4F\u89C8\u5668"))) : '', /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Space, {
       h: "xl"
     })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.Flex, {
       bg: "#eeeeee",
@@ -56246,7 +56252,7 @@ function combine (array, callback) {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("4309a60bcfc95f4b047f")
+/******/ 		__webpack_require__.h = () => ("2774f482b6f3b75d6cae")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

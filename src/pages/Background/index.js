@@ -892,6 +892,7 @@ chrome.runtime.onMessage.addListener(async function (
     if (request.isMy && request.address) {
       // 我的贡献
       queryByCfxAddress(request.address).then(({ result, success, info }) => {
+        updateTags(result || [])
         chrome.tabs.query(
           { active: true, currentWindow: true },
           function (tabs) {
@@ -915,6 +916,7 @@ chrome.runtime.onMessage.addListener(async function (
       queryNotEmptyOfReply(request.timestamp).then(
         ({ result, success, info }) => {
           // isQueryNotEmptyOfReply = false
+          updateTags(result || [])
           chrome.tabs.query(
             { active: true, currentWindow: true },
             function (tabs) {
@@ -947,13 +949,13 @@ chrome.runtime.onMessage.addListener(async function (
       function (tab) {}
     )
   } else if (cmd == 'get-all-tags') {
-    getAllTags().then(async ({ result, success, info }) => {
-      await updateTags(result || [])
+    getAllTags().then(({ result, success, info }) => {
+      updateTags(result || [])
     })
   } else if (cmd == 'find-by-tag' && request.data) {
 
     queryByTag(request.data,request.pageSize).then(({ result, success, info }) => {
-      
+        updateTags(result || [])
         chrome.tabs.query(
           { active: true, currentWindow: true },
           function (tabs) {

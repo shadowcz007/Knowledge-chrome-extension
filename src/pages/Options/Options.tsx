@@ -467,46 +467,47 @@ const NotionsSetup: React.FC<NotionsProps> = ({alertCallback}:NotionsProps) => {
       </Flex>
    
       <Title order={5} style={{marginLeft:'24px',marginTop:'12px'}}>添加新的数据库</Title>
-        <Flex 
+      
+      <Flex 
         justify="flex-start"
         align="flex-start"
         direction='column'
         >
-          <FileInput style={{marginLeft:'24px',marginTop:'12px',marginBottom:'12px'}}
-          accept='application/json'
-      placeholder="打开知识库配置文件"
-      label="快速导入"
-      description="访问 github.com/shadowcz007 获取"
-      variant="filled"
-      icon={<IconUpload size={14} />}
-      onChange={(file:any)=>{
-         
-        let reader = new FileReader();
-        reader.readAsText(file, "UTF-8");
-        reader.onload = function (e:any) {
-          let file_string:any = e.target.result;
-          let json=JSON.parse(file_string);
-          let properties=json.properties
-          // setCurrentNotionId('')
-          if(json.id&&json.title&&json.token&&json.databaseId&&properties&&json.matchKeywords) {
-            
-            setCurrentNotion(json.id,
-            json.title ,
-            json.token ,
-            json.databaseId ,
-            Object.values(properties) ,
-            json.matchKeywords )
+      
+      <FileInput style={{marginLeft:'24px',marginTop:'12px',marginBottom:'12px'}}
+            accept='application/json'
+        placeholder="打开知识库配置文件"
+        label="快速导入"
+        description="访问 github.com/shadowcz007 获取"
+        variant="filled"
+        icon={<IconUpload size={14} />}
+        onChange={(file:any)=>{
+          let reader = new FileReader();
+          reader.readAsText(file, "UTF-8");
+          reader.onload = function (e:any) {
+            let file_string:any = e.target.result;
+            let json=JSON.parse(file_string);
+            let properties=json.properties
+            // setCurrentNotionId('')
+            if(json.id&&json.title&&json.token&&json.databaseId&&properties&&json.matchKeywords) {
+              
+              setCurrentNotion(json.id,
+              json.title ,
+              json.token ,
+              json.databaseId ,
+              Object.values(properties) ,
+              json.matchKeywords )
 
-          }else{
-              alertCallback({
-                display:true,
-                title:'添加失败',
-                text:'检查文件',loadingDisplay:false
-              })
-            }
-        } 
-      }}
-    /> 
+            }else{
+                alertCallback({
+                  display:true,
+                  title:'添加失败',
+                  text:'检查文件',loadingDisplay:false
+                })
+              }
+            } 
+        }}
+      /> 
         <Flex 
         style={{marginLeft:'24px',marginTop:'12px'}}
         mih={50}

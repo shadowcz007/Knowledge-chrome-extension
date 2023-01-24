@@ -3,6 +3,7 @@
 // _console('Must reload extension for modifications to take effect.')
 // printLine("Using the 'printLine' function from the Print Module")
 
+
 // 格式化字符串的功能
 // 1. Superheroes
 // 2. Supervillains
@@ -30,6 +31,11 @@ String.prototype.format = function (start = '', end = '') {
   )
   return Object.keys(ids).join('\n')
 }
+
+String.prototype.format2=function(){
+ return this.replace(/\n/ig,'').split('.').join('.\n');
+}
+
 // 去重
 Array.prototype.unque = function () {
   let json = {}
@@ -110,6 +116,10 @@ function parseSentenceMatchTags (sentenceTexts, sentenceMatchTagsResult, color) 
     return texts.filter((f) => f).join('')
   })
 }
+
+
+
+
 
 // 找到页面的超链接里符合tags的
 // 只保留前4条,标签多的排前面
@@ -1484,7 +1494,8 @@ function translateEn(){
 
 function domContentLoadedDoSomething () {
   _console('DOM loaded')
-  translateEn()
+  translateEn();
+  createPDFDiv();
   window.requestAnimationFrame(() => {
     update().then(() => getComments())
   })
@@ -1565,5 +1576,62 @@ document.addEventListener("selectionchange", () => {
 
 });
 
+// https://mozilla.github.io/pdf.js/web/viewer.html?file=
+// pdf 
+function createPDFDiv(){
+
+  let div=document.createElement('div');
+  div.id="knowlege-pdf-read-new";
+  div.style=`position: fixed;
+  width: 420px;
+  height: 100vh;
+  top: 32px;
+  color: black;
+  left: 0;
+  background-color: #eee;
+  z-index: 999;`;
+ 
+  if(!document.querySelector('#'+div.id)&&window.location.href.match('https://mozilla.github.io/pdf.js/web/viewer.html')){
+    document.body.appendChild(div);
+    let btn=document.createElement('button');
+    btn.innerText='打开PDF'
+    btn.addEventListener('click',e=>{
+      document.body.querySelector('#openFile').click()
+    });
+    div.appendChild(btn);
+
+    let copyBtn=document.createElement('button');
+    copyBtn.innerText='拷贝'
+    copyBtn.addEventListener('click',e=>{
+      _console(text.innerText)
+    });
+    div.appendChild(copyBtn);
+
+
+    let text=document.createElement('div');
+    text.class="text";
+    text.style.height='100%'
+    text.setAttribute('contentEditable',true);
+    div.appendChild(text);
+    //  去除格式
+    text.addEventListener("paste", function(event) {
+      event.stopPropagation();
+      event.preventDefault();
+        var text = '';
+        if (event.clipboardData && event.clipboardData.getData) {
+            text = event.clipboardData.getData('text/plain');
+        };
+        // console.log(event.clipboardData)
+        if (document.queryCommandSupported('insertText')) {
+            text=text.format2();
+            document.execCommand('insertText', false, text);
+        }
+    });
+
+  }
+
+}
+
 // _console('KNOWLEDGE')
 // _console(window.location.href)
+// console.log(pdfjsLib)
