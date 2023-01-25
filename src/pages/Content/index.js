@@ -1126,7 +1126,8 @@ class MyPdfRead extends React.Component {
           that.setState({
             ticking : false,
             lastKnownScrollPosition:scrollY,
-            currentPageAnnotations:c
+            currentPageAnnotations:c,
+            text:c.join('\n\n') 
           });
         })
         that.setState({ticking : true});
@@ -1152,20 +1153,22 @@ class MyPdfRead extends React.Component {
           if(startContainer.parentElement.parentElement&&startContainer.parentElement.parentElement.className.match('freeTextEditor')) return
 
           let nt=text.format2();
-          pdfTextDiv.querySelector('textarea').value=nt;
-          pdfTextDiv.setAttribute('selection-text',nt)
+          that.setState({text:nt})
+          // pdfTextDiv.querySelector('textarea').value=nt;
+          // pdfTextDiv.setAttribute('selection-text',nt)
 
         }
       }else if(selection.type=='Caret'){
         // pdf的标注
-        let textLocal=localStorage.getItem('_pdf_current_input_')
-        let t=(textLocal||'').trim();
-        // document.execCommand('insertText', false, 'pasteText');
-        if(selection.anchorNode.className&&selection.anchorNode.className.match('internal')&&t.length>0){
-          document.execCommand('insertText', false,t);
-          localStorage.setItem('_pdf_current_input_','')
-          await that.savePDFAnnotations()
-        }
+        // let textLocal=localStorage.getItem('_pdf_current_input_')
+        // let textLocal=(await that.getCurrentPageAnnotations()).join('\n')
+        // let t=(textLocal||'').trim();
+        // // document.execCommand('insertText', false, 'pasteText');
+        // if(selection.anchorNode.className&&selection.anchorNode.className.match('internal')&&t.length>0){
+        //   document.execCommand('insertText', false,t);
+        //   // localStorage.setItem('_pdf_current_input_','')
+        //   // await that.savePDFAnnotations()
+        // }
       }
     });
   }
@@ -1181,32 +1184,7 @@ class MyPdfRead extends React.Component {
     style={{maxWidth:'400px',
     backgroundColor:'#eee',padding:'12px',borderRadius:'12px'}}
     >
-      
-    <Textarea
-    style={{ 
-    minWidth:'360px',
-     }}
-      autosize
-      placeholder="采集后可使用翻译工具后编辑"
-      label="评论" 
-      value={this.state.text}
-      minRows={5}
-      maxRows={24}
-      onChange={event=>{
-        let val = event.currentTarget.value;
-        that.setState({
-          text:val
-        });
-        localStorage.setItem('_pdf_current_input_',val);
-
-        let pdfTextDiv=  document.querySelector('#knowlege-pdf-read-new');
-        pdfTextDiv.setAttribute('selection-text','')
-
-      }}
-    
-    />
-    <Space h='xl' />
-        <Flex  direction='row'
+      <Flex  direction='row'
                 align='flex-start'
                 justify='flex-start'>
             
@@ -1220,9 +1198,8 @@ class MyPdfRead extends React.Component {
                   if(data&&data.pdfAllPages) pages=data.pdfAllPages;
                    
                     if(pages.length==count&&pages[pageNum-1]){
-                      let pdfTextDiv=  document.querySelector('#knowlege-pdf-read-new');
-                      let text=pdfTextDiv.getAttribute('selection-text')
-                      if(!text) text=that.state.text;
+                      // let pdfTextDiv=  document.querySelector('#knowlege-pdf-read-new');
+                      let text=that.state.text;
                       pages[pageNum-1].push(text);
                       pages[pageNum-1]=pages[pageNum-1].filter(f=>f&&f.trim())
                       pages[pageNum-1]=pages[pageNum-1].unque();
@@ -1233,16 +1210,12 @@ class MyPdfRead extends React.Component {
                     };
                   
                 }}>
-                 保存
+                 收集
             </Button>
             <Space w='xl' />
             <CopyButton value={that.state.text}>
               {({ copied, copy }) => (
-                <Button variant='outline' color={copied ? 'teal' : 'dark'} onClick={(e)=>{
-                  copy(e)
-                  console.log(e)
-                  localStorage.setItem('_pdf_current_input_',that.state.text)
-                }}>
+                <Button variant='outline' color={copied ? 'teal' : 'dark'} onClick={copy}>
                   {copied ? '已复制到剪切板' : '拷贝'}
                 </Button>
               )}
@@ -1259,6 +1232,31 @@ class MyPdfRead extends React.Component {
                 }}>加载缓存</Button>
             </Indicator>
         </Flex>
+        <Space h='xl' />
+    <Textarea
+    style={{ 
+    minWidth:'360px',
+     }}
+      autosize
+      placeholder="划选记录"
+      label="记录" 
+      description="采集后使用谷歌翻译"
+      value={this.state.text}
+      minRows={5}
+      maxRows={24}
+      onChange={event=>{
+        let val = event.currentTarget.value;
+        that.setState({
+          text:val
+        });
+        // localStorage.setItem('_pdf_current_input_',val);
+
+        // let pdfTextDiv=  document.querySelector('#knowlege-pdf-read-new');
+        // pdfTextDiv.setAttribute('selection-text',val)
+
+      }}    
+    />
+  
       </Flex>)
   }
 }
@@ -2037,15 +2035,15 @@ function createPDFDiv(){
   }
 
   // 样式修改 for .freeTextEditor.internal
-  addStyle(`
-  .freeTextEditor .internal {
-    background: #eee !important;
-    padding: 8px;
-    border-radius: 4px;
-    font-weight: 300 !important;
-    white-space: break-spaces !important;
-  }
-  `,'knowlege-pdf-read-new-css');
+  // addStyle(`
+  // .freeTextEditor .internal {
+  //   background: #eee !important;
+  //   padding: 8px;
+  //   border-radius: 4px;
+  //   font-weight: 300 !important;
+  //   white-space: break-spaces !important;
+  // }
+  // `,'knowlege-pdf-read-new-css');
 
 }
 

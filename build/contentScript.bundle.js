@@ -53101,10 +53101,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Divider/Divider.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Flex/Flex.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Switch/Switch.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Textarea/Textarea.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Button/Button.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/CopyButton/CopyButton.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Indicator/Indicator.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Button/Button.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/CopyButton/CopyButton.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Indicator/Indicator.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Textarea/Textarea.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Group/Group.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Alert/Alert.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Modal/Modal.js");
@@ -54052,7 +54052,8 @@ class MyPdfRead extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
           that.setState({
             ticking: false,
             lastKnownScrollPosition: scrollY,
-            currentPageAnnotations: c
+            currentPageAnnotations: c,
+            text: c.join('\n\n')
           });
         });
         that.setState({
@@ -54076,19 +54077,23 @@ class MyPdfRead extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
           if (startContainer.parentElement.className.match('internal')) return;
           if (startContainer.parentElement.parentElement && startContainer.parentElement.parentElement.className.match('freeTextEditor')) return;
           let nt = text.format2();
-          pdfTextDiv.querySelector('textarea').value = nt;
-          pdfTextDiv.setAttribute('selection-text', nt);
+          that.setState({
+            text: nt
+          });
+          // pdfTextDiv.querySelector('textarea').value=nt;
+          // pdfTextDiv.setAttribute('selection-text',nt)
         }
       } else if (selection.type == 'Caret') {
         // pdf的标注
-        let textLocal = localStorage.getItem('_pdf_current_input_');
-        let t = (textLocal || '').trim();
-        // document.execCommand('insertText', false, 'pasteText');
-        if (selection.anchorNode.className && selection.anchorNode.className.match('internal') && t.length > 0) {
-          document.execCommand('insertText', false, t);
-          localStorage.setItem('_pdf_current_input_', '');
-          await that.savePDFAnnotations();
-        }
+        // let textLocal=localStorage.getItem('_pdf_current_input_')
+        // let textLocal=(await that.getCurrentPageAnnotations()).join('\n')
+        // let t=(textLocal||'').trim();
+        // // document.execCommand('insertText', false, 'pasteText');
+        // if(selection.anchorNode.className&&selection.anchorNode.className.match('internal')&&t.length>0){
+        //   document.execCommand('insertText', false,t);
+        //   // localStorage.setItem('_pdf_current_input_','')
+        //   // await that.savePDFAnnotations()
+        // }
       }
     });
   }
@@ -54107,32 +54112,11 @@ class MyPdfRead extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
         padding: '12px',
         borderRadius: '12px'
       }
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Textarea, {
-      style: {
-        minWidth: '360px'
-      },
-      autosize: true,
-      placeholder: "\u91C7\u96C6\u540E\u53EF\u4F7F\u7528\u7FFB\u8BD1\u5DE5\u5177\u540E\u7F16\u8F91",
-      label: "\u8BC4\u8BBA",
-      value: this.state.text,
-      minRows: 5,
-      maxRows: 24,
-      onChange: event => {
-        let val = event.currentTarget.value;
-        that.setState({
-          text: val
-        });
-        localStorage.setItem('_pdf_current_input_', val);
-        let pdfTextDiv = document.querySelector('#knowlege-pdf-read-new');
-        pdfTextDiv.setAttribute('selection-text', '');
-      }
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
-      h: "xl"
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Flex, {
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Flex, {
       direction: "row",
       align: "flex-start",
       justify: "flex-start"
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Button, {
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
       variant: "outline",
       color: 'dark',
       onClick: async e => {
@@ -54146,9 +54130,8 @@ class MyPdfRead extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
         let pages = JSON.parse(JSON.stringify(new Array(count).fill([])));
         if (data && data.pdfAllPages) pages = data.pdfAllPages;
         if (pages.length == count && pages[pageNum - 1]) {
-          let pdfTextDiv = document.querySelector('#knowlege-pdf-read-new');
-          let text = pdfTextDiv.getAttribute('selection-text');
-          if (!text) text = that.state.text;
+          // let pdfTextDiv=  document.querySelector('#knowlege-pdf-read-new');
+          let text = that.state.text;
           pages[pageNum - 1].push(text);
           pages[pageNum - 1] = pages[pageNum - 1].filter(f => f && f.trim());
           pages[pageNum - 1] = pages[pageNum - 1].unque();
@@ -54159,28 +54142,24 @@ class MyPdfRead extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
         }
         ;
       }
-    }, "\u4FDD\u5B58"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
+    }, "\u6536\u96C6"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
       w: "xl"
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.CopyButton, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.CopyButton, {
       value: that.state.text
     }, ({
       copied,
       copy
-    }) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Button, {
+    }) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
       variant: "outline",
       color: copied ? 'teal' : 'dark',
-      onClick: e => {
-        copy(e);
-        console.log(e);
-        localStorage.setItem('_pdf_current_input_', that.state.text);
-      }
+      onClick: copy
     }, copied ? '已复制到剪切板' : '拷贝')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
       w: "xl"
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_17__.Indicator, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.Indicator, {
       label: that.state.currentPageAnnotations.length,
       inline: true,
       size: 22
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Button, {
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
       variant: "outline",
       color: "dark",
       onClick: async () => {
@@ -54191,7 +54170,30 @@ class MyPdfRead extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
           });
         }
       }
-    }, "\u52A0\u8F7D\u7F13\u5B58"))));
+    }, "\u52A0\u8F7D\u7F13\u5B58"))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
+      h: "xl"
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_17__.Textarea, {
+      style: {
+        minWidth: '360px'
+      },
+      autosize: true,
+      placeholder: "\u5212\u9009\u8BB0\u5F55",
+      label: "\u8BB0\u5F55",
+      description: "\u91C7\u96C6\u540E\u4F7F\u7528\u8C37\u6B4C\u7FFB\u8BD1",
+      value: this.state.text,
+      minRows: 5,
+      maxRows: 24,
+      onChange: event => {
+        let val = event.currentTarget.value;
+        that.setState({
+          text: val
+        });
+        // localStorage.setItem('_pdf_current_input_',val);
+
+        // let pdfTextDiv=  document.querySelector('#knowlege-pdf-read-new');
+        // pdfTextDiv.setAttribute('selection-text',val)
+      }
+    }));
   }
   // @ts-ignore
   __reactstandin__regenerateByEval(key, code) {
@@ -54238,7 +54240,7 @@ class MyGoogleTranslate extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       style: {
         width: '100%'
       }
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Button.Group, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_17__.Indicator, {
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button.Group, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.Indicator, {
       color: "cyan",
       position: "bottom-end",
       label: that.state.pages.length,
@@ -54247,7 +54249,7 @@ class MyGoogleTranslate extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       overflowCount: 999,
       inline: true,
       size: 22
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Button, {
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
       variant: "outline",
       color: "cyan",
       uppercase: true,
@@ -54271,7 +54273,7 @@ class MyGoogleTranslate extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
           // that.init();
         }
       }
-    }, "\u52A0\u8F7D\u7F13\u5B58")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Button, {
+    }, "\u52A0\u8F7D\u7F13\u5B58")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
       variant: "outline",
       color: "cyan",
       uppercase: true,
@@ -54313,7 +54315,7 @@ class MyGoogleTranslate extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       style: {
         width: '100%'
       }
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Textarea, {
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_17__.Textarea, {
       label: "\u539F\u6587",
       autosize: true,
       variant: "filled",
@@ -54327,7 +54329,7 @@ class MyGoogleTranslate extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
           pages
         });
       }
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Textarea, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_17__.Textarea, {
       label: "\u7ED3\u679C",
       autosize: true,
       variant: "filled",
@@ -54345,7 +54347,7 @@ class MyGoogleTranslate extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       h: 'xs'
     }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_18__.Group, {
       spacing: "sm"
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Button, {
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
       variant: "light",
       color: "cyan",
       compact: true,
@@ -54368,12 +54370,12 @@ class MyGoogleTranslate extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
           }), 500);
         }, 1000);
       }
-    }, "\u7FFB\u8BD1"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.CopyButton, {
+    }, "\u7FFB\u8BD1"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.CopyButton, {
       value: t.en + '\n' + t.zh
     }, ({
       copied,
       copy
-    }) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Button, {
+    }) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
       variant: "light",
       color: copied ? 'dark' : 'cyan',
       compact: true,
@@ -54425,12 +54427,12 @@ class MyAlert extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       key: _i + _t
     }, _t, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("br", null))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
       w: "xl"
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.CopyButton, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.CopyButton, {
       value: that.state.texts.join('\n')
     }, ({
       copied,
       copy
-    }) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Button, {
+    }) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
       variant: "outline",
       color: copied ? 'teal' : 'dark',
       onClick: copy
@@ -54530,7 +54532,7 @@ class Notions extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
           return item;
         }
       }
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Textarea, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_17__.Textarea, {
       style: {
         minWidth: '600px'
       },
@@ -54549,7 +54551,7 @@ class Notions extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
           }
         });
       }
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Textarea, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_17__.Textarea, {
       style: {
         minWidth: '600px'
       },
@@ -54618,7 +54620,7 @@ class Notions extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       wrap: "wrap"
     }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
       h: "xl"
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Button, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
       style: {
         color: 'white',
         'backgroundColor': '#228be6'
@@ -54972,15 +54974,15 @@ function createPDFDiv() {
   }
 
   // 样式修改 for .freeTextEditor.internal
-  (0,_modules_myStyle__WEBPACK_IMPORTED_MODULE_3__.addStyle)(`
-  .freeTextEditor .internal {
-    background: #eee !important;
-    padding: 8px;
-    border-radius: 4px;
-    font-weight: 300 !important;
-    white-space: break-spaces !important;
-  }
-  `, 'knowlege-pdf-read-new-css');
+  // addStyle(`
+  // .freeTextEditor .internal {
+  //   background: #eee !important;
+  //   padding: 8px;
+  //   border-radius: 4px;
+  //   font-weight: 300 !important;
+  //   white-space: break-spaces !important;
+  // }
+  // `,'knowlege-pdf-read-new-css');
 }
 
 // _console('KNOWLEDGE')
@@ -58593,7 +58595,7 @@ function combine (array, callback) {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("5ce30a73fda88d271920")
+/******/ 		__webpack_require__.h = () => ("0996001b96f99db6d44e")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */
