@@ -222,7 +222,7 @@ class KnowledgeCard extends React.Component {
               <Badge size='xs' style={{ marginRight: '12px' }}>
                 记录
               </Badge>
-              {Array.from(c.replies,(cr,i)=><Text key={i}>{cr}</Text>)}
+              {Array.from(c.replies,(cr,i)=><Text key={i}>{Array.from(cr.split('\n'),cc=><Text>{cc}</Text>)}</Text>)}
             </Text>
           ) : (
             ''

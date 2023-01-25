@@ -856,6 +856,11 @@ function addBadge (
   element.insertAdjacentElement('afterbegin', div2)
   element.setAttribute('data-badge', true)
 
+  addStyle(`
+  .mantine-HoverCard-dropdown{
+    z-index:999999999999999999 !important
+  }`,'mantine-HoverCard-dropdown-css')
+
   const countBtn = (
     <Avatar.Group>
       <Avatar variant='filled' radius='lg' size='sm' color={color}>
@@ -866,7 +871,7 @@ function addBadge (
 
   // _console(relate)
   render(
-    <HoverCard width={440} shadow='md' zIndex={9999999999}>
+    <HoverCard width={440} shadow='md'>
       <HoverCard.Target>
         <Badge
           color={color}
@@ -1063,22 +1068,24 @@ class MyPdfRead extends React.Component {
     return {pageNum:index,count}
   }
   
-  getPDFAnnotations(){
+ async getPDFAnnotations(){
     const {count}=this.extractCurrentPageNum()
-    var pages=(new Array(count)).fill([]);
+    var pages=JSON.parse(JSON.stringify((new Array(count)).fill([])));
     try {
-      pages=JSON.parse(localStorage.getItem('_pdf_all_pages_'))
+      let data=await chrome.storage.local.get('pdfAllPages');
+      if(data&&data.pdfAllPages) pages=data.pdfAllPages;
+      // pages=JSON.parse(localStorage.getItem('_pdf_all_pages_'))
     } catch (error) {
-      pages=(new Array(count)).fill([]);
+      pages=JSON.parse(JSON.stringify((new Array(count)).fill([])));
     }
     return pages
   }
 
-  getCurrentPageAnnotations(){
+ async getCurrentPageAnnotations(){
      // 当前页码
      const {pageNum,count}=this.extractCurrentPageNum()
      // 加载缓存
-    let pages= this.getPDFAnnotations();
+    let pages=await this.getPDFAnnotations();
     if(pages.length==count&&pages[pageNum-1]){
       // console.log(pages[pageNum-1])
       return pages[pageNum-1].unque()
@@ -1086,15 +1093,18 @@ class MyPdfRead extends React.Component {
     return []
   }
 
-  savePDFAnnotations(){
-    var pages=this.getPDFAnnotations();
+  async savePDFAnnotations(){
+    var pages=await this.getPDFAnnotations();
     let pagesElement=document.body.querySelectorAll('.page');
    if(pages.length==pagesElement.length){
     for (let index = 0; index < pagesElement.length; index++) {
       pages[index]=[...pages[index],...Array.from(pagesElement[index].querySelectorAll('.freeTextEditor'),text=>text.innerText)]
       pages[index]=pages[index].unque();
     }
-    localStorage.setItem('_pdf_all_pages_',JSON.stringify(pages))
+    // localStorage.setItem('_pdf_all_pages_',JSON.stringify(pages))
+    await chrome.storage.local.set({
+      pdfAllPages:pages
+    })
    }
     
   }
@@ -1109,18 +1119,19 @@ class MyPdfRead extends React.Component {
         Math.abs(scrollY - that.state.lastKnownScrollPosition) >
           innerHeight*0.6
       ) {
-        window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(async() => {
+          let c=await that.getCurrentPageAnnotations()
           that.setState({
             ticking : false,
             lastKnownScrollPosition:scrollY,
-            currentPageAnnotations:that.getCurrentPageAnnotations()
+            currentPageAnnotations:c
           });
         })
         that.setState({ticking : true});
       }
     })
 
-    document.addEventListener("selectionchange", event => {
+    document.addEventListener("selectionchange",async event => {
       const selection = window.getSelection();
       if (selection.type =='Range') {
         const oRange = selection.getRangeAt(0)
@@ -1137,8 +1148,11 @@ class MyPdfRead extends React.Component {
           if(startContainer.parentElement.className.match("knowlege-pdf-read") ||startContainer.parentElement.parentElement.className.match("knowlege-pdf-read")|| text.format2().length<2)return
           if(startContainer.parentElement.className.match('internal')) return
           if(startContainer.parentElement.parentElement&&startContainer.parentElement.parentElement.className.match('freeTextEditor')) return
-  
-          pdfTextDiv.querySelector('textarea').value=text.format2();
+
+          let nt=text.format2();
+          pdfTextDiv.querySelector('textarea').value=nt;
+          pdfTextDiv.setAttribute('selection-text',nt)
+
         }
       }else if(selection.type=='Caret'){
         // pdf的标注
@@ -1148,7 +1162,7 @@ class MyPdfRead extends React.Component {
         if(selection.anchorNode.className&&selection.anchorNode.className.match('internal')&&t.length>0){
           document.execCommand('insertText', false,t);
           localStorage.setItem('_pdf_current_input_','')
-          that.savePDFAnnotations()
+          await that.savePDFAnnotations()
         }
       }
     });
@@ -1181,7 +1195,11 @@ class MyPdfRead extends React.Component {
         that.setState({
           text:val
         });
-        localStorage.setItem('_pdf_current_input_',val)
+        localStorage.setItem('_pdf_current_input_',val);
+
+        let pdfTextDiv=  document.querySelector('#knowlege-pdf-read-new');
+        pdfTextDiv.setAttribute('selection-text','')
+
       }}
     
     />
@@ -1189,6 +1207,33 @@ class MyPdfRead extends React.Component {
         <Flex  direction='row'
                 align='flex-start'
                 justify='flex-start'>
+            
+            <Button variant='outline' color={'dark'} onClick={async(e)=>{
+                  let data=await chrome.storage.local.get('pdfAllPages');
+
+                  // 当前页码
+                  const {pageNum,count}=that.extractCurrentPageNum()
+                  let pages= JSON.parse(JSON.stringify((new Array(count)).fill([])));
+                
+                  if(data&&data.pdfAllPages) pages=data.pdfAllPages;
+                   
+                    if(pages.length==count&&pages[pageNum-1]){
+                      let pdfTextDiv=  document.querySelector('#knowlege-pdf-read-new');
+                      let text=pdfTextDiv.getAttribute('selection-text')
+                      if(!text) text=that.state.text;
+                      pages[pageNum-1].push(text);
+                      pages[pageNum-1]=pages[pageNum-1].filter(f=>f&&f.trim())
+                      pages[pageNum-1]=pages[pageNum-1].unque();
+                      await chrome.storage.local.set({
+                        pdfAllPages:pages
+                      })
+                      // console.log(pageNum,pages)
+                    };
+                  
+                }}>
+                 保存
+            </Button>
+            <Space w='xl' />
             <CopyButton value={that.state.text}>
               {({ copied, copy }) => (
                 <Button variant='outline' color={copied ? 'teal' : 'dark'} onClick={(e)=>{
@@ -1203,8 +1248,8 @@ class MyPdfRead extends React.Component {
             <Space w='xl' />
             <Indicator label={that.state.currentPageAnnotations.length} inline size={22}>
                 <Button variant='outline'
-                        color='dark' onClick={()=>{
-                  let a= that.getCurrentPageAnnotations()
+                        color='dark' onClick={async ()=>{
+                  let a=await that.getCurrentPageAnnotations()
                   if(a){
                     that.setState({text:a.join('\n\n')})
                   }
@@ -1509,19 +1554,27 @@ async function getNotions () {
 }
 
 function createAlert(title,texts){
-  if(document.querySelector('#knowledge-alert-div')) document.querySelector('#knowledge-alert-div').remove()
-  let div = document.createElement('div');
+
+  let div =document.querySelector('#knowledge-alert-div');
+  if(div)div.remove()
+  
+  div= document.createElement('div');
   div.id="knowledge-alert-div";
-  div.style=`position: fixed;
-  right: 0px;
-  width: 100%;
-  top: 0px;
-  overflow-y: scroll;
-  height: 100vh;;
-  z-index: 99999999999999999999;`
+  document.body.appendChild(div);
+
+  addStyle(`
+    #knowledge-alert-div {
+      position: fixed;
+      right: 0px;
+      width: 100%;
+      top: 0px;
+      overflow-y: scroll;
+      z-index: 99999999999999999999;
+    }`,'knowledge-alert-div-css')
+
   render(<MyAlert title={title} texts={texts} onClose={()=>div.remove()}
   />,div)
-  document.body.appendChild(div)
+  
 }
 
 async function createPrompt (notions, userData) {
@@ -1563,18 +1616,15 @@ chrome.runtime.onMessage.addListener(async function (
           _console('收到来自后台的回复：' + response) })
     }
   } else if (request.cmd == 'mark-push') {
-    alert('已提交')
     if (request.data && request.success) displayComments(request.data)
     if (!request.success) {
       _console(JSON.stringify(request.info))
     }
+    alert('已提交')
   } else if (request.cmd === 'get-by-pageId-run') {
     domContentLoadedDoSomething()
-    // window.requestAnimationFrame(() => {
-    //   update().then(() => getComments())
-    // })
   } else if (request.cmd == 'get-by-pageId-result') {
-    console.log(request)
+    // console.log(request)
     if (request.data) displayComments(request.data)
   }else if(request.cmd == 'translate-run'){
     let text=getSelectionText();
@@ -1604,7 +1654,30 @@ function pageSetContenteditable(){
   }
 }
 
-// 翻译的style
+
+// 直接使用谷歌翻译，从保存的记录里调取 - pdf
+function insertGoogleTranslate(){
+  if(window.location.host!='translate.google.com')return
+  
+  let id='know-insert-google-translate'
+  let div=document.querySelector('#'+id);
+  if(!div){
+    div=document.createElement('div');
+    div.id=id;
+    document.body.appendChild(div)
+  }
+
+  render(<Button onClick={async()=>{
+    let data=await chrome.storage.local.get('pdfAllPages');
+    if(data&&data.pdfAllPages){
+      let pages=data.pdfAllPages;
+      console.log(pages)
+    }
+  }}>加载缓存</Button>,div)
+
+}
+
+// 翻译 全文的方法1 
 function translateEn(){
   const treeWalker = document.createTreeWalker(
     document.body,
@@ -1622,29 +1695,54 @@ function translateEn(){
     // text
     // 对比#text和commit的匹配
      if(currentNode.parentElement&&['FONT'].includes(currentNode.parentElement.nodeName)) {
-        console.log(currentNode.parentElement.nodeName)
         let textElement=currentNode.parentElement.parentElement.parentElement;
-        textElement.setAttribute('data-hover-text',textElement.innerText.trim())
-        if(!textElement.classList.contains('knowlege-translate-hovertext')) textElement.classList.add('knowlege-translate-hovertext')
-        // currentNode.parentElement.parentElement.parentElement.setAttribute('data-hover-text')
+      // console.log(textElement.className.match("mantine-"),textElement)
+        
+        // if(textElement.className.match("mantine-"))return
+         
+        // 排除插件的ui 和功能性html
+        if(!['BUTTON','A'].includes(textElement.nodeName)&&!textElement.className.match("mantine-")){
+          textElement.setAttribute('data-hover-text',textElement.innerText.trim())
+          if(!textElement.classList.contains('knowlege-translate-hovertext')&&
+          !textElement.parentElement.classList.contains('knowlege-translate-hovertext')
+          ) {
+            textElement.classList.add('knowlege-translate-hovertext')
+            textElement.addEventListener('click',e=>{
+              // console.log(textElement)
+              let en=textElement.innerText,zh=textElement.getAttribute('data-hover-text');
+              createAlert('翻译结果',[en,zh])
+            })
+          }
+          // console.log('translate:',textElement)
+        }
+
+        
      }
     // nodeList.push(currentNode)
     currentNode = treeWalker.nextNode()
   }
 
   addStyle(`
-  .knowlege-translate-hovertext {
-    border-bottom:2px solid gray
+  .knowlege-translate-hovertext:hover {
+    background: #2196f326;
+    cursor: pointer;
+    box-shadow: 0 0 8px #2196f38c;
+  }
+
+  .knowlege-translate-hovertext{
+    border-left: 0.5px dashed #9e9e9e;
   }
   `,'knowlege-translate-css')
 
 }
  
 
+
 function domContentLoadedDoSomething () {
   _console('DOM loaded')
   translateEn();
   createPDFDiv();
+  insertGoogleTranslate()
   window.requestAnimationFrame(() => {
     update().then(() => getComments())
   })
@@ -1682,54 +1780,52 @@ document.addEventListener('scroll', (event) => {
   }
 })
 
-document.addEventListener("selectionchange", event => {
-  // console.log('selectionchange')
-  // TODO iframe的处理， https://huggingface.co/spaces/lambdalabs/image-mixer-demo
-  const selection = window.getSelection();
-  let id="knowledge-e-menu-div"
-  let div=document.querySelector('#'+id);
-  console.log(selection.type)
-  if (selection.type =='Range') {
-    const oRange = selection.getRangeAt(0)
-    const oRect = oRange.getBoundingClientRect()
-    let text = selection.toString(),result='',isHover=false;
 
-    let startContainer = oRange.startContainer
-    console.log(startContainer.parentElement,text,event)
-    // 排除插件的ui
-    if(startContainer.parentElement.className.match("mantine-"))return
-    
-    
-    // 翻译保留原文功能
-    if(startContainer.parentElement&&
-      startContainer.parentElement.className.match('knowlege-translate-hovertext')){
-        // 保留了翻译结果
-        result=startContainer.parentElement.getAttribute('data-hover-text');
-        text=startContainer.parentElement.innerText;
-        isHover=true;
-      }
-    if(div) div.remove();
-    div=document.createElement('div');
-    div.style.color=`#4a4a4a`
-    div.style.zIndex=9999999999999;
-    div.style.position='fixed';
-    div.id=id;
-      document.body.appendChild(div)
-      render(<MyMenu text={text} result={result}/>,div)
-      let divRect=getElementViewPosition(div)
-      // console.log(oRect,divRect)
-    if(isHover)  {
-      div.style.display='block';
-      div.style.left=`${Math.max(0,oRect.x)}px`;
-      div.style.top=`${Math.max(0,oRect.y-divRect.height-24)}px`;
-    }else{
-      div.style.display='none'
-    }
+// // 翻译功能
+// document.addEventListener("selectionchange", event => {
+//   // console.log('selectionchange')
+//   // TODO iframe的处理， https://huggingface.co/spaces/lambdalabs/image-mixer-demo
+//   const selection = window.getSelection();
+//   // console.log(selection.type,selection)
+//   if (selection.type =='Range') {
+//     const oRange = selection.getRangeAt(0)
+//     let text = selection.toString(),
+//     result='';
+//     let startContainer = oRange.startContainer
+//     // console.log(startContainer.parentElement,text,event)
+//     // 排除插件的ui
+//     if(startContainer.parentElement.className.match("mantine-"))return
+//     // 翻译保留原文功能
+//     if(startContainer.parentElement&&
+//       startContainer.parentElement.className.match('knowlege-translate-hovertext')){
+//         // 保留了翻译结果
+//         result=startContainer.parentElement.getAttribute('data-hover-text');
+//         text=startContainer.parentElement.innerText;
+//         createAlert('翻译结果',[text,result])
+//       }
+//   }else if(selection.type =='Caret'){
+//     if(selection.anchorNode.nodeName=='#text'){
+//       let startContainer=selection.anchorNode;
+//       // 排除插件的ui
+//       if(startContainer.parentElement.className.match("mantine-"))return
 
-     
-  } 
-
-});
+//       // 翻译保留原文功能
+//       if(startContainer.parentElement&&
+//         startContainer.parentElement.className.match('knowlege-translate-hovertext')){
+//         // 保留了翻译结果
+//         let result=startContainer.parentElement.getAttribute('data-hover-text'),
+//         text=startContainer.parentElement.innerText;
+//         createAlert('翻译结果',[text,result])
+//       }else if(startContainer.parentElement.parentElement&&
+//         startContainer.parentElement.parentElement.className.match('knowlege-translate-hovertext')){
+//         // 保留了翻译结果
+//         let result=startContainer.parentElement.getAttribute('data-hover-text'),
+//         text=startContainer.parentElement.innerText;
+//         createAlert('翻译结果',[text,result])
+//       }
+//     }
+//   } 
+// });
 
 
 // https://mozilla.github.io/pdf.js/web/viewer.html?file=
