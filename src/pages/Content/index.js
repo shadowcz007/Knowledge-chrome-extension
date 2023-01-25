@@ -1270,15 +1270,39 @@ class MyGoogleTranslate extends React.Component {
     super(props)
     this.state = {
       title:props.title,
-      pages:props.pages||[]
+      pages:props.pages||[],
+      currentPage:null,
+      saveSuccess:false
     }
+    // this.init()
   }
+  // init(){
+  //   let that=this;
+  //   let copyBtn=document.body.querySelector(`button[aria-label="复制译文"]`);
+  //   if(copyBtn&&!copyBtn.getAttribute('knowledge-google-translate-event')){
+  //     copyBtn.setAttribute('knowledge-google-translate-event',1)
+  //     copyBtn.addEventListener('click',e=>{
+  //       if(that.state.currentPage) setTimeout(()=>navigator.clipboard.readText().then(text => {
+  //         console.log(text)
+  //         let pages=[...that.state.pages];
+  //         let i=that.state.currentPage[0],
+  //         k=that.state.currentPage[1];
+  //         pages[i][k].zh=text;
+  //         that.setState({
+  //           pages
+  //         })
+  //     }),500)
+  //     })
+  //   }
+  // }
   render () {
-    let that = this
+    let that = this;
     return ( 
       <Flex justify='flex-start' align='flex-start' 
       direction='column'
       style={{width:'100%'}}>
+
+      <Button.Group>
         <Indicator color="cyan" position="bottom-end"
         label={that.state.pages.length} showZero={false} dot={false} overflowCount={999} inline size={22}>
           <Button variant="outline" color="cyan" uppercase
@@ -1295,10 +1319,29 @@ class MyGoogleTranslate extends React.Component {
                   })
                 });
                 console.log(pages)
-                that.setState({pages:pages})
+                that.setState({pages:pages,saveSuccess:false})
+                // that.init();
               }
             }}>加载缓存</Button>
           </Indicator>
+
+          <Button variant="outline" color="cyan" uppercase
+          onClick={async()=>{
+            let data=await chrome.storage.local.get('pdfAllPages');
+            if(data&&data.pdfAllPages){
+              let pages=[...that.state.pages];
+              pages=Array.from(pages,ps=>{
+               return Array.from(ps,p=>{
+                  return p.en+'\n\n'+p.zh
+                })
+              })
+              if(data.pdfAllPages.length==pages.length) await chrome.storage.local.set({pdfAllPages:pages});
+              
+            }
+            that.setState({saveSuccess:true});
+
+            }}>保存{that.state.saveSuccess?'*':''}</Button>
+        </Button.Group>
           <Space h='xl' />
         {
           Array.from(that.state.pages,(texts,i)=> texts.length>0?<Flex 
@@ -1316,8 +1359,25 @@ class MyGoogleTranslate extends React.Component {
                 key={i+'_'+k}
                 style={{width:'100%'}}
                 >
-                  <Textarea  label="原文" autosize variant="filled" value={t.en}/>
-                  <Textarea  label="结果" autosize variant="filled" value={t.zh}/>
+                  <Textarea  label="原文" autosize variant="filled" value={t.en} onChange={(event)=>{
+                      let val = event.currentTarget.value.trim();
+                      let pages=[...that.state.pages];
+                          pages[i][k].en=val;
+                          that.setState({
+                            currentPage:[i,k],
+                            pages
+                          })
+                  }}/>
+                  <Textarea  label="结果" autosize variant="filled" value={t.zh} onChange={(event)=>{
+                      let val = event.currentTarget.value.trim();
+                      let pages=[...that.state.pages];
+                          pages[i][k].zh=val;
+                          that.setState({
+                            currentPage:[i,k],
+                            pages
+                          })
+                  }}/>
+                  <Space h={'xs'} />
                   <Group spacing="sm">
                     <Button variant="light" color="cyan" compact onClick={()=>{
                       let input=document.body.querySelector(`textarea[aria-label="原文"]`);
@@ -1327,7 +1387,15 @@ class MyGoogleTranslate extends React.Component {
                       setTimeout(()=>{
                         let copyBtn=document.body.querySelector(`button[aria-label="复制译文"]`);
                         copyBtn.click();
-                        setTimeout(()=>navigator.clipboard.readText().then(text => console.log(text)),500)
+                        setTimeout(()=>navigator.clipboard.readText().then(text => {
+                          console.log(text)
+                          let pages=[...that.state.pages];
+                          pages[i][k].zh=text;
+                          that.setState({
+                            currentPage:[i,k],
+                            pages
+                          })
+                        }),500)
                        
                       },1000);
                     }}>翻译
@@ -1340,7 +1408,7 @@ class MyGoogleTranslate extends React.Component {
                           )}
                         </CopyButton>
                   </Group>
-                  <Space h={'xs'} />
+                  <Space h={'lg'} />
                   </Flex>)
               }
 
