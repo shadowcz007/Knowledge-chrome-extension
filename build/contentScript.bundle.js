@@ -53102,8 +53102,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Flex/Flex.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Switch/Switch.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Button/Button.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/CopyButton/CopyButton.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Indicator/Indicator.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Indicator/Indicator.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/CopyButton/CopyButton.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Textarea/Textarea.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Group/Group.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Alert/Alert.js");
@@ -54020,11 +54020,15 @@ class MyPdfRead extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
     } = this.extractCurrentPageNum();
     // 加载缓存
     let pages = await this.getPDFAnnotations();
+    let res = {
+      pageNum,
+      count,
+      data: []
+    };
     if (pages.length == count && pages[pageNum - 1]) {
-      // console.log(pages[pageNum-1])
-      return pages[pageNum - 1].unque();
+      res.data = pages[pageNum - 1].unque();
     }
-    return [];
+    return res;
   }
   async savePDFAnnotations() {
     var pages = await this.getPDFAnnotations();
@@ -54046,14 +54050,20 @@ class MyPdfRead extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
     view.addEventListener('scroll', event => {
       let scrollY = view.scrollTop,
         innerHeight = view.clientHeight;
-      if (!that.state.ticking && Math.abs(scrollY - that.state.lastKnownScrollPosition) > innerHeight * 0.6) {
+      if (!that.state.ticking && Math.abs(scrollY - that.state.lastKnownScrollPosition) > innerHeight * 0.5) {
         window.requestAnimationFrame(async () => {
-          let c = await that.getCurrentPageAnnotations();
+          let {
+            pageNum,
+            count,
+            data
+          } = await that.getCurrentPageAnnotations();
           that.setState({
             ticking: false,
             lastKnownScrollPosition: scrollY,
-            currentPageAnnotations: c,
-            text: c.join('\n\n')
+            currentPageAnnotations: data,
+            text: data.join('\n------------\n'),
+            pageNum,
+            count
           });
         });
         that.setState({
@@ -54112,16 +54122,15 @@ class MyPdfRead extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
         padding: '12px',
         borderRadius: '12px'
       }
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Flex, {
-      direction: "row",
-      align: "flex-start",
-      justify: "flex-start"
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button.Group, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Indicator, {
+      label: that.state.currentPageAnnotations.length,
+      inline: true,
+      size: 22
     }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
       variant: "outline",
       color: 'dark',
       onClick: async e => {
         let data = await chrome.storage.local.get('pdfAllPages');
-
         // 当前页码
         const {
           pageNum,
@@ -54138,13 +54147,23 @@ class MyPdfRead extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
           await chrome.storage.local.set({
             pdfAllPages: pages
           });
+          let {
+            data
+          } = await that.getCurrentPageAnnotations();
+          that.setState({
+            currentPageAnnotations: data,
+            text: data.join('\n------------\n'),
+            pageNum,
+            count
+          });
+
           // console.log(pageNum,pages)
         }
         ;
       }
-    }, "\u6536\u96C6"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
+    }, "\u6536\u96C6")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
       w: "xl"
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.CopyButton, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.CopyButton, {
       value: that.state.text
     }, ({
       copied,
@@ -54155,22 +54174,23 @@ class MyPdfRead extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       onClick: copy
     }, copied ? '已复制到剪切板' : '拷贝')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
       w: "xl"
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.Indicator, {
-      label: that.state.currentPageAnnotations.length,
-      inline: true,
-      size: 22
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
       variant: "outline",
       color: "dark",
       onClick: async () => {
-        let a = await that.getCurrentPageAnnotations();
-        if (a) {
-          that.setState({
-            text: a.join('\n\n')
-          });
-        }
+        const {
+          count
+        } = that.extractCurrentPageNum();
+        let pages = JSON.parse(JSON.stringify(new Array(count).fill([])));
+        that.setState({
+          text: '',
+          currentPageAnnotations: []
+        });
+        await chrome.storage.local.set({
+          pdfAllPages: pages
+        });
       }
-    }, "\u52A0\u8F7D\u7F13\u5B58"))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
+    }, "\u65B0\u5EFA")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
       h: "xl"
     }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_17__.Textarea, {
       style: {
@@ -54178,7 +54198,7 @@ class MyPdfRead extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       },
       autosize: true,
       placeholder: "\u5212\u9009\u8BB0\u5F55",
-      label: "\u8BB0\u5F55",
+      label: `当前页面 ${that.state.currentPageAnnotations.length}记录` + `${that.state.pageNum ? `，${that.state.pageNum} / ${that.state.count}页` : ''}`,
       description: "\u91C7\u96C6\u540E\u4F7F\u7528\u8C37\u6B4C\u7FFB\u8BD1",
       value: this.state.text,
       minRows: 5,
@@ -54189,7 +54209,6 @@ class MyPdfRead extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
           text: val
         });
         // localStorage.setItem('_pdf_current_input_',val);
-
         // let pdfTextDiv=  document.querySelector('#knowlege-pdf-read-new');
         // pdfTextDiv.setAttribute('selection-text',val)
       }
@@ -54240,7 +54259,7 @@ class MyGoogleTranslate extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       style: {
         width: '100%'
       }
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button.Group, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.Indicator, {
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button.Group, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Indicator, {
       color: "cyan",
       position: "bottom-end",
       label: that.state.pages.length,
@@ -54273,7 +54292,7 @@ class MyGoogleTranslate extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
           // that.init();
         }
       }
-    }, "\u52A0\u8F7D\u7F13\u5B58")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
+    }, "\u8BFB\u53D6\u8BB0\u5F55")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
       variant: "outline",
       color: "cyan",
       uppercase: true,
@@ -54370,7 +54389,7 @@ class MyGoogleTranslate extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
           }), 500);
         }, 1000);
       }
-    }, "\u7FFB\u8BD1"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.CopyButton, {
+    }, "\u7FFB\u8BD1"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.CopyButton, {
       value: t.en + '\n' + t.zh
     }, ({
       copied,
@@ -54427,7 +54446,7 @@ class MyAlert extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       key: _i + _t
     }, _t, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("br", null))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
       w: "xl"
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.CopyButton, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.CopyButton, {
       value: that.state.texts.join('\n')
     }, ({
       copied,
@@ -58595,7 +58614,7 @@ function combine (array, callback) {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("0996001b96f99db6d44e")
+/******/ 		__webpack_require__.h = () => ("bf12f5fe050685b1aca4")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

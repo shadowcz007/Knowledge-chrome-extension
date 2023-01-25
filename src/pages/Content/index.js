@@ -1085,14 +1085,14 @@ class MyPdfRead extends React.Component {
 
  async getCurrentPageAnnotations(){
      // 当前页码
-     const {pageNum,count}=this.extractCurrentPageNum()
+    const {pageNum,count}=this.extractCurrentPageNum()
      // 加载缓存
     let pages=await this.getPDFAnnotations();
+    let res={pageNum,count,data:[]};
     if(pages.length==count&&pages[pageNum-1]){
-      // console.log(pages[pageNum-1])
-      return pages[pageNum-1].unque()
+      res.data=pages[pageNum-1].unque()
     }
-    return []
+    return res
   }
 
   async savePDFAnnotations(){
@@ -1119,15 +1119,16 @@ class MyPdfRead extends React.Component {
       if (
         !that.state.ticking &&
         Math.abs(scrollY - that.state.lastKnownScrollPosition) >
-          innerHeight*0.6
+          innerHeight*0.5
       ) {
         window.requestAnimationFrame(async() => {
-          let c=await that.getCurrentPageAnnotations()
+          let {pageNum,count,data}=await that.getCurrentPageAnnotations()
           that.setState({
             ticking : false,
             lastKnownScrollPosition:scrollY,
-            currentPageAnnotations:c,
-            text:c.join('\n\n') 
+            currentPageAnnotations:data,
+            text:data.join('\n------------\n'),
+            pageNum,count
           });
         })
         that.setState({ticking : true});
@@ -1156,7 +1157,6 @@ class MyPdfRead extends React.Component {
           that.setState({text:nt})
           // pdfTextDiv.querySelector('textarea').value=nt;
           // pdfTextDiv.setAttribute('selection-text',nt)
-
         }
       }else if(selection.type=='Caret'){
         // pdf的标注
@@ -1184,13 +1184,10 @@ class MyPdfRead extends React.Component {
     style={{maxWidth:'400px',
     backgroundColor:'#eee',padding:'12px',borderRadius:'12px'}}
     >
-      <Flex  direction='row'
-                align='flex-start'
-                justify='flex-start'>
-            
+      <Button.Group>  
+          <Indicator label={that.state.currentPageAnnotations.length} inline size={22}>
             <Button variant='outline' color={'dark'} onClick={async(e)=>{
                   let data=await chrome.storage.local.get('pdfAllPages');
-
                   // 当前页码
                   const {pageNum,count}=that.extractCurrentPageNum()
                   let pages= JSON.parse(JSON.stringify((new Array(count)).fill([])));
@@ -1203,15 +1200,22 @@ class MyPdfRead extends React.Component {
                       pages[pageNum-1].push(text);
                       pages[pageNum-1]=pages[pageNum-1].filter(f=>f&&f.trim())
                       pages[pageNum-1]=pages[pageNum-1].unque();
+
                       await chrome.storage.local.set({
                         pdfAllPages:pages
-                      })
+                      });
+
+                      let {data}=await that.getCurrentPageAnnotations()
+                      that.setState({
+                        currentPageAnnotations:data,
+                        text:data.join('\n------------\n'),
+                        pageNum,count
+                      });
+
                       // console.log(pageNum,pages)
                     };
-                  
-                }}>
-                 收集
-            </Button>
+                }}>收集</Button>
+            </Indicator>
             <Space w='xl' />
             <CopyButton value={that.state.text}>
               {({ copied, copy }) => (
@@ -1221,41 +1225,36 @@ class MyPdfRead extends React.Component {
               )}
             </CopyButton>
             <Space w='xl' />
-            <Indicator label={that.state.currentPageAnnotations.length} inline size={22}>
-                <Button variant='outline'
+            <Button variant='outline'
                         color='dark' onClick={async ()=>{
-                  let a=await that.getCurrentPageAnnotations()
-                  if(a){
-                    that.setState({text:a.join('\n\n')})
-                  }
-                    
-                }}>加载缓存</Button>
-            </Indicator>
-        </Flex>
+                          const {count}=that.extractCurrentPageNum();
+                          let pages=JSON.parse(JSON.stringify((new Array(count)).fill([])));
+                          that.setState({text:'',currentPageAnnotations:[]});
+                          await chrome.storage.local.set({pdfAllPages:pages})
+                }}>新建</Button>
+        </Button.Group>
         <Space h='xl' />
-    <Textarea
-    style={{ 
-    minWidth:'360px',
-     }}
-      autosize
-      placeholder="划选记录"
-      label="记录" 
-      description="采集后使用谷歌翻译"
-      value={this.state.text}
-      minRows={5}
-      maxRows={24}
-      onChange={event=>{
-        let val = event.currentTarget.value;
-        that.setState({
-          text:val
-        });
-        // localStorage.setItem('_pdf_current_input_',val);
-
-        // let pdfTextDiv=  document.querySelector('#knowlege-pdf-read-new');
-        // pdfTextDiv.setAttribute('selection-text',val)
-
-      }}    
-    />
+      <Textarea
+          style={{ 
+          minWidth:'360px',
+          }}
+            autosize
+            placeholder="划选记录"
+            label={`当前页面 ${that.state.currentPageAnnotations.length}记录`+`${that.state.pageNum?`，${that.state.pageNum} / ${that.state.count}页`:''}`}
+            description="采集后使用谷歌翻译"
+            value={this.state.text}
+            minRows={5}
+            maxRows={24}
+            onChange={event=>{
+              let val = event.currentTarget.value;
+              that.setState({
+                text:val
+              });
+              // localStorage.setItem('_pdf_current_input_',val);
+              // let pdfTextDiv=  document.querySelector('#knowlege-pdf-read-new');
+              // pdfTextDiv.setAttribute('selection-text',val)
+          }}    
+          />
   
       </Flex>)
   }
@@ -1320,7 +1319,7 @@ class MyGoogleTranslate extends React.Component {
                 that.setState({pages:pages,saveSuccess:false})
                 // that.init();
               }
-            }}>加载缓存</Button>
+            }}>读取记录</Button>
           </Indicator>
 
           <Button variant="outline" color="cyan" uppercase
