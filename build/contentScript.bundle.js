@@ -53105,10 +53105,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Button/Button.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/CopyButton/CopyButton.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Indicator/Indicator.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Alert/Alert.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Modal/Modal.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/MultiSelect/MultiSelect.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Select/Select.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Group/Group.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Alert/Alert.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Modal/Modal.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/MultiSelect/MultiSelect.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Select/Select.js");
 /* harmony import */ var _modules_myStyle__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./modules/myStyle */ "./src/pages/Content/modules/myStyle.js");
 /* harmony import */ var _modules_twitter__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./modules/twitter */ "./src/pages/Content/modules/twitter.js");
 /* module decorator */ module = __webpack_require__.hmd(module);
@@ -53126,7 +53127,7 @@ var __signature__ = typeof reactHotLoaderGlobal !== 'undefined' ? reactHotLoader
 
 
 
-console.log(_modules_twitter__WEBPACK_IMPORTED_MODULE_4__.getUserInfo);
+// console.log(getUserInfo)
 // 格式化字符串的功能
 // 1. Superheroes
 // 2. Supervillains
@@ -54198,6 +54199,122 @@ class MyPdfRead extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
     this[key] = eval(code);
   }
 }
+class MyGoogleTranslate extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      title: props.title,
+      pages: props.pages || []
+    };
+  }
+  render() {
+    let that = this;
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Flex, {
+      justify: "flex-start",
+      align: "flex-start",
+      direction: "column",
+      style: {
+        width: '100%'
+      }
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_17__.Indicator, {
+      color: "cyan",
+      position: "bottom-end",
+      label: that.state.pages.length,
+      showZero: false,
+      dot: false,
+      overflowCount: 999,
+      inline: true,
+      size: 22
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Button, {
+      variant: "outline",
+      color: "cyan",
+      uppercase: true,
+      onClick: async () => {
+        let data = await chrome.storage.local.get('pdfAllPages');
+        if (data && data.pdfAllPages) {
+          let pages = data.pdfAllPages;
+          pages = Array.from(pages, ps => {
+            return Array.from(ps, p => {
+              return {
+                en: p,
+                zh: ''
+              };
+            });
+          });
+          console.log(pages);
+          that.setState({
+            pages: pages
+          });
+        }
+      }
+    }, "\u52A0\u8F7D\u7F13\u5B58")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
+      h: "xl"
+    }), Array.from(that.state.pages, (texts, i) => texts.length > 0 ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Flex, {
+      direction: "column",
+      justify: "flex-start",
+      align: "flex-start",
+      key: i,
+      style: {
+        width: '100%',
+        marginTop: '12px'
+      }
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Text, {
+      fw: 700
+    }, "P", i + 1), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
+      h: 'xs'
+    }), Array.from(texts, (t, k) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Flex, {
+      direction: "column",
+      key: i + '_' + k,
+      style: {
+        width: '100%'
+      }
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Textarea, {
+      label: "\u539F\u6587",
+      autosize: true,
+      variant: "filled",
+      value: t.en
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Textarea, {
+      label: "\u7ED3\u679C",
+      autosize: true,
+      variant: "filled",
+      value: t.zh
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_18__.Group, {
+      spacing: "sm"
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Button, {
+      variant: "light",
+      color: "cyan",
+      compact: true,
+      onClick: () => {
+        let input = document.body.querySelector(`textarea[aria-label="原文"]`);
+        input.value = t.en;
+        input.click();
+        document.execCommand('insertText', false, ' ');
+        setTimeout(() => {
+          let copyBtn = document.body.querySelector(`button[aria-label="复制译文"]`);
+          copyBtn.click();
+          setTimeout(() => navigator.clipboard.readText().then(text => console.log(text)), 500);
+        }, 1000);
+      }
+    }, "\u7FFB\u8BD1"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.CopyButton, {
+      value: t.en + '\n' + t.zh
+    }, ({
+      copied,
+      copy
+    }) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Button, {
+      variant: "light",
+      color: copied ? 'dark' : 'cyan',
+      compact: true,
+      onClick: copy
+    }, copied ? '已复制到剪切板' : '拷贝'))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
+      h: 'xs'
+    })))) : ''));
+  }
+  // @ts-ignore
+  __reactstandin__regenerateByEval(key, code) {
+    // @ts-ignore
+    this[key] = eval(code);
+  }
+}
 class MyAlert extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
   constructor(props) {
     super(props);
@@ -54209,7 +54326,7 @@ class MyAlert extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
   }
   render() {
     let that = this;
-    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_18__.Alert
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_19__.Alert
     // icon={<img src={logo} className='App-logo' alt='logo' />}
     , {
       title: that.state.title,
@@ -54288,7 +54405,7 @@ class Notions extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
   }
   render() {
     let that = this;
-    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_19__.Modal, {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_20__.Modal, {
       opened: this.state.opened,
       onClose: () => {
         that.setState({
@@ -54307,7 +54424,7 @@ class Notions extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       align: "flex-start",
       direction: "column",
       wrap: "wrap"
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_20__.MultiSelect, {
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_21__.MultiSelect, {
       label: "\u6807\u7B7E",
       data: that.state._tags,
       placeholder: "\u9009\u62E9\u4E00\u4E2A\u6216\u65B0\u5EFA",
@@ -54387,7 +54504,7 @@ class Notions extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       align: "flex-start",
       direction: "row",
       wrap: "nowrap"
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_21__.Select, {
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_22__.Select, {
       label: '当前Notion数据库',
       placeholder: '保存到哪里？',
       data: Array.from(this.state.notions, n => {
@@ -54602,16 +54719,30 @@ function insertGoogleTranslate() {
     div = document.createElement('div');
     div.id = id;
     document.body.appendChild(div);
-  }
-  (0,react_dom__WEBPACK_IMPORTED_MODULE_1__.render)( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Button, {
-    onClick: async () => {
-      let data = await chrome.storage.local.get('pdfAllPages');
-      if (data && data.pdfAllPages) {
-        let pages = data.pdfAllPages;
-        console.log(pages);
-      }
+    (0,_modules_myStyle__WEBPACK_IMPORTED_MODULE_3__.addStyle)(`
+    #know-insert-google-translate {
+      position: fixed;
+    top: 132px;
+    left: 20px;
+    z-index: 99999;
+    background: #fff;
+    height: calc(90vh - 132px);
+    padding: 12px;
+    width: 248px;
+    overflow-y: scroll;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-top: 0;
+    box-shadow: 0 1px 4px 0 rgb(0 0 0 / 37%);
     }
-  }, "\u52A0\u8F7D\u7F13\u5B58"), div);
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    `, id + '-css');
+  }
+  (0,react_dom__WEBPACK_IMPORTED_MODULE_1__.render)( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(MyGoogleTranslate, null), div);
 }
 
 // 翻译 全文的方法1 
@@ -54820,6 +54951,7 @@ function createPDFDiv() {
   reactHotLoader.register(MyMenu, "MyMenu", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
   reactHotLoader.register(MyPDFSwitch, "MyPDFSwitch", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
   reactHotLoader.register(MyPdfRead, "MyPdfRead", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
+  reactHotLoader.register(MyGoogleTranslate, "MyGoogleTranslate", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
   reactHotLoader.register(MyAlert, "MyAlert", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
   reactHotLoader.register(Notions, "Notions", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
   reactHotLoader.register(getCfxAddress, "getCfxAddress", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
@@ -58388,7 +58520,7 @@ function combine (array, callback) {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("789e6205ed89ab96b571")
+/******/ 		__webpack_require__.h = () => ("acf487584be061ba8f75")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

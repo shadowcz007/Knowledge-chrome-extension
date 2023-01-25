@@ -14,13 +14,15 @@ import {
   Button,
   Modal,
   Space,
-  MultiSelect,
-  Textarea,CopyButton,Alert,Menu,Switch ,Indicator
+  MultiSelect,Group,
+  Textarea,CopyButton,Alert,Menu,Switch ,Indicator,List, ThemeIcon
 } from '@mantine/core'
-import { IconSettings, IconMessageCircle } from '@tabler/icons'
+ 
+import { IconCircleCheck, IconCircleDashed, IconSettings, IconMessageCircle } from '@tabler/icons';
+
 import { addStyle } from './modules/myStyle'
 import {getUserInfo} from './modules/twitter'
-console.log(getUserInfo)
+// console.log(getUserInfo)
 // 格式化字符串的功能
 // 1. Superheroes
 // 2. Supervillains
@@ -1261,6 +1263,97 @@ class MyPdfRead extends React.Component {
   }
 }
 
+
+
+class MyGoogleTranslate extends React.Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      title:props.title,
+      pages:props.pages||[]
+    }
+  }
+  render () {
+    let that = this
+    return ( 
+      <Flex justify='flex-start' align='flex-start' 
+      direction='column'
+      style={{width:'100%'}}>
+        <Indicator color="cyan" position="bottom-end"
+        label={that.state.pages.length} showZero={false} dot={false} overflowCount={999} inline size={22}>
+          <Button variant="outline" color="cyan" uppercase
+          onClick={async()=>{
+              let data=await chrome.storage.local.get('pdfAllPages');
+              if(data&&data.pdfAllPages){
+                let pages=data.pdfAllPages;
+                pages=Array.from(pages,ps=>{
+                  return Array.from(ps,p=>{
+                    return {
+                      en:p,
+                      zh:''
+                    }
+                  })
+                });
+                console.log(pages)
+                that.setState({pages:pages})
+              }
+            }}>加载缓存</Button>
+          </Indicator>
+          <Space h='xl' />
+        {
+          Array.from(that.state.pages,(texts,i)=> texts.length>0?<Flex 
+          direction='column'
+          justify='flex-start'
+          align='flex-start'
+          key={i}
+          style={{width:'100%',marginTop:'12px'}}
+          >
+              <Text fw={700}>P{i+1}</Text>
+              <Space h={'xs'} />
+              {
+                Array.from(texts,(t,k)=><Flex 
+                direction='column'
+                key={i+'_'+k}
+                style={{width:'100%'}}
+                >
+                  <Textarea  label="原文" autosize variant="filled" value={t.en}/>
+                  <Textarea  label="结果" autosize variant="filled" value={t.zh}/>
+                  <Group spacing="sm">
+                    <Button variant="light" color="cyan" compact onClick={()=>{
+                      let input=document.body.querySelector(`textarea[aria-label="原文"]`);
+                      input.value=t.en;
+                      input.click()
+                      document.execCommand('insertText', false,' ');
+                      setTimeout(()=>{
+                        let copyBtn=document.body.querySelector(`button[aria-label="复制译文"]`);
+                        copyBtn.click();
+                        setTimeout(()=>navigator.clipboard.readText().then(text => console.log(text)),500)
+                       
+                      },1000);
+                    }}>翻译
+                    </Button>
+                    <CopyButton value={t.en+'\n'+t.zh}>
+                          {({ copied, copy }) => (
+                            <Button variant="light" color={copied ? 'dark' : 'cyan'} compact onClick={copy}>
+                              {copied ? '已复制到剪切板' : '拷贝'}
+                            </Button>
+                          )}
+                        </CopyButton>
+                  </Group>
+                  <Space h={'xs'} />
+                  </Flex>)
+              }
+
+            </Flex>:'' )
+        }
+        
+      </Flex> )
+  }
+}
+
+
+ 
+
 class MyAlert extends React.Component {
   constructor (props) {
     super(props)
@@ -1664,16 +1757,32 @@ function insertGoogleTranslate(){
   if(!div){
     div=document.createElement('div');
     div.id=id;
-    document.body.appendChild(div)
+    document.body.appendChild(div);
+    addStyle(`
+    #know-insert-google-translate {
+      position: fixed;
+    top: 132px;
+    left: 20px;
+    z-index: 99999;
+    background: #fff;
+    height: calc(90vh - 132px);
+    padding: 12px;
+    width: 248px;
+    overflow-y: scroll;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-top: 0;
+    box-shadow: 0 1px 4px 0 rgb(0 0 0 / 37%);
+    }
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    `,id+'-css');
   }
 
-  render(<Button onClick={async()=>{
-    let data=await chrome.storage.local.get('pdfAllPages');
-    if(data&&data.pdfAllPages){
-      let pages=data.pdfAllPages;
-      console.log(pages)
-    }
-  }}>加载缓存</Button>,div)
+  render(<MyGoogleTranslate />,div)
 
 }
 
