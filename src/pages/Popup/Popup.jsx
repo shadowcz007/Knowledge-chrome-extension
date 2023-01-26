@@ -59,6 +59,27 @@ const Popup = () => {
             <Button
               onClick={(event) => {
                 event.preventDefault()
+               
+                chrome.tabs.query(
+                  { active: true, currentWindow: true },
+                  function (tabs) {
+                    chrome.tabs.sendMessage(
+                      tabs[0].id,
+                      { cmd: 'display-translate-pannel'},
+                      function (response) {
+                        console.log(response)
+                      }
+                    )
+                  }
+                )
+              }}
+            >
+              打开翻译助手
+            </Button>
+            <Space h='xl' />
+            <Button
+              onClick={(event) => {
+                event.preventDefault()
                 chrome.tabs.create({
                   url: chrome.runtime.getURL('newtab.html'),
                 })

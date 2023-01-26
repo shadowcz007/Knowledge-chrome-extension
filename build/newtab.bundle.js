@@ -50076,7 +50076,9 @@ class KnowledgeCard extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       }
     }, "\u8BB0\u5F55"), Array.from(c.replies, (cr, i) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_11__.Text, {
       key: i
-    }, Array.from(cr.split('\n'), cc => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_11__.Text, null, cc))))) : '', /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Space, {
+    }, Array.from(cr.split('\n'), (cc, cci) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_11__.Text, {
+      key: cc + cci
+    }, cc))))) : '', /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Space, {
       h: "xl"
     }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.CopyButton, {
       value: `${Array.from(c.tags, t => t.name).join('#')} \n \n${c.replies} \n \n -${c.title}\n${c.url} `
@@ -50600,7 +50602,7 @@ class Newtab2 extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
     }, Array.from(cards, (c, j) => {
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(KnowledgeCard, {
         data: c,
-        key: j
+        key: i + '_' + j
       });
     })))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Space, {
       h: "xl"
@@ -56265,7 +56267,7 @@ function combine (array, callback) {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("5bcdcf7604b25eb9997f")
+/******/ 		__webpack_require__.h = () => ("96faca606ee91a8c519e")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

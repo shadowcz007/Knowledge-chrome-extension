@@ -295,29 +295,7 @@ chrome.contextMenus.onClicked.addListener(async (item, tab) => {
       })
   } else if (id == 'mark') {
     // 右键菜单选择了标注
-    const data = await chrome.storage.sync.get('cfxAddress')
-    if (data && data.cfxAddress && data.cfxAddress.address)
-      cfxAddress = data.cfxAddress.address
-
-    if (!cfxAddress) {
-      // 通知页面进行标注
-      chrome.tabs.sendMessage(
-        tab.id,
-        { cmd: 'login', tabId: tab.id },
-        function (response) {
-          console.log(response)
-        }
-      )
-    } else {
-      // 通知页面进行标注
-      chrome.tabs.sendMessage(
-        tab.id,
-        { cmd: 'mark-run', tabId: tab.id },
-        function (response) {
-          console.log(response)
-        }
-      )
-    }
+    await markCanRun(tab.id)
   }else if(id=='translate'){
    // 通知页面返回文字
    chrome.tabs.sendMessage(
@@ -334,6 +312,33 @@ chrome.contextMenus.onClicked.addListener(async (item, tab) => {
   // url.searchParams.set('q', item.selectionText)
   // chrome.tabs.create({ url: url.href, index: tab.index + 1 })
 })
+
+async function markCanRun(tabId,reply){
+  const data = await chrome.storage.sync.get('cfxAddress')
+    if (data && data.cfxAddress && data.cfxAddress.address)
+      cfxAddress = data.cfxAddress.address
+
+    if (!cfxAddress) {
+      // 通知页面进行标注
+      chrome.tabs.sendMessage(
+        tabId,
+        { cmd: 'login', tabId },
+        function (response) {
+          console.log(response)
+        }
+      )
+    } else {
+      // 通知页面进行标注
+      chrome.tabs.sendMessage(
+        tabId,
+        { cmd: 'mark-run', tabId,reply },
+        function (response) {
+          console.log(response)
+        }
+      )
+    }
+}
+
 
 function updateTags (items = []) {
   let tags = {}
@@ -768,7 +773,16 @@ chrome.runtime.onMessage.addListener(async function (
   const { cmd } = request
   // console.log('收到来自content-script的消息：', request, cmd)
 
-  if (cmd == 'mark-result') {
+  if(cmd=='mark-run'){
+
+    chrome.tabs.query(
+      { active: true, currentWindow: true },
+      async function (tabs) {
+        await markCanRun(tabs[0].id,request.reply)
+      }
+    )
+
+  }else if (cmd == 'mark-result') {
     const data = await chrome.storage.sync.get('cfxAddress')
     if (data && data.cfxAddress && data.cfxAddress.address)
       cfxAddress = data.cfxAddress.address

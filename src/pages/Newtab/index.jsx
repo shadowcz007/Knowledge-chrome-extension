@@ -222,7 +222,7 @@ class KnowledgeCard extends React.Component {
               <Badge size='xs' style={{ marginRight: '12px' }}>
                 记录
               </Badge>
-              {Array.from(c.replies,(cr,i)=><Text key={i}>{Array.from(cr.split('\n'),cc=><Text>{cc}</Text>)}</Text>)}
+              {Array.from(c.replies,(cr,i)=><Text key={i}>{Array.from(cr.split('\n'),(cc,cci)=><Text key={cc+cci}>{cc}</Text>)}</Text>)}
             </Text>
           ) : (
             ''
@@ -776,7 +776,7 @@ class Newtab2 extends React.Component {
                 key={i}
               >
                 {Array.from(cards, (c, j) => {
-                  return <KnowledgeCard data={c} key={j} />
+                  return <KnowledgeCard data={c} key={i+'_'+j} />
                 })}
               </Flex>
             ))}

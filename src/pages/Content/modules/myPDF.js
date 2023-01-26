@@ -1,4 +1,12 @@
+import React from 'react'
 
+import {
+  Flex,
+  Button,
+  Space,
+  Textarea,CopyButton,Switch ,Indicator
+} from '@mantine/core'
+ 
 class MyPDFSwitch extends React.Component {
     constructor (props) {
       super(props)
@@ -32,24 +40,32 @@ class MyPDFSwitch extends React.Component {
       }
     }
      extractCurrentPageNum(){
+      let index=parseInt(document.querySelector('#pageNumber').value);
       let currentPage=document.querySelector('#numPages').innerText.split('/');
-      let index=parseInt(currentPage[0].split('(').join('').trim()),count=parseInt(currentPage[1].split(')').join('').trim())
+      let count=parseInt(currentPage[1].split(')').join('').trim())
       return {pageNum:index,count}
     }
-    
-   async getPDFAnnotations(){
+
+    initPagesData(){
       const {count}=this.extractCurrentPageNum()
-      var pages=JSON.parse(JSON.stringify((new Array(count)).fill([])));
+      return JSON.parse(JSON.stringify((new Array(count)).fill([])));
+    }
+    
+    // pages=[{zh,en}]
+   async getPDFAnnotations(){
+      
+      var pages=this.initPagesData();
       try {
         let data=await chrome.storage.local.get('pdfAllPages');
         if(data&&data.pdfAllPages) pages=data.pdfAllPages;
         // pages=JSON.parse(localStorage.getItem('_pdf_all_pages_'))
       } catch (error) {
-        pages=JSON.parse(JSON.stringify((new Array(count)).fill([])));
+        pages=this.initPagesData();
       }
       return pages
     }
   
+    // data=[string]
    async getCurrentPageAnnotations(){
        // 当前页码
       const {pageNum,count}=this.extractCurrentPageNum()
@@ -57,18 +73,20 @@ class MyPDFSwitch extends React.Component {
       let pages=await this.getPDFAnnotations();
       let res={pageNum,count,data:[]};
       if(pages.length==count&&pages[pageNum-1]){
-        res.data=pages[pageNum-1].unque()
+        res.data=Array.from(pages[pageNum-1],p=>p.en+'\n\n'+p.zh).unque()
       }
       return res
     }
   
+    // pages=[{zh,en}]
     async savePDFAnnotations(){
       var pages=await this.getPDFAnnotations();
       let pagesElement=document.body.querySelectorAll('.page');
      if(pages.length==pagesElement.length){
       for (let index = 0; index < pagesElement.length; index++) {
-        pages[index]=[...pages[index],...Array.from(pagesElement[index].querySelectorAll('.freeTextEditor'),text=>text.innerText)]
-        pages[index]=pages[index].unque();
+        pages[index]=[...pages[index],...Array.from(pagesElement[index].querySelectorAll('.freeTextEditor'),text=>({zh:'',en:text.innerText}))]
+        // pages[index]=pages[index].unque();
+        // pages[index]=Array.from(pages[index],p=>({zh:'',en:p}))
       }
       // localStorage.setItem('_pdf_all_pages_',JSON.stringify(pages))
       await chrome.storage.local.set({
@@ -160,13 +178,15 @@ class MyPDFSwitch extends React.Component {
                     let pages= JSON.parse(JSON.stringify((new Array(count)).fill([])));
                   
                     if(data&&data.pdfAllPages) pages=data.pdfAllPages;
-                     
-                      if(pages.length==count&&pages[pageNum-1]){
+                    if(pages.length!=count){
+                      pages=this.initPagesData()
+                    }
+                    if(pages.length==count&&pages[pageNum-1]){
                         // let pdfTextDiv=  document.querySelector('#knowlege-pdf-read-new');
                         let text=that.state.text;
-                        pages[pageNum-1].push(text);
-                        pages[pageNum-1]=pages[pageNum-1].filter(f=>f&&f.trim())
-                        pages[pageNum-1]=pages[pageNum-1].unque();
+                        pages[pageNum-1].push({zh:'',en:text});
+                        // pages[pageNum-1]=pages[pageNum-1].filter(f=>f&&f.trim())
+                        // pages[pageNum-1]=pages[pageNum-1].unque();
   
                         await chrome.storage.local.set({
                           pdfAllPages:pages

@@ -2006,25 +2006,7 @@ chrome.contextMenus.onClicked.addListener(async (item, tab) => {
     });
   } else if (id == 'mark') {
     // 右键菜单选择了标注
-    const data = await chrome.storage.sync.get('cfxAddress');
-    if (data && data.cfxAddress && data.cfxAddress.address) cfxAddress = data.cfxAddress.address;
-    if (!cfxAddress) {
-      // 通知页面进行标注
-      chrome.tabs.sendMessage(tab.id, {
-        cmd: 'login',
-        tabId: tab.id
-      }, function (response) {
-        console.log(response);
-      });
-    } else {
-      // 通知页面进行标注
-      chrome.tabs.sendMessage(tab.id, {
-        cmd: 'mark-run',
-        tabId: tab.id
-      }, function (response) {
-        console.log(response);
-      });
-    }
+    await markCanRun(tab.id);
   } else if (id == 'translate') {
     // 通知页面返回文字
     chrome.tabs.sendMessage(tab.id, {
@@ -2041,6 +2023,28 @@ chrome.contextMenus.onClicked.addListener(async (item, tab) => {
   // chrome.tabs.create({ url: url.href, index: tab.index + 1 })
 });
 
+async function markCanRun(tabId, reply) {
+  const data = await chrome.storage.sync.get('cfxAddress');
+  if (data && data.cfxAddress && data.cfxAddress.address) cfxAddress = data.cfxAddress.address;
+  if (!cfxAddress) {
+    // 通知页面进行标注
+    chrome.tabs.sendMessage(tabId, {
+      cmd: 'login',
+      tabId
+    }, function (response) {
+      console.log(response);
+    });
+  } else {
+    // 通知页面进行标注
+    chrome.tabs.sendMessage(tabId, {
+      cmd: 'mark-run',
+      tabId,
+      reply
+    }, function (response) {
+      console.log(response);
+    });
+  }
+}
 function updateTags(items = []) {
   let tags = {};
   return new Promise(async (res, rej) => {
@@ -2493,7 +2497,14 @@ chrome.runtime.onMessage.addListener(async function (request, sender, sendRespon
   } = request;
   // console.log('收到来自content-script的消息：', request, cmd)
 
-  if (cmd == 'mark-result') {
+  if (cmd == 'mark-run') {
+    chrome.tabs.query({
+      active: true,
+      currentWindow: true
+    }, async function (tabs) {
+      await markCanRun(tabs[0].id, request.reply);
+    });
+  } else if (cmd == 'mark-result') {
     const data = await chrome.storage.sync.get('cfxAddress');
     if (data && data.cfxAddress && data.cfxAddress.address) cfxAddress = data.cfxAddress.address;
     if (!cfxAddress) {
@@ -2789,6 +2800,7 @@ chrome.runtime.onMessage.addListener(async function (request, sender, sendRespon
   reactHotLoader.register(changeNotionKeyForTool, "changeNotionKeyForTool", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Background\\index.js");
   reactHotLoader.register(parseData, "parseData", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Background\\index.js");
   reactHotLoader.register(cfxAddress, "cfxAddress", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Background\\index.js");
+  reactHotLoader.register(markCanRun, "markCanRun", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Background\\index.js");
   reactHotLoader.register(updateTags, "updateTags", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Background\\index.js");
   reactHotLoader.register(createProperties, "createProperties", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Background\\index.js");
   reactHotLoader.register(createFilterForUrl, "createFilterForUrl", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Background\\index.js");
@@ -3062,7 +3074,7 @@ module.exports = JSON.parse('{"100":"Continue","101":"Switching Protocols","102"
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("5bcdcf7604b25eb9997f")
+/******/ 		__webpack_require__.h = () => ("96faca606ee91a8c519e")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

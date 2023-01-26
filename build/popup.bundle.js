@@ -37707,6 +37707,22 @@ const Popup = () => {
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Button, {
     onClick: event => {
       event.preventDefault();
+      chrome.tabs.query({
+        active: true,
+        currentWindow: true
+      }, function (tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, {
+          cmd: 'display-translate-pannel'
+        }, function (response) {
+          console.log(response);
+        });
+      });
+    }
+  }, "\u6253\u5F00\u7FFB\u8BD1\u52A9\u624B"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_4__.Space, {
+    h: "xl"
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Button, {
+    onClick: event => {
+      event.preventDefault();
       chrome.tabs.create({
         url: chrome.runtime.getURL('newtab.html')
       });
@@ -42389,7 +42405,7 @@ function combine (array, callback) {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("5bcdcf7604b25eb9997f")
+/******/ 		__webpack_require__.h = () => ("96faca606ee91a8c519e")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */
