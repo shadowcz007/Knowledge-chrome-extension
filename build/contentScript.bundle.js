@@ -53092,26 +53092,26 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-dom */ "./node_modules/@hot-loader/react-dom/index.js");
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Progress/Progress.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Avatar/Avatar.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Text/Text.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/HoverCard/HoverCard.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Badge/Badge.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Space/Space.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Divider/Divider.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Flex/Flex.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Switch/Switch.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Button/Button.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Indicator/Indicator.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/CopyButton/CopyButton.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Textarea/Textarea.js");
-/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Group/Group.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Progress/Progress.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Avatar/Avatar.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Text/Text.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/HoverCard/HoverCard.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Badge/Badge.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Space/Space.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Divider/Divider.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Flex/Flex.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Switch/Switch.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Button/Button.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Indicator/Indicator.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/CopyButton/CopyButton.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Textarea/Textarea.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Alert/Alert.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Modal/Modal.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/MultiSelect/MultiSelect.js");
 /* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Select/Select.js");
 /* harmony import */ var _modules_myStyle__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./modules/myStyle */ "./src/pages/Content/modules/myStyle.js");
 /* harmony import */ var _modules_twitter__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./modules/twitter */ "./src/pages/Content/modules/twitter.js");
+/* harmony import */ var _modules_translate__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./modules/translate */ "./src/pages/Content/modules/translate.js");
 /* module decorator */ module = __webpack_require__.hmd(module);
 (function () {
   var enterModule = typeof reactHotLoaderGlobal !== 'undefined' ? reactHotLoaderGlobal.enterModule : undefined;
@@ -53120,6 +53120,7 @@ __webpack_require__.r(__webpack_exports__);
 var __signature__ = typeof reactHotLoaderGlobal !== 'undefined' ? reactHotLoaderGlobal.default.signature : function (a) {
   return a;
 };
+
 
 
 
@@ -53706,7 +53707,7 @@ function Demo() {
     setCount(countTarget);
   }
   const colors = ['#7AD1DD', '#5FCCDB', '#44CADC', '#2AC9DE', '#1AC2D9', '#11B7CD', '#09ADC3', '#0E99AC', '#128797', '#147885'];
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_5__.Progress
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_6__.Progress
   //   color='violet'
   , {
     size: "sm",
@@ -53820,20 +53821,20 @@ function addBadge(element, color = 'red', createdAt, nicknames = [], count = 1, 
   .mantine-HoverCard-dropdown{
     z-index:999999999999999999 !important
   }`, 'mantine-HoverCard-dropdown-css');
-  const countBtn = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_6__.Avatar.Group, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_6__.Avatar, {
+  const countBtn = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Avatar.Group, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Avatar, {
     variant: "filled",
     radius: "lg",
     size: "sm",
     color: color
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Text, {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_8__.Text, {
     fz: createdAt ? 'sm' : 'xs'
   }, "+", count)));
 
   // _console(relate)
-  (0,react_dom__WEBPACK_IMPORTED_MODULE_1__.render)( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_8__.HoverCard, {
+  (0,react_dom__WEBPACK_IMPORTED_MODULE_1__.render)( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_9__.HoverCard, {
     width: 440,
     shadow: "md"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_8__.HoverCard.Target, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_9__.Badge, {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_9__.HoverCard.Target, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Badge, {
     color: color,
     size: "lg",
     sx: {
@@ -53841,28 +53842,28 @@ function addBadge(element, color = 'red', createdAt, nicknames = [], count = 1, 
     },
     leftSection: createdAt ? '' : countBtn,
     rightSection: createdAt ? countBtn : ''
-  }, createdAt ? (0,timeago_js__WEBPACK_IMPORTED_MODULE_2__.format)(createdAt, 'zh_CN') : '发现链接*')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_8__.HoverCard.Dropdown, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Text, {
+  }, createdAt ? (0,timeago_js__WEBPACK_IMPORTED_MODULE_2__.format)(createdAt, 'zh_CN') : '发现链接*')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_9__.HoverCard.Dropdown, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_8__.Text, {
     size: "xs",
     c: "dimmed",
     align: "left"
-  }, nicknames.join('\n')), replies && replies.length > 0 ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Text, {
+  }, nicknames.join('\n')), replies && replies.length > 0 ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_8__.Text, {
     size: "sm",
     align: "left"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("br", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_9__.Badge, {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("br", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Badge, {
     size: "xs"
-  }, "\u8BB0\u5F55"), Array.from(replies.filter(f => f), r => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Text, {
+  }, "\u8BB0\u5F55"), Array.from(replies.filter(f => f), r => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_8__.Text, {
     key: r,
     style: {
       paddingLeft: '4px',
       color: '#4a4a4a',
       backgroundColor: 'transparent'
     }
-  }, r, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("br", null))), currentNotion && currentNotion.title ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
+  }, r, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("br", null))), currentNotion && currentNotion.title ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_11__.Space, {
     h: "xl"
-  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_9__.Badge, {
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Badge, {
     color: "gray",
     size: "xs"
-  }, "\u6765\u6E90: ", currentNotion.title)) : '') : '', (replies && replies.length > 0 || nicknames.join('\n')) && relate && relate.length > 0 ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_11__.Divider, {
+  }, "\u6765\u6E90: ", currentNotion.title)) : '') : '', (replies && replies.length > 0 || nicknames.join('\n')) && relate && relate.length > 0 ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Divider, {
     my: "xs",
     label: "\u76F8\u5173",
     labelPosition: "left"
@@ -53883,10 +53884,10 @@ function addBadge(element, color = 'red', createdAt, nicknames = [], count = 1, 
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap'
     }
-  }, color == 'blue' ? Array.from(e.tags, t => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_9__.Badge, {
+  }, color == 'blue' ? Array.from(e.tags, t => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Badge, {
     key: t.name,
     size: "xs"
-  }, t.name)) : '', e.pageTitle, ' ', color == 'red' ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_9__.Badge, {
+  }, t.name)) : '', e.pageTitle, ' ', color == 'red' ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Badge, {
     key: e.pageTitle,
     size: "xs"
   }, Array.from(e.tags, t => t.name).join(' ')) : ''))
@@ -53923,7 +53924,7 @@ class MyMenu extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
   }
   render() {
     let that = this;
-    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Flex, {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_13__.Flex, {
       direction: "column",
       align: "flex-start",
       justify: "flex-start",
@@ -53933,15 +53934,15 @@ class MyMenu extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
         padding: '12px',
         borderRadius: '12px'
       }
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Flex, {
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_13__.Flex, {
       direction: "row"
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Text, {
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_8__.Text, {
       fz: 'sm',
       style: {
         maxWidth: '440px',
         marginLeft: '24px'
       }
-    }, that.state.result), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Text, {
+    }, that.state.result), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_8__.Text, {
       fz: 'sm'
     }, that.state.text)));
   }
@@ -53960,7 +53961,7 @@ class MyPDFSwitch extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
   }
   render() {
     let that = this;
-    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_13__.Switch, {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Switch, {
       label: "\u5F00\u59CB\u6536\u96C6",
       size: "md",
       color: "cyan",
@@ -54112,7 +54113,7 @@ class MyPdfRead extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
   }
   render() {
     let that = this;
-    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Flex, {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_13__.Flex, {
       direction: "column",
       align: "flex-start",
       justify: "flex-start",
@@ -54122,11 +54123,11 @@ class MyPdfRead extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
         padding: '12px',
         borderRadius: '12px'
       }
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button.Group, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Indicator, {
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Button.Group, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.Indicator, {
       label: that.state.currentPageAnnotations.length,
       inline: true,
       size: 22
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Button, {
       variant: "outline",
       color: 'dark',
       onClick: async e => {
@@ -54161,20 +54162,20 @@ class MyPdfRead extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
         }
         ;
       }
-    }, "\u6536\u96C6")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
+    }, "\u6536\u96C6")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_11__.Space, {
       w: "xl"
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.CopyButton, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_17__.CopyButton, {
       value: that.state.text
     }, ({
       copied,
       copy
-    }) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
+    }) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Button, {
       variant: "outline",
       color: copied ? 'teal' : 'dark',
       onClick: copy
-    }, copied ? '已复制到剪切板' : '拷贝')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
+    }, copied ? '已复制到剪切板' : '拷贝')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_11__.Space, {
       w: "xl"
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Button, {
       variant: "outline",
       color: "dark",
       onClick: async () => {
@@ -54190,9 +54191,9 @@ class MyPdfRead extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
           pdfAllPages: pages
         });
       }
-    }, "\u65B0\u5EFA")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
+    }, "\u65B0\u5EFA")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_11__.Space, {
       h: "xl"
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_17__.Textarea, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_18__.Textarea, {
       style: {
         minWidth: '360px'
       },
@@ -54220,195 +54221,6 @@ class MyPdfRead extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
     this[key] = eval(code);
   }
 }
-class MyGoogleTranslate extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      title: props.title,
-      pages: props.pages || [],
-      currentPage: null,
-      saveSuccess: false
-    };
-    // this.init()
-  }
-  // init(){
-  //   let that=this;
-  //   let copyBtn=document.body.querySelector(`button[aria-label="复制译文"]`);
-  //   if(copyBtn&&!copyBtn.getAttribute('knowledge-google-translate-event')){
-  //     copyBtn.setAttribute('knowledge-google-translate-event',1)
-  //     copyBtn.addEventListener('click',e=>{
-  //       if(that.state.currentPage) setTimeout(()=>navigator.clipboard.readText().then(text => {
-  //         console.log(text)
-  //         let pages=[...that.state.pages];
-  //         let i=that.state.currentPage[0],
-  //         k=that.state.currentPage[1];
-  //         pages[i][k].zh=text;
-  //         that.setState({
-  //           pages
-  //         })
-  //     }),500)
-  //     })
-  //   }
-  // }
-  render() {
-    let that = this;
-    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Flex, {
-      justify: "flex-start",
-      align: "flex-start",
-      direction: "column",
-      style: {
-        width: '100%'
-      }
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button.Group, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Indicator, {
-      color: "cyan",
-      position: "bottom-end",
-      label: that.state.pages.length,
-      showZero: false,
-      dot: false,
-      overflowCount: 999,
-      inline: true,
-      size: 22
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
-      variant: "outline",
-      color: "cyan",
-      uppercase: true,
-      onClick: async () => {
-        let data = await chrome.storage.local.get('pdfAllPages');
-        if (data && data.pdfAllPages) {
-          let pages = data.pdfAllPages;
-          pages = Array.from(pages, ps => {
-            return Array.from(ps, p => {
-              return {
-                en: p,
-                zh: ''
-              };
-            });
-          });
-          console.log(pages);
-          that.setState({
-            pages: pages,
-            saveSuccess: false
-          });
-          // that.init();
-        }
-      }
-    }, "\u8BFB\u53D6\u8BB0\u5F55")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
-      variant: "outline",
-      color: "cyan",
-      uppercase: true,
-      onClick: async () => {
-        let data = await chrome.storage.local.get('pdfAllPages');
-        if (data && data.pdfAllPages) {
-          let pages = [...that.state.pages];
-          pages = Array.from(pages, ps => {
-            return Array.from(ps, p => {
-              return p.en + '\n\n' + p.zh;
-            });
-          });
-          if (data.pdfAllPages.length == pages.length) await chrome.storage.local.set({
-            pdfAllPages: pages
-          });
-        }
-        that.setState({
-          saveSuccess: true
-        });
-      }
-    }, "\u4FDD\u5B58", that.state.saveSuccess ? '*' : '')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
-      h: "xl"
-    }), Array.from(that.state.pages, (texts, i) => texts.length > 0 ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Flex, {
-      direction: "column",
-      justify: "flex-start",
-      align: "flex-start",
-      key: i,
-      style: {
-        width: '100%',
-        marginTop: '12px'
-      }
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Text, {
-      fw: 700
-    }, "P", i + 1), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
-      h: 'xs'
-    }), Array.from(texts, (t, k) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Flex, {
-      direction: "column",
-      key: i + '_' + k,
-      style: {
-        width: '100%'
-      }
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_17__.Textarea, {
-      label: "\u539F\u6587",
-      autosize: true,
-      variant: "filled",
-      value: t.en,
-      onChange: event => {
-        let val = event.currentTarget.value.trim();
-        let pages = [...that.state.pages];
-        pages[i][k].en = val;
-        that.setState({
-          currentPage: [i, k],
-          pages
-        });
-      }
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_17__.Textarea, {
-      label: "\u7ED3\u679C",
-      autosize: true,
-      variant: "filled",
-      value: t.zh,
-      onChange: event => {
-        let val = event.currentTarget.value.trim();
-        let pages = [...that.state.pages];
-        pages[i][k].zh = val;
-        that.setState({
-          currentPage: [i, k],
-          pages
-        });
-      }
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
-      h: 'xs'
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_18__.Group, {
-      spacing: "sm"
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
-      variant: "light",
-      color: "cyan",
-      compact: true,
-      onClick: () => {
-        let input = document.body.querySelector(`textarea[aria-label="原文"]`);
-        input.value = t.en;
-        input.click();
-        document.execCommand('insertText', false, ' ');
-        setTimeout(() => {
-          let copyBtn = document.body.querySelector(`button[aria-label="复制译文"]`);
-          copyBtn.click();
-          setTimeout(() => navigator.clipboard.readText().then(text => {
-            console.log(text);
-            let pages = [...that.state.pages];
-            pages[i][k].zh = text;
-            that.setState({
-              currentPage: [i, k],
-              pages
-            });
-          }), 500);
-        }, 1000);
-      }
-    }, "\u7FFB\u8BD1"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.CopyButton, {
-      value: t.en + '\n' + t.zh
-    }, ({
-      copied,
-      copy
-    }) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
-      variant: "light",
-      color: copied ? 'dark' : 'cyan',
-      compact: true,
-      onClick: copy
-    }, copied ? '已复制到剪切板' : '拷贝'))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
-      h: 'lg'
-    })))) : ''));
-  }
-  // @ts-ignore
-  __reactstandin__regenerateByEval(key, code) {
-    // @ts-ignore
-    this[key] = eval(code);
-  }
-}
 class MyAlert extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
   constructor(props) {
     super(props);
@@ -54429,29 +54241,29 @@ class MyAlert extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       // variant='filled'
       ,
       onClose: () => that.props.onClose()
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Flex, {
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_13__.Flex, {
       justify: "flex-start",
       align: "flex-start",
       style: {
         width: '100%'
       }
-    }, Array.from(that.state.texts, (t, i) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Flex, {
+    }, Array.from(that.state.texts, (t, i) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_13__.Flex, {
       direction: 'column',
       key: t + i,
       style: {
         width: '40%',
         margin: '0 24px'
       }
-    }, Array.from(t.split('\n'), (_t, _i) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Text, {
+    }, Array.from(t.split('\n'), (_t, _i) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_8__.Text, {
       key: _i + _t
-    }, _t, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("br", null))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
+    }, _t, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("br", null))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_11__.Space, {
       w: "xl"
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_16__.CopyButton, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_17__.CopyButton, {
       value: that.state.texts.join('\n')
     }, ({
       copied,
       copy
-    }) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
+    }) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Button, {
       variant: "outline",
       color: copied ? 'teal' : 'dark',
       onClick: copy
@@ -54511,7 +54323,7 @@ class Notions extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       centered: true,
       size: "calc(100vw - 98px)",
       zIndex: 99999999999999999
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Flex, {
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_13__.Flex, {
       miw: '60%',
       gap: "sm",
       justify: "flex-start",
@@ -54551,7 +54363,7 @@ class Notions extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
           return item;
         }
       }
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_17__.Textarea, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_18__.Textarea, {
       style: {
         minWidth: '600px'
       },
@@ -54570,7 +54382,7 @@ class Notions extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
           }
         });
       }
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_17__.Textarea, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_18__.Textarea, {
       style: {
         minWidth: '600px'
       },
@@ -54589,9 +54401,9 @@ class Notions extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
           }
         });
       }
-    })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
+    })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_11__.Space, {
       h: "xl"
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Flex, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_13__.Flex, {
       mih: 50,
       gap: "md",
       justify: "flex-start",
@@ -54615,7 +54427,7 @@ class Notions extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       },
       allowDeselect: false,
       dropdownPosition: "bottom"
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Flex, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_13__.Flex, {
       miw: 600,
       gap: "sm",
       justify: "flex-start",
@@ -54623,23 +54435,23 @@ class Notions extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       direction: "column",
       wrap: "wrap",
       maw: 720
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Text, {
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_8__.Text, {
       fz: "xs"
     }, "\u5F85\u63D0\u4EA4"), Array.from(Object.keys(that.state.userData), key => {
-      if (key != '_tags') return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Text, {
+      if (key != '_tags') return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_8__.Text, {
         fz: "xs",
         key: key
       }, `- ${key} : ${that.state.userData[key]}`);
-    }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_12__.Flex, {
+    }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_13__.Flex, {
       mih: 50,
       gap: "lg",
       justify: "flex-end",
       align: "flex-start",
       direction: "column",
       wrap: "wrap"
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Space, {
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_11__.Space, {
       h: "xl"
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_14__.Button, {
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_15__.Button, {
       style: {
         color: 'white',
         'backgroundColor': '#228be6'
@@ -54816,27 +54628,28 @@ function insertGoogleTranslate() {
     (0,_modules_myStyle__WEBPACK_IMPORTED_MODULE_3__.addStyle)(`
     #know-insert-google-translate {
       position: fixed;
-    top: 132px;
-    left: 20px;
-    z-index: 99999;
-    background: #fff;
-    height: calc(90vh - 132px);
-    padding: 12px;
-    width: 248px;
-    overflow-y: scroll;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
-    border-top: 0;
-    box-shadow: 0 1px 4px 0 rgb(0 0 0 / 37%);
+      top: 132px;
+      left: 20px;
+      z-index: 99999;
+      
+      /*background: #fff;
+      height: calc(90vh - 132px);
+      padding: 12px;
+      width: 248px;
+      overflow-y: scroll;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      border-bottom-left-radius: 8px;
+      border-bottom-right-radius: 8px;
+      border-top: 0;
+      box-shadow: 0 1px 4px 0 rgb(0 0 0 / 37%);*/
     }
     ::-webkit-scrollbar {
       display: none;
     }
     `, id + '-css');
   }
-  (0,react_dom__WEBPACK_IMPORTED_MODULE_1__.render)( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(MyGoogleTranslate, null), div);
+  (0,react_dom__WEBPACK_IMPORTED_MODULE_1__.render)( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_modules_translate__WEBPACK_IMPORTED_MODULE_5__.MyGoogleTranslate, null), div);
 }
 
 // 翻译 全文的方法1 
@@ -55045,7 +54858,6 @@ function createPDFDiv() {
   reactHotLoader.register(MyMenu, "MyMenu", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
   reactHotLoader.register(MyPDFSwitch, "MyPDFSwitch", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
   reactHotLoader.register(MyPdfRead, "MyPdfRead", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
-  reactHotLoader.register(MyGoogleTranslate, "MyGoogleTranslate", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
   reactHotLoader.register(MyAlert, "MyAlert", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
   reactHotLoader.register(Notions, "Notions", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
   reactHotLoader.register(getCfxAddress, "getCfxAddress", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\index.js");
@@ -55101,6 +54913,269 @@ function addStyle(str = '', id = 'add-style') {
     return;
   }
   reactHotLoader.register(addStyle, "addStyle", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\modules\\myStyle.js");
+})();
+;
+(function () {
+  var leaveModule = typeof reactHotLoaderGlobal !== 'undefined' ? reactHotLoaderGlobal.leaveModule : undefined;
+  leaveModule && leaveModule(module);
+})();
+
+/***/ }),
+
+/***/ "./src/pages/Content/modules/translate.js":
+/*!************************************************!*\
+  !*** ./src/pages/Content/modules/translate.js ***!
+  \************************************************/
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "MyGoogleTranslate": () => (/* binding */ MyGoogleTranslate)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Flex/Flex.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Button/Button.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Paper/Paper.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Indicator/Indicator.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Space/Space.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Text/Text.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Textarea/Textarea.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/Group/Group.js");
+/* harmony import */ var _mantine_core__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @mantine/core */ "./node_modules/@mantine/core/esm/CopyButton/CopyButton.js");
+/* module decorator */ module = __webpack_require__.hmd(module);
+(function () {
+  var enterModule = typeof reactHotLoaderGlobal !== 'undefined' ? reactHotLoaderGlobal.enterModule : undefined;
+  enterModule && enterModule(module);
+})();
+var __signature__ = typeof reactHotLoaderGlobal !== 'undefined' ? reactHotLoaderGlobal.default.signature : function (a) {
+  return a;
+};
+
+
+class MyGoogleTranslate extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      disabled: true,
+      title: props.title,
+      pages: props.pages || [],
+      currentPage: null,
+      saveSuccess: false,
+      display: 'none'
+    };
+    // this.init()
+  }
+
+  init() {
+    let that = this;
+    this.getPages().then(pages => {
+      if (pages.length > 0) {
+        that.setState({
+          saveSuccess: false,
+          pages,
+          disabled: false
+        });
+      }
+    });
+  }
+  async getPages() {
+    let pages = [];
+    let data = await chrome.storage.local.get('pdfAllPages');
+    if (data && data.pdfAllPages) {
+      pages = data.pdfAllPages;
+      pages = Array.from(pages, ps => {
+        return Array.from(ps, p => {
+          return {
+            en: p,
+            zh: ''
+          };
+        });
+      });
+      console.log(pages);
+    }
+    return pages;
+  }
+  render() {
+    let that = this;
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_1__.Flex, {
+      direction: "column",
+      style: {
+        minWidth: '280px'
+      }
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_2__.Button, {
+      styles: {
+        display: !that.state.disabled ? 'block' : 'none'
+      },
+      variant: "light",
+      color: "teal",
+      radius: "xl",
+      size: "md",
+      uppercase: true,
+      onClick: () => that.setState({
+        display: 'flex'
+      })
+    }, "\u7FFB\u8BD1\u52A9\u624B"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_3__.Paper, {
+      shadow: "md",
+      radius: "md",
+      p: "md",
+      style: {
+        width: '100%',
+        display: that.state.display
+      }
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_1__.Flex, {
+      justify: "flex-start",
+      align: "flex-start",
+      direction: "column",
+      style: {
+        width: '100%',
+        overflowY: 'scroll',
+        height: 'calc(90vh - 132px)'
+      }
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_2__.Button.Group, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_4__.Indicator, {
+      color: "cyan",
+      position: "bottom-end",
+      label: that.state.pages.length,
+      showZero: false,
+      dot: false,
+      overflowCount: 999,
+      inline: true,
+      size: 22
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_2__.Button, {
+      variant: "outline",
+      color: "cyan",
+      uppercase: true,
+      onClick: async () => {
+        let pages = await that.getPages();
+        that.setState({
+          pages,
+          saveSuccess: false
+        });
+      }
+    }, "\u8BFB\u53D6\u8BB0\u5F55")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_2__.Button, {
+      variant: "outline",
+      color: "cyan",
+      uppercase: true,
+      onClick: async () => {
+        let data = await chrome.storage.local.get('pdfAllPages');
+        if (data && data.pdfAllPages) {
+          let pages = [...that.state.pages];
+          pages = Array.from(pages, ps => {
+            return Array.from(ps, p => {
+              return p.en + '\n\n' + p.zh;
+            });
+          });
+          if (data.pdfAllPages.length == pages.length) await chrome.storage.local.set({
+            pdfAllPages: pages
+          });
+        }
+        that.setState({
+          saveSuccess: true
+        });
+      }
+    }, "\u4FDD\u5B58", that.state.saveSuccess ? '*' : '')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_5__.Space, {
+      h: "xl"
+    }), Array.from(that.state.pages, (texts, i) => texts.length > 0 ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_1__.Flex, {
+      direction: "column",
+      justify: "flex-start",
+      align: "flex-start",
+      key: i,
+      style: {
+        width: '100%',
+        marginTop: '12px'
+      }
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_6__.Text, {
+      fw: 700
+    }, "P", i + 1), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_5__.Space, {
+      h: 'xs'
+    }), Array.from(texts, (t, k) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_1__.Flex, {
+      direction: "column",
+      key: i + '_' + k,
+      style: {
+        width: '100%'
+      }
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Textarea, {
+      label: "\u539F\u6587",
+      autosize: true,
+      variant: "filled",
+      value: t.en,
+      onChange: event => {
+        let val = event.currentTarget.value.trim();
+        let pages = [...that.state.pages];
+        pages[i][k].en = val;
+        that.setState({
+          currentPage: [i, k],
+          pages
+        });
+      }
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Textarea, {
+      label: "\u7ED3\u679C",
+      autosize: true,
+      variant: "filled",
+      value: t.zh,
+      onChange: event => {
+        let val = event.currentTarget.value.trim();
+        let pages = [...that.state.pages];
+        pages[i][k].zh = val;
+        that.setState({
+          currentPage: [i, k],
+          pages
+        });
+      }
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_5__.Space, {
+      h: 'xs'
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_8__.Group, {
+      spacing: "sm"
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_2__.Button, {
+      variant: "light",
+      color: "cyan",
+      compact: true,
+      onClick: () => {
+        let input = document.body.querySelector(`textarea[aria-label="原文"]`);
+        input.value = t.en;
+        input.click();
+        document.execCommand('insertText', false, ' ');
+        setTimeout(() => {
+          let copyBtn = document.body.querySelector(`button[aria-label="复制译文"]`);
+          copyBtn.click();
+          setTimeout(() => navigator.clipboard.readText().then(text => {
+            console.log(text);
+            let pages = [...that.state.pages];
+            pages[i][k].zh = text;
+            that.setState({
+              currentPage: [i, k],
+              pages
+            });
+          }), 500);
+        }, 1000);
+      }
+    }, "\u7FFB\u8BD1"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_9__.CopyButton, {
+      value: t.en + '\n' + t.zh
+    }, ({
+      copied,
+      copy
+    }) => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_2__.Button, {
+      variant: "light",
+      color: copied ? 'dark' : 'cyan',
+      compact: true,
+      onClick: copy
+    }, copied ? '已复制到剪切板' : '拷贝'))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_5__.Space, {
+      h: 'lg'
+    })))) : ''))));
+  }
+  // @ts-ignore
+  __reactstandin__regenerateByEval(key, code) {
+    // @ts-ignore
+    this[key] = eval(code);
+  }
+}
+
+;
+(function () {
+  var reactHotLoader = typeof reactHotLoaderGlobal !== 'undefined' ? reactHotLoaderGlobal.default : undefined;
+  if (!reactHotLoader) {
+    return;
+  }
+  reactHotLoader.register(MyGoogleTranslate, "MyGoogleTranslate", "C:\\Users\\38957\\Documents\\GitHub\\Knowledge-chrome-extension\\src\\pages\\Content\\modules\\translate.js");
 })();
 ;
 (function () {
@@ -58614,7 +58689,7 @@ function combine (array, callback) {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("bf12f5fe050685b1aca4")
+/******/ 		__webpack_require__.h = () => ("5bcdcf7604b25eb9997f")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

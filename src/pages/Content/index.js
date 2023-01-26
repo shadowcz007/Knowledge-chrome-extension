@@ -15,13 +15,14 @@ import {
   Modal,
   Space,
   MultiSelect,Group,
-  Textarea,CopyButton,Alert,Menu,Switch ,Indicator,List, ThemeIcon
+  Textarea,CopyButton,Alert,Menu,Switch ,Indicator,List, ThemeIcon,Paper,Transition
 } from '@mantine/core'
  
 import { IconCircleCheck, IconCircleDashed, IconSettings, IconMessageCircle } from '@tabler/icons';
 
 import { addStyle } from './modules/myStyle'
 import {getUserInfo} from './modules/twitter'
+import {MyGoogleTranslate} from './modules/translate'
 // console.log(getUserInfo)
 // 格式化字符串的功能
 // 1. Superheroes
@@ -1262,159 +1263,6 @@ class MyPdfRead extends React.Component {
 
 
 
-class MyGoogleTranslate extends React.Component {
-  constructor (props) {
-    super(props)
-    this.state = {
-      title:props.title,
-      pages:props.pages||[],
-      currentPage:null,
-      saveSuccess:false
-    }
-    // this.init()
-  }
-  // init(){
-  //   let that=this;
-  //   let copyBtn=document.body.querySelector(`button[aria-label="复制译文"]`);
-  //   if(copyBtn&&!copyBtn.getAttribute('knowledge-google-translate-event')){
-  //     copyBtn.setAttribute('knowledge-google-translate-event',1)
-  //     copyBtn.addEventListener('click',e=>{
-  //       if(that.state.currentPage) setTimeout(()=>navigator.clipboard.readText().then(text => {
-  //         console.log(text)
-  //         let pages=[...that.state.pages];
-  //         let i=that.state.currentPage[0],
-  //         k=that.state.currentPage[1];
-  //         pages[i][k].zh=text;
-  //         that.setState({
-  //           pages
-  //         })
-  //     }),500)
-  //     })
-  //   }
-  // }
-  render () {
-    let that = this;
-    return ( 
-      <Flex justify='flex-start' align='flex-start' 
-      direction='column'
-      style={{width:'100%'}}>
-
-      <Button.Group>
-        <Indicator color="cyan" position="bottom-end"
-        label={that.state.pages.length} showZero={false} dot={false} overflowCount={999} inline size={22}>
-          <Button variant="outline" color="cyan" uppercase
-          onClick={async()=>{
-              let data=await chrome.storage.local.get('pdfAllPages');
-              if(data&&data.pdfAllPages){
-                let pages=data.pdfAllPages;
-                pages=Array.from(pages,ps=>{
-                  return Array.from(ps,p=>{
-                    return {
-                      en:p,
-                      zh:''
-                    }
-                  })
-                });
-                console.log(pages)
-                that.setState({pages:pages,saveSuccess:false})
-                // that.init();
-              }
-            }}>读取记录</Button>
-          </Indicator>
-
-          <Button variant="outline" color="cyan" uppercase
-          onClick={async()=>{
-            let data=await chrome.storage.local.get('pdfAllPages');
-            if(data&&data.pdfAllPages){
-              let pages=[...that.state.pages];
-              pages=Array.from(pages,ps=>{
-               return Array.from(ps,p=>{
-                  return p.en+'\n\n'+p.zh
-                })
-              })
-              if(data.pdfAllPages.length==pages.length) await chrome.storage.local.set({pdfAllPages:pages});
-              
-            }
-            that.setState({saveSuccess:true});
-
-            }}>保存{that.state.saveSuccess?'*':''}</Button>
-        </Button.Group>
-          <Space h='xl' />
-        {
-          Array.from(that.state.pages,(texts,i)=> texts.length>0?<Flex 
-          direction='column'
-          justify='flex-start'
-          align='flex-start'
-          key={i}
-          style={{width:'100%',marginTop:'12px'}}
-          >
-              <Text fw={700}>P{i+1}</Text>
-              <Space h={'xs'} />
-              {
-                Array.from(texts,(t,k)=><Flex 
-                direction='column'
-                key={i+'_'+k}
-                style={{width:'100%'}}
-                >
-                  <Textarea  label="原文" autosize variant="filled" value={t.en} onChange={(event)=>{
-                      let val = event.currentTarget.value.trim();
-                      let pages=[...that.state.pages];
-                          pages[i][k].en=val;
-                          that.setState({
-                            currentPage:[i,k],
-                            pages
-                          })
-                  }}/>
-                  <Textarea  label="结果" autosize variant="filled" value={t.zh} onChange={(event)=>{
-                      let val = event.currentTarget.value.trim();
-                      let pages=[...that.state.pages];
-                          pages[i][k].zh=val;
-                          that.setState({
-                            currentPage:[i,k],
-                            pages
-                          })
-                  }}/>
-                  <Space h={'xs'} />
-                  <Group spacing="sm">
-                    <Button variant="light" color="cyan" compact onClick={()=>{
-                      let input=document.body.querySelector(`textarea[aria-label="原文"]`);
-                      input.value=t.en;
-                      input.click()
-                      document.execCommand('insertText', false,' ');
-                      setTimeout(()=>{
-                        let copyBtn=document.body.querySelector(`button[aria-label="复制译文"]`);
-                        copyBtn.click();
-                        setTimeout(()=>navigator.clipboard.readText().then(text => {
-                          console.log(text)
-                          let pages=[...that.state.pages];
-                          pages[i][k].zh=text;
-                          that.setState({
-                            currentPage:[i,k],
-                            pages
-                          })
-                        }),500)
-                       
-                      },1000);
-                    }}>翻译
-                    </Button>
-                    <CopyButton value={t.en+'\n'+t.zh}>
-                          {({ copied, copy }) => (
-                            <Button variant="light" color={copied ? 'dark' : 'cyan'} compact onClick={copy}>
-                              {copied ? '已复制到剪切板' : '拷贝'}
-                            </Button>
-                          )}
-                        </CopyButton>
-                  </Group>
-                  <Space h={'lg'} />
-                  </Flex>)
-              }
-
-            </Flex>:'' )
-        }
-        
-      </Flex> )
-  }
-}
 
 
  
@@ -1826,20 +1674,21 @@ function insertGoogleTranslate(){
     addStyle(`
     #know-insert-google-translate {
       position: fixed;
-    top: 132px;
-    left: 20px;
-    z-index: 99999;
-    background: #fff;
-    height: calc(90vh - 132px);
-    padding: 12px;
-    width: 248px;
-    overflow-y: scroll;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
-    border-top: 0;
-    box-shadow: 0 1px 4px 0 rgb(0 0 0 / 37%);
+      top: 132px;
+      left: 20px;
+      z-index: 99999;
+      
+      /*background: #fff;
+      height: calc(90vh - 132px);
+      padding: 12px;
+      width: 248px;
+      overflow-y: scroll;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      border-bottom-left-radius: 8px;
+      border-bottom-right-radius: 8px;
+      border-top: 0;
+      box-shadow: 0 1px 4px 0 rgb(0 0 0 / 37%);*/
     }
     ::-webkit-scrollbar {
       display: none;
