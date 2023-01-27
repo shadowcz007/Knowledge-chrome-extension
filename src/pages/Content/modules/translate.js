@@ -5,8 +5,8 @@ import {
   Flex,
   Button,
   Space,
-  Group,
-  Textarea,CopyButton,Indicator,Paper,Select ,Stepper, Title 
+  Group,Chip,
+  Textarea,CopyButton,Indicator,Paper,Select ,Stepper ,ScrollArea
 } from '@mantine/core'
 
 import { addStyle } from './myStyle'
@@ -20,7 +20,7 @@ class MyGoogleTranslate extends React.Component {
         pages:props.pages||[],
         currentPage:null,
         saveSuccess:false,
-        display:'none',
+        display:'block',
         type:window.location.pathname=='/pdf.js/web/viewer.html'?'pdf':'web',
         webStepActive:0
       }
@@ -181,21 +181,31 @@ class MyGoogleTranslate extends React.Component {
     render () {
       let that = this;
       return (
+        
+     
+        
       <Flex direction='column' style={{minWidth:'280px'}}>
         
-        <Title>
-          翻译整理助手
-        </Title>
+      
+        <Chip defaultChecked 
+        color="teal" 
+        variant="filled" size="md"
+        checked={that.state.display=='block'} onChange={v => {
+          that.setState({
+            display:that.state.display=='block'?'none':'block'
+          })
+        }}>翻译整理助手
+        </Chip>
   
-        <Paper shadow="md" radius="md" p="md" style={{width:'100%'}}>
-        
+      <Paper shadow="md" radius="md" p="md" style={{margin:'10px',width:'calc(100% - 20px)',display:that.state.display}}>
+      <ScrollArea style={{ height:'calc(90vh - 132px)'}} scrollbarSize={4}>
         <Flex 
         justify='flex-start' 
         align='flex-start' 
         direction='column'
-        style={{width:'100%',overflowY:'scroll',height: 'calc(90vh - 132px)'}}>
+        style={{width:'100%', height: '100%'}}>
 
-      <Stepper 
+      <Stepper style={{padding:'12px'}}
         active={that.state.webStepActive} 
         color="teal" size="sm"
         breakpoint="sm" 
@@ -232,11 +242,7 @@ class MyGoogleTranslate extends React.Component {
                     webStepActive:webStepActive+1,
                   })
               }}
-                >{{
-                  0:'下一步',
-                  1:'提取',
-                  2:'完成'
-                }[that.state.webStepActive]}</Button>:''}
+                >下一步</Button>:''}
           
 
           <Space h='xl' />
@@ -277,22 +283,7 @@ class MyGoogleTranslate extends React.Component {
                 that.setState({pages,saveSuccess:false})
                 }}
                 >读取记录</Button>
-            
-            
-              <Button 
-              variant="outline" 
-              color="cyan" 
-              uppercase
-              style={{marginLeft:'8px'}}
-              onClick={async()=>{
-                let pages=await that.savePages();
-                // 透传reply
-                chrome.runtime.sendMessage({ cmd: 'mark-run',reply:Array.from(pages,ps=>Array.from(ps,p=>p.en+'\n'+p.zh).join('\n\n')).join('\n\n') }, function (response) {});
-
-              }}
-              >保存并提交{that.state.saveSuccess?'*':''}</Button>
-           
-           <Button 
+            <Button 
               variant="outline" 
               color="cyan" 
               uppercase
@@ -301,6 +292,31 @@ class MyGoogleTranslate extends React.Component {
                 await that.newPages()
               }}
               >新建</Button>
+            
+              
+
+          </Flex>
+          <Space h='xl' />
+          <Flex direction={'row'} justify='flex-start' align='flex-start'>
+            <Button 
+              variant="outline" 
+              color="cyan" 
+              uppercase
+              style={{marginLeft:'8px'}}
+              onClick={async()=>await that.savePages()}
+              >保存{that.state.saveSuccess?'*':''}</Button>
+
+            <Button 
+              variant="outline" 
+              color="cyan" 
+              uppercase
+              style={{marginLeft:'8px'}}
+              onClick={()=>{
+                // 透传reply p.en+'\n'+p.zh
+                chrome.runtime.sendMessage({ cmd: 'mark-run',reply:Array.from(that.state.pages,ps=>Array.from(ps,p=>p.zh).join('\n\n')).join('\n\n') }, function (response) {});
+              }}
+              >提交中文</Button>
+
           </Flex>
 
             <Space h='xl' />
@@ -322,7 +338,8 @@ class MyGoogleTranslate extends React.Component {
                   style={{width:'100%'}}
                   >
                     <Textarea  
-                    label="原文" 
+                    label="原文"
+                    minRows={3}
                     autosize 
                     variant="filled" 
                     value={t.en} 
@@ -337,6 +354,7 @@ class MyGoogleTranslate extends React.Component {
                     }}/>
                     <Textarea  
                     label="结果" 
+                    minRows={3}
                     autosize 
                     variant="filled" 
                     value={t.zh} 
@@ -384,14 +402,28 @@ class MyGoogleTranslate extends React.Component {
                             )}
                           </CopyButton>
 
-                          <Button variant="light" color={'cyan'} compact onClick={()=>{
-                              let pages=[...that.state.pages];
+                          <Button variant="light" color={'cyan'} compact onClick={async ()=>{
+                            let pages=[...that.state.pages];
+                            
+                              // 实验性，收集删除的词语
+                              let text=pages[i][k].en;
+                              let data=await chrome.storage.local.get('__bad__remove_')
+                              let json=data.__bad__remove_||{};
+                              if(!json[text]) json[text]=0;
+                              json[text]++;
+                              chrome.storage.local.set({
+                                '__bad__remove_':json
+                              })
+
+                              
                               pages[i][k]=null;
                               pages[i]=pages[i].filter(m=>m!=null);
                               that.setState({
                                 currentPage:[i,k],
                                 pages
-                              })
+                              });
+                              
+
                           }}>删除</Button>
 
                     </Group>
@@ -404,6 +436,8 @@ class MyGoogleTranslate extends React.Component {
           }
           
         </Flex>
+        
+        </ScrollArea>
         </Paper>
   
       </Flex>

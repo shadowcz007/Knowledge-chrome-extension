@@ -1415,6 +1415,8 @@ chrome.runtime.onMessage.addListener(async function (
       _console(JSON.stringify(request.info))
     }
     alert('已提交')
+    //TODO bug contentScript.bundle.js:55423 Ignored call to 'alert()'. The document is sandboxed, and the 'allow-modals' keyword is not set.
+
   } else if (request.cmd === 'get-by-pageId-run') {
     domContentLoadedDoSomething()
   } else if (request.cmd == 'get-by-pageId-result') {
@@ -1469,12 +1471,11 @@ function insertGoogleTranslate(){
       position: fixed;
       top: 132px;
       left: 20px;
-      z-index: 99999;
+      z-index: 9999999999999999999999999;
       /*background: #fff;
-      height: calc(90vh - 132px);
+      height: calc(90vh - 120px);
       padding: 12px;
       width: 248px;
-      overflow-y: scroll;
       border-top-left-radius: 8px;
       border-top-right-radius: 8px;
       border-bottom-left-radius: 8px;
@@ -1482,7 +1483,7 @@ function insertGoogleTranslate(){
       border-top: 0;
       box-shadow: 0 1px 4px 0 rgb(0 0 0 / 37%);*/
     }
-    ::-webkit-scrollbar {
+    #know-insert-google-translate ::-webkit-scrollbar {
       display: none;
     }
     `,id+'-css');
