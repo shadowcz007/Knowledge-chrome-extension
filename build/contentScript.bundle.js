@@ -54239,6 +54239,14 @@ String.prototype.format = function (start = '', end = '') {
 String.prototype.format2 = function () {
   return this.replace(/\n/ig, ' ').split('.').join('.\n\n');
 };
+String.prototype.format3 = function () {
+  let text = this;
+  let n = '？！。”'.split('');
+  text = text.split('\n').filter(f => f.trim());
+  text = Array.from(text, m1 => !n.includes(m1[m1.length - 1]) ? m1 += '||' : m1);
+  text = text.join('\n').replace(/\|\|\n/ig, '');
+  return text;
+};
 
 // 去重
 Array.prototype.unque = function () {
@@ -55495,6 +55503,13 @@ function insertGoogleTranslate() {
     #know-insert-google-translate ::-webkit-scrollbar {
       display: none;
     }
+    input.mantine-Select-input{
+      width: -webkit-fill-available;
+    }
+    input.mantine-MultiSelect-searchInput{
+      background: none;
+      border: none;
+    }
     `, id + '-css');
   }
   (0,react_dom__WEBPACK_IMPORTED_MODULE_1__.render)( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_modules_translate__WEBPACK_IMPORTED_MODULE_5__.MyGoogleTranslate, null), div);
@@ -56039,6 +56054,14 @@ var __signature__ = typeof reactHotLoaderGlobal !== 'undefined' ? reactHotLoader
 
 
 
+String.prototype.format3 = function () {
+  let text = this;
+  let n = '？！。”'.split('');
+  text = text.split('\n').filter(f => f.trim());
+  text = Array.from(text, m1 => !n.includes(m1[m1.length - 1]) ? m1 += '||' : m1);
+  text = text.join('\n\n').replace(/\|\|\n/ig, '');
+  return text;
+};
 class MyGoogleTranslate extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
   constructor(props) {
     super(props);
@@ -56144,6 +56167,7 @@ class MyGoogleTranslate extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       /*border-left: 0.5px dashed #9e9e9e;*/
       background: #2196f326;
     }
+    
     `, 'knowlege-translate-hovertext-css');
     const treeWalker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
       acceptNode(node) {
@@ -56353,10 +56377,12 @@ class MyGoogleTranslate extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
         marginLeft: '8px'
       },
       onClick: () => {
+        let reply = Array.from(that.state.pages, ps => Array.from(ps, p => p.zh).join('\n\n')).join('\n\n');
+        reply = reply.format3();
         // 透传reply p.en+'\n'+p.zh
         chrome.runtime.sendMessage({
           cmd: 'mark-run',
-          reply: Array.from(that.state.pages, ps => Array.from(ps, p => p.zh).join('\n\n')).join('\n\n')
+          reply
         }, function (response) {});
       }
     }, "\u63D0\u4EA4\u4E2D\u6587")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_8__.Space, {
@@ -60004,7 +60030,7 @@ function combine (array, callback) {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("1ab4380e45c09aeb9c0c")
+/******/ 		__webpack_require__.h = () => ("f3fe8096c0176391d3a8")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

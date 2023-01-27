@@ -10,6 +10,17 @@ import {
 } from '@mantine/core'
 
 import { addStyle } from './myStyle'
+
+String.prototype.format3=function(){
+  let text=this;
+  let n='？！。”'.split('')
+  text=text.split('\n').filter(f=>f.trim())
+  text=Array.from(text,m1=>!n.includes(m1[m1.length-1])?m1+='||':m1)
+  text=text.join('\n\n').replace(/\|\|\n/ig,'');
+  return text
+}
+
+
  
 class MyGoogleTranslate extends React.Component {
     constructor (props) {
@@ -115,6 +126,7 @@ class MyGoogleTranslate extends React.Component {
       /*border-left: 0.5px dashed #9e9e9e;*/
       background: #2196f326;
     }
+    
     `,'knowlege-translate-hovertext-css')
 
     const treeWalker = document.createTreeWalker(
@@ -312,8 +324,10 @@ class MyGoogleTranslate extends React.Component {
               uppercase
               style={{marginLeft:'8px'}}
               onClick={()=>{
+                let reply=Array.from(that.state.pages,ps=>Array.from(ps,p=>p.zh).join('\n\n')).join('\n\n');
+                reply=reply.format3()
                 // 透传reply p.en+'\n'+p.zh
-                chrome.runtime.sendMessage({ cmd: 'mark-run',reply:Array.from(that.state.pages,ps=>Array.from(ps,p=>p.zh).join('\n\n')).join('\n\n') }, function (response) {});
+                chrome.runtime.sendMessage({ cmd: 'mark-run',reply }, function (response) {});
               }}
               >提交中文</Button>
 

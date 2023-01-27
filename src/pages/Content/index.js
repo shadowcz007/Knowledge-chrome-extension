@@ -57,6 +57,15 @@ String.prototype.format2=function(){
  return this.replace(/\n/ig,' ').split('.').join('.\n\n');
 }
 
+String.prototype.format3=function(){
+  let text=this;
+  let n='？！。”'.split('')
+  text=text.split('\n').filter(f=>f.trim())
+  text=Array.from(text,m1=>!n.includes(m1[m1.length-1])?m1+='||':m1)
+  text=text.join('\n').replace(/\|\|\n/ig,'');
+  return text
+}
+
 // 去重
 Array.prototype.unque = function () {
   let json = {}
@@ -1485,6 +1494,13 @@ function insertGoogleTranslate(){
     }
     #know-insert-google-translate ::-webkit-scrollbar {
       display: none;
+    }
+    input.mantine-Select-input{
+      width: -webkit-fill-available;
+    }
+    input.mantine-MultiSelect-searchInput{
+      background: none;
+      border: none;
     }
     `,id+'-css');
   }
