@@ -55199,7 +55199,7 @@ class Notions extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
         minWidth: '600px'
       },
       label: "\u8BC4\u8BBA",
-      error: "\u5B57\u7B26\u6570\u8D85\u8FC72000\uFF0C\u65E0\u6CD5\u63D0\u4EA4",
+      error: `当前${that.state.userData.reply.length},字符数超过2000，无法提交`,
       withAsterisk: true,
       placeholder: "reply",
       value: that.state.userData.reply,
@@ -56073,7 +56073,8 @@ class MyGoogleTranslate extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       saveSuccess: false,
       display: 'block',
       type: window.location.pathname == '/pdf.js/web/viewer.html' ? 'pdf' : 'web',
-      webStepActive: 0
+      webStepActive: 0,
+      saveType: 'zh'
     };
     this.init();
   }
@@ -56329,7 +56330,7 @@ class MyGoogleTranslate extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       },
       allowDeselect: false,
       style: {
-        width: '88px'
+        width: '80px'
       }
     }), " "), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Button, {
       variant: "outline",
@@ -56345,7 +56346,7 @@ class MyGoogleTranslate extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
           saveSuccess: false
         });
       }
-    }, "\u8BFB\u53D6\u8BB0\u5F55"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Button, {
+    }, "\u52A0\u8F7D"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Button, {
       variant: "outline",
       color: "cyan",
       uppercase: true,
@@ -56355,13 +56356,7 @@ class MyGoogleTranslate extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
       onClick: async () => {
         await that.newPages();
       }
-    }, "\u65B0\u5EFA")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_8__.Space, {
-      h: "xl"
-    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_2__.Flex, {
-      direction: 'row',
-      justify: "flex-start",
-      align: "flex-start"
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Button, {
+    }, "\u65B0\u5EFA"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Button, {
       variant: "outline",
       color: "cyan",
       uppercase: true,
@@ -56369,7 +56364,13 @@ class MyGoogleTranslate extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
         marginLeft: '8px'
       },
       onClick: async () => await that.savePages()
-    }, "\u4FDD\u5B58", that.state.saveSuccess ? '*' : ''), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Button, {
+    }, "\u4FDD\u5B58", that.state.saveSuccess ? '*' : '')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_8__.Space, {
+      h: "xl"
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_2__.Flex, {
+      direction: 'row',
+      justify: "flex-start",
+      align: "flex-end"
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_7__.Button, {
       variant: "outline",
       color: "cyan",
       uppercase: true,
@@ -56377,15 +56378,50 @@ class MyGoogleTranslate extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
         marginLeft: '8px'
       },
       onClick: () => {
-        let reply = Array.from(that.state.pages, ps => Array.from(ps, p => p.zh).join('\n\n')).join('\n\n');
-        reply = reply.format3();
         // 透传reply p.en+'\n'+p.zh
+        const t = (en, zh) => {
+          if (that.state.saveType == 'all') {
+            return en + '\n' + zh;
+          } else if (that.state.saveType == 'en') {
+            return en;
+          } else if (that.state.saveType == 'zh') {
+            return zh;
+          }
+        };
+        let reply = Array.from(that.state.pages, ps => Array.from(ps, p => t(p.en, p.zh)).join('\n\n')).join('\n\n');
+        // 中文的格式化
+        if (that.state.saveType == 'zh') reply = reply.format3();
         chrome.runtime.sendMessage({
           cmd: 'mark-run',
           reply
         }, function (response) {});
       }
-    }, "\u63D0\u4EA4\u4E2D\u6587")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_8__.Space, {
+    }, "\u63D0\u4EA4"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_10__.Select, {
+      label: '类型'
+      // placeholder={placeholder}
+      ,
+      data: [{
+        label: '中文',
+        value: 'zh'
+      }, {
+        label: '英文',
+        value: 'en'
+      }, {
+        label: '全部',
+        value: 'all'
+      }],
+      value: that.state.saveType,
+      defaultValue: that.state.saveType,
+      onChange: val => {
+        that.setState({
+          saveType: val
+        });
+      },
+      allowDeselect: false,
+      style: {
+        width: '80px'
+      }
+    })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_8__.Space, {
       h: "xl"
     }), Array.from(that.state.pages, (texts, i) => texts.length > 0 ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_mantine_core__WEBPACK_IMPORTED_MODULE_2__.Flex, {
       direction: "column",
@@ -60030,7 +60066,7 @@ function combine (array, callback) {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("f3fe8096c0176391d3a8")
+/******/ 		__webpack_require__.h = () => ("ab99d8b2d5b7929cda25")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

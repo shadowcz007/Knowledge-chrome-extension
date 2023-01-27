@@ -33,7 +33,8 @@ class MyGoogleTranslate extends React.Component {
         saveSuccess:false,
         display:'block',
         type:window.location.pathname=='/pdf.js/web/viewer.html'?'pdf':'web',
-        webStepActive:0
+        webStepActive:0,
+        saveType:'zh'
       }
       this.init()
     }
@@ -284,7 +285,7 @@ class MyGoogleTranslate extends React.Component {
                   that.setState({type:val})
                 }}
                 allowDeselect={false}
-                style={{width:'88px'}}
+                style={{width:'80px'}}
               /> </Indicator>
 
           
@@ -294,7 +295,7 @@ class MyGoogleTranslate extends React.Component {
                 let pages=await that.getPages();
                 that.setState({pages,saveSuccess:false})
                 }}
-                >读取记录</Button>
+                >加载</Button>
             <Button 
               variant="outline" 
               color="cyan" 
@@ -305,11 +306,6 @@ class MyGoogleTranslate extends React.Component {
               }}
               >新建</Button>
             
-              
-
-          </Flex>
-          <Space h='xl' />
-          <Flex direction={'row'} justify='flex-start' align='flex-start'>
             <Button 
               variant="outline" 
               color="cyan" 
@@ -318,18 +314,52 @@ class MyGoogleTranslate extends React.Component {
               onClick={async()=>await that.savePages()}
               >保存{that.state.saveSuccess?'*':''}</Button>
 
+          </Flex>
+          <Space h='xl' />
+          <Flex direction={'row'} justify='flex-start' align='flex-end'>
+            
+
             <Button 
               variant="outline" 
               color="cyan" 
               uppercase
               style={{marginLeft:'8px'}}
               onClick={()=>{
-                let reply=Array.from(that.state.pages,ps=>Array.from(ps,p=>p.zh).join('\n\n')).join('\n\n');
-                reply=reply.format3()
                 // 透传reply p.en+'\n'+p.zh
+                const t=(en,zh)=>{
+                  if(that.state.saveType=='all'){
+                    return en+'\n'+zh
+                  }else if(that.state.saveType=='en'){
+                    return en
+                  }else if(that.state.saveType=='zh'){
+                    return zh
+                  }
+                }
+                let reply=Array.from(that.state.pages,ps=>Array.from(ps,p=>t(p.en,p.zh)).join('\n\n')).join('\n\n');
+                // 中文的格式化
+                if(that.state.saveType=='zh')reply=reply.format3()
+                
                 chrome.runtime.sendMessage({ cmd: 'mark-run',reply }, function (response) {});
               }}
-              >提交中文</Button>
+              >提交</Button>
+              <Select
+                label={'类型'}
+                // placeholder={placeholder}
+                data={[{
+                  label:'中文',value:'zh'
+                },{
+                  label:'英文',value:'en'
+                },{
+                  label:'全部',value:'all'
+                }]}
+                value={that.state.saveType}
+                defaultValue={that.state.saveType}
+                onChange={val=>{
+                  that.setState({saveType:val})
+                }}
+                allowDeselect={false}
+                style={{width:'80px'}}
+              />
 
           </Flex>
 

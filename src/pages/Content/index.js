@@ -1175,7 +1175,7 @@ class Notions extends React.Component {
             that.state.userData.reply.length>2000?<Textarea
             style={{ minWidth: '600px' }}
             label='评论'
-            error="字符数超过2000，无法提交"
+            error={`当前${that.state.userData.reply.length},字符数超过2000，无法提交`}
             withAsterisk
             placeholder='reply'
             value={that.state.userData.reply}
