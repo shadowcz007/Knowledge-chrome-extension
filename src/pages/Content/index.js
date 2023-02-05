@@ -121,6 +121,30 @@ function sentenceMatchTags (sentence, tags = []) {
   return { sentenceTexts, result }
 }
 
+function linkMatchSites(link){
+  // 内置一些好站点，比如
+  const sites = {
+    "github.com": 'code',
+    "github.io": 'project page',
+    "arxiv.org/abs/": 'paper',
+    "arxiv.org/pdf": 'pdf',
+    "huggingface.co/spaces": 'demo',
+    "replicate.com": "demo",
+    "youtube.com": "video",
+    "twitter.com": "social media",
+    "discord.gg":'dao'
+  }
+  let result = {};
+
+  for (const key in sites) {
+    if (link.includes(key)) {
+      result[sites[key]] = key;
+    }
+  }
+
+  return result
+}
+
 // 把匹配到的tag，塞到原文本里，并变成a标签
 function parseSentenceMatchTags (sentenceTexts, sentenceMatchTagsResult, color) {
   let values = Object.values(sentenceMatchTagsResult)
@@ -152,8 +176,8 @@ function parseSentenceMatchTags (sentenceTexts, sentenceMatchTagsResult, color) 
 
 
 // 找到页面的超链接里符合tags的
-// 只保留前4条,标签多的排前面
-function findPageLinks (elements, tags, count = 4) {
+// 标签多的排前面
+function findPageLinks (elements, tags) {
   // 去重
   let targets = [],
     urlsIndex = {}
@@ -165,7 +189,13 @@ function findPageLinks (elements, tags, count = 4) {
     // 12个字符以上 && sentence不等于标签本身
     // link不等于本页面
     let link = parseUrl(child.href || '')
+    
+    // 是否是关心的优质网站
+    let mSites=linkMatchSites(link);
+    
+    let pos = getElementViewPosition(child)
 
+    // sentenceMatchTags 的处理
     if (
       Object.keys(result).length > 0 &&
       sentence.trim().length > 12 &&
@@ -182,7 +212,7 @@ function findPageLinks (elements, tags, count = 4) {
           result,
           getColor(child)
         )
-        let pos = getElementViewPosition(child)
+        
         targets.push({
           pageId: link,
           pageTitle: sentence,
@@ -196,15 +226,29 @@ function findPageLinks (elements, tags, count = 4) {
           ),
         })
       }
+    }else if(Object.keys(mSites).length>0&&
+    !getHostname(link).includes(getPageHostname()) &&
+    !getPageHostname().includes(getHostname(link))&&
+    getPageHostname()!=getHostname(link)
+    ){
+      
+      // 匹配网站的处理
+      targets.push({
+        pageId: link,
+        pageTitle: sentence,
+        // a标签
+        sentenceTexts: sentenceTexts,
+        pos,
+        // 匹配到的tags
+        tags:Array.from(Object.keys(mSites), (c) => ({ name: c})),
+      })
     }
   }
 
   targets = targets.sort((a, b) => b.pageTitle.length - a.pageTitle.length)
 
   // 排序，精简
-  targets = targets
-    .slice(0, count)
-    .sort((a, b) => b.tags.length - a.tags.length)
+  targets = targets.sort((a, b) => b.tags.length - a.tags.length)
 
   return targets
 }
@@ -412,7 +456,13 @@ let ticking = false
 function getPageUrl () {
   return parseUrl(window.location.href)
 }
-
+function getHostname(url){
+  let u=new URL(url);
+  return u.hostname
+}
+function getPageHostname(){
+  return getHostname(window.location.href);
+}
 function parseUrl (url) {
   return url.replace(/\?.*/, '')
 }
@@ -509,11 +559,11 @@ function getComments () {
 }
 
 function displayComments (cms) {
+ 
   // 只保留前4条,标签多的排前面
   let pageRelate = findPageLinks(
     document.body.querySelectorAll('a'),
-    Object.keys(window._knowledgeTags || []),
-    4
+    Object.keys(window._knowledgeTags || [])
   );
 
   let textContents = {}
@@ -557,6 +607,14 @@ function displayComments (cms) {
   )
   // 把tags的关联上?
   _console(textContents, pageRelate)
+
+  // popup的提示显示
+  if(Object.keys(textContents).length==0&&pageRelate.length==0){
+     setPopup('Mark')
+  }else{
+    setPopup(`${Object.keys(textContents).length}*${pageRelate.length}`)
+  }
+
 
   // 页面内值得关注的链接
   addMarkForLinks(
@@ -1509,10 +1567,19 @@ function insertGoogleTranslate(){
 
 }
 
+function setPopup(t){
+  chrome.runtime.sendMessage(
+    { cmd: 'set-badge-text', data: { text:t } },
+    function (response) {
+      console.log(response)
+    }
+  )
+}
+
 
 function domContentLoadedDoSomething () {
   _console('DOM loaded')
-  
+  setPopup('loaded')  
   createPDFDiv();
   insertGoogleTranslate()
   window.requestAnimationFrame(() => {
@@ -1588,8 +1655,3 @@ function createPDFDiv(){
   // `,'knowlege-pdf-read-new-css');
 
 }
-
-
-// _console('KNOWLEDGE')
-// _console(window.location.href)
-// console.log(pdfjsLib)

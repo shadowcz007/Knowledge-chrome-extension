@@ -9,6 +9,24 @@ import {Md5} from 'ts-md5'
 const getId=(t)=>{
   return Md5.hashStr(t)
 }
+
+// var bg = chrome.extension.getBackgroundPage();
+// bg.test();//test()是background中的一个方法
+
+// content_scripts向popup主动发消息的前提是popup必须打开！否则需要利用background作中转
+chrome.runtime.onMessage.addListener(async function (
+  request,
+  sender,
+  sendResponse
+) {
+  const { cmd } = request;
+
+//  console.log(cmd)
+ sendResponse('我是popup，我已收到你的消息：' + JSON.stringify(request))
+});
+
+
+
 const Popup = () => {
   const [notionTitle, setNotionTitle] = React.useState('')
   const [funs,setFuns]=React.useState({

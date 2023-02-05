@@ -163,9 +163,10 @@ function changeNotionKeyForTool (properties = {}) {
 }
 
 async function parseData (res) {
+  // console.log(res.id,'!!!!!!')
   let properties = { ...res.properties }
   let result = {
-    nodeName: '#text',
+    nodeName: '#text'
   }
   // 用来记录数据类型和字段名称
   // let _notion_properties = {}
@@ -194,7 +195,12 @@ async function parseData (res) {
   }
 
   // 转化为工具的字段
-  result = await changeNotionKeyForTool(result)
+  result = await changeNotionKeyForTool(result);
+  result={...result, 
+    // notion的原始字段
+    _id:res.id,
+    _url:res.url
+  }
   /*
   {
     pageTitle: res.properties.pageTitle.title[0]?.plain_text,
@@ -1044,6 +1050,19 @@ chrome.runtime.onMessage.addListener(async function (
   //     filename: json.title+'.json',
   //     saveAs: true
   // });
+  }else if(cmd=='set-badge-text'){
+    const data=request.data;
+    chrome.action.setBadgeText({text: data.text});
+    // const canvas = new OffscreenCanvas(16, 16);
+    // const context = canvas.getContext('2d');
+    // context.clearRect(0, 0, 16, 16);
+    // context.fillStyle = '#00FF00';  // Green
+    // context.fillRect(0, 0, 16, 16);
+    // const imageData = context.getImageData(0, 0, 16, 16);
+    // chrome.action.setIcon({imageData: imageData}, () => {
+    //   console.log('set')
+    //  });
+    chrome.action.setBadgeBackgroundColor({color:data.color|| [0, 0, 0, 255]});
   }
 
   sendResponse('我是后台，我已收到你的消息：' + JSON.stringify(request))

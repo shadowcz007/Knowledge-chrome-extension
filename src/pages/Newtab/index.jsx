@@ -22,7 +22,7 @@ import {
   Alert,
 } from '@mantine/core'
 
-import { IconUpload } from '@tabler/icons'
+import { IconDatabase } from '@tabler/icons'
 
 function getAppInfo () {
   return {
@@ -64,6 +64,9 @@ function parseData (data) {
         content: [d.text],
         createdAt: [new Date(d.createdAt).getTime()],
         tags: d.tags,
+        // notion原始字段
+        _id:d._id,
+        _url:d._url
       }
     us[d.url].address[d.cfxAddress] = 1
     us[d.url].replies = unqueArray([...us[d.url].replies, d.reply])
@@ -228,21 +231,29 @@ class KnowledgeCard extends React.Component {
             ''
           )}
           <Space h='xl' />
-          <CopyButton
-            value={`${Array.from(c.tags, (t) => t.name).join('#')} \n \n${
-              c.replies
-            } \n \n -${c.title}\n${c.url} `}
-          >
-            {({ copied, copy }) => (
-              <Button
-                variant='outline'
-                color={copied ? 'teal' : 'dark'}
-                onClick={copy}
-              >
-                {copied ? '已复制到剪切板' : '拷贝'}
-              </Button>
-            )}
-          </CopyButton>
+          <Flex >
+            <CopyButton
+              value={`${Array.from(c.tags, (t) => t.name).join('#')} \n \n${
+                c.replies
+              } \n \n -${c.title}\n${c.url} `}
+            >
+              {({ copied, copy }) => (
+                <Button
+                  variant='outline'
+                  color={copied ? 'teal' : 'dark'}
+                  onClick={copy}
+                >
+                  {copied ? '已复制到剪切板' : '拷贝'}
+                </Button>
+              )}
+            </CopyButton>
+            <Button leftIcon={<IconDatabase />} variant="white" color="gray"
+            onClick={()=>{
+              window.open(c._url)
+            }}
+            >编辑</Button>
+            
+          </Flex>
         </Card>
       </Container>
     )
@@ -435,7 +446,8 @@ class Newtab2 extends React.Component {
     for (const url in this.state.urls) {
      
       if (url && this.state.urls[url]) {
-        let data = this.state.urls[url]
+        let data = this.state.urls[url];
+        console.log(data)
         if (!data.createdAt) data.createdAt = []
         data.createdAt.sort((a, b) => b - a)
 
@@ -452,6 +464,9 @@ class Newtab2 extends React.Component {
             url: url,
             createdAt: createDay(data.createdAt[0]),
             tags: data.tags,
+            // notion原始字段
+            _id:data._id,
+            _url:data._url
           })
 
           for (const a of Object.keys(data.address)) {
