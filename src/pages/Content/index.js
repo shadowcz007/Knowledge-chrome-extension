@@ -235,12 +235,12 @@ function findPageLinks (elements, tags) {
       // 匹配网站的处理
       targets.push({
         pageId: link,
-        pageTitle: sentence,
+        pageTitle: sentence.trim()||getHostname(link),
         // a标签
         sentenceTexts: sentenceTexts,
         pos,
         // 匹配到的tags
-        tags:Array.from(Object.keys(mSites), (c) => ({ name: c})),
+        tags:Array.from(Object.keys(mSites), (c) => ({ name: c,color:'orange'})),
       })
     }
   }
@@ -833,11 +833,13 @@ function Demo () {
 // render(<Demo2 />, div2)
 
 function addRating () {
-  if (document.body.getAttribute('data-rating')) return
-  document.body.setAttribute('data-rating', true)
-
+  let id='knowledge-data-rating-icon';
+  if (document.querySelector('#'+id)) {
+    document.querySelector('#'+id).remove();
+  }
+   
   let div2 = document.createElement('div')
-  div2.id = 'knowledge-data-rating-icon'
+  div2.id = id;
   div2.style = `position:fixed;top:44px;left:12px;z-index:999999999999999999`
   document.body.insertAdjacentElement('beforeend', div2)
 
@@ -855,21 +857,15 @@ function addRating () {
 
   window.isMoveClicked = false
   div2.addEventListener('click', (e) => {
-    // 用来判断是否点击到位，不然会到hover里去了
-    // console.log(e.target.className)
+    // 用来判断是否点击到位，不然会到hover里去了;
     if (e.target.className.match(/mantine\-.*\-root/)) {
       window.isMoveClicked = !window.isMoveClicked
-    }
-    // e.preventDefault()
-    // e.stopPropagation()
+    };
   })
 
   // 跟随鼠标
   document.onmousemove = (event) => {
     if (window.isMoveClicked) {
-      // console.dir(span);
-      // span.innerText = event.clientX + ', ' + event.clientY
-
       window.requestAnimationFrame(() => {
         let top = event.clientY - 12 + 'px',
           left = event.clientX - 24 + 'px'
@@ -897,16 +893,6 @@ function addRating () {
       // TODO 记录下来
     }
   }
-
-  // let div3 = document.createElement('div')
-  // div2.appendChild(div3)
-
-  // render(
-  //   <Badge color='gray' size='lg' sx={{ paddingRight: 3, paddingLeft: 3 }}>
-  //     <Rating defaultValue={count} readOnly={true} />
-  //   </Badge>,
-  //   div3
-  // )
   return div2
 }
 
@@ -1027,7 +1013,7 @@ function addBadge (
               >
                 {color == 'blue'
                   ? Array.from(e.tags, (t) => (
-                      <Badge key={t.name} size='xs'>
+                      <Badge key={t.name} size='xs' color={t.color?t.color:'blue'} >
                         {t.name}
                       </Badge>
                     ))
@@ -1593,6 +1579,12 @@ if (document.readyState !== 'complete') {
 }
 domContentLoadedDoSomething()
 // setTimeout(() => domContentLoadedDoSomething(), 50)
+
+window.onfocus = function(e){
+	console.log("激活状态！")
+  if(document.readyState=='complete')  domContentLoadedDoSomething()
+}
+
 
 document.addEventListener('scroll', (event) => {
   if (
