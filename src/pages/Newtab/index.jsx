@@ -357,9 +357,22 @@ class Newtab2 extends React.Component {
     )
   }
 
+
+  getMetaverseDailyIndex(){
+    let that=this;
+    fetch('https://shadowcz007.github.io/MetaverseDaily/data/index_extract_html.json').then(res => res.json()).then(res => {
+      that.setState({
+       extractHtml:Array.from(res,r=>'https://shadowcz007.github.io/MetaverseDaily/'+r)
+      })
+    });
+  }
+
   init () {
     let that = this
-    this.setLoading(false)
+    this.setLoading(false);
+    if(this.state.displayLoginBtn){
+      this.getMetaverseDailyIndex()
+    }
     chrome.runtime.onMessage.addListener(function (
       request,
       sender,
@@ -613,7 +626,9 @@ class Newtab2 extends React.Component {
                   🚀 登陆
                 </Button>
               </Flex>
-             
+
+              
+
               <Flex justify='flex-end'
               align='flex-start'
               direction='column' 
@@ -623,7 +638,7 @@ class Newtab2 extends React.Component {
                 <Space h="xs" />
                   <Button
                     variant='outline'
-                    color='dark'
+                    color='dark' size="lg"
                     onClick={() =>
                       chrome.tabs.create({
                         url: 'https://mozilla.github.io/pdf.js/web/viewer.html?file=',
@@ -634,6 +649,35 @@ class Newtab2 extends React.Component {
                   </Button> 
                   <Text style={{marginTop:'12px'}}>{'全文翻译选择翻译为中文 -> 右键选择 发现 -> 全文翻译切换回英文 -> 点击显示中英翻译结果'}</Text>
               </Flex>
+
+              <Flex justify='flex-end'
+              align='flex-start'
+              direction='column' 
+              style={{marginTop:'24px'}}>
+                 
+                <Text>MetaverseDaily</Text>
+                <Space h="xs" />
+                  <Button
+                    size='xs'
+                    variant='outline'
+                    color='dark'
+                    onClick={() =>
+                      chrome.tabs.create({
+                        url: 'https://github.com/shadowcz007/MetaverseDaily',
+                      })
+                    }
+                  >
+                    仓库地址
+                  </Button> 
+                  {
+                    this.state.extractHtml?Array.from(this.state.extractHtml,h=>{
+                      return <Badge key={h} color="gray" size="lg" onClick={()=>window.open(h)}
+                      style={{margin:'12px 0',cursor: 'pointer'}}
+                      >{h.replace('_extract.html','').replace(/.*\//,'')}</Badge>
+                    }):''
+                  }
+              </Flex>
+
             </Alert>
           ) : (
             ''
