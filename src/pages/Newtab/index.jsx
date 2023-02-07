@@ -2,7 +2,7 @@ import React from 'react'
 import { render } from 'react-dom'
 import logo from '../../assets/img/icon-128.png'
 import './index.css'
- 
+
 import {
   CopyButton,
   Badge,
@@ -47,7 +47,7 @@ function createDay (n) {
 function unqueArray (arr) {
   let obj = {}
   for (const a of arr) {
-    if(a) obj[a] = 1
+    if (a) obj[a] = 1
   }
   return Object.keys(obj)
 }
@@ -55,7 +55,7 @@ function unqueArray (arr) {
 function parseData (data) {
   let us = {}
   Array.from(data, (d) => {
-    if(!d.url) d.url='-'
+    if (!d.url) d.url = '-'
     if (!us[d.url])
       us[d.url] = {
         address: {},
@@ -65,8 +65,8 @@ function parseData (data) {
         createdAt: [new Date(d.createdAt).getTime()],
         tags: d.tags,
         // notion原始字段
-        _id:d._id,
-        _url:d._url
+        _id: d._id,
+        _url: d._url,
       }
     us[d.url].address[d.cfxAddress] = 1
     us[d.url].replies = unqueArray([...us[d.url].replies, d.reply])
@@ -209,7 +209,7 @@ class KnowledgeCard extends React.Component {
                       ))
                     : ''
                 }
-                text={c.url||''}
+                text={c.url || ''}
               />
             </Card.Section>
           </a>
@@ -225,13 +225,19 @@ class KnowledgeCard extends React.Component {
               <Badge size='xs' style={{ marginRight: '12px' }}>
                 记录
               </Badge>
-              {Array.from(c.replies,(cr,i)=><Text key={i}>{Array.from(cr.split('\n'),(cc,cci)=><Text key={cc+cci}>{cc}</Text>)}</Text>)}
+              {Array.from(c.replies, (cr, i) => (
+                <Text key={i}>
+                  {Array.from(cr.split('\n'), (cc, cci) => (
+                    <Text key={cc + cci}>{cc}</Text>
+                  ))}
+                </Text>
+              ))}
             </Text>
           ) : (
             ''
           )}
           <Space h='xl' />
-          <Flex >
+          <Flex>
             <CopyButton
               value={`${Array.from(c.tags, (t) => t.name).join('#')} \n \n${
                 c.replies
@@ -247,12 +253,16 @@ class KnowledgeCard extends React.Component {
                 </Button>
               )}
             </CopyButton>
-            <Button leftIcon={<IconDatabase />} variant="white" color="gray"
-            onClick={()=>{
-              window.open(c._url)
-            }}
-            >编辑</Button>
-            
+            <Button
+              leftIcon={<IconDatabase />}
+              variant='white'
+              color='gray'
+              onClick={() => {
+                window.open(c._url)
+              }}
+            >
+              编辑
+            </Button>
           </Flex>
         </Card>
       </Container>
@@ -271,9 +281,9 @@ class Newtab2 extends React.Component {
         title: '',
         text: '',
       },
-      currentNotion:{},
-      notions:{},
-      tags:{},
+      currentNotion: {},
+      notions: {},
+      tags: {},
       // notionTitle: '',
       displayLoginBtn: true,
     }
@@ -357,20 +367,26 @@ class Newtab2 extends React.Component {
     )
   }
 
-
-  getMetaverseDailyIndex(){
-    let that=this;
-    fetch('https://shadowcz007.github.io/MetaverseDaily/data/index_extract_html.json').then(res => res.json()).then(res => {
-      that.setState({
-       extractHtml:Array.from(res,r=>'https://shadowcz007.github.io/MetaverseDaily/'+r)
+  getMetaverseDailyIndex () {
+    let that = this
+    fetch(
+      'https://shadowcz007.github.io/MetaverseDaily/data/index_extract_html.json'
+    )
+      .then((res) => res.json())
+      .then((res) => {
+        that.setState({
+          extractHtml: Array.from(
+            res,
+            (r) => 'https://shadowcz007.github.io/MetaverseDaily/' + r
+          ),
+        })
       })
-    });
   }
 
   init () {
     let that = this
-    this.setLoading(false);
-    if(this.state.displayLoginBtn){
+    this.setLoading(false)
+    if (this.state.displayLoginBtn) {
       this.getMetaverseDailyIndex()
     }
     chrome.runtime.onMessage.addListener(function (
@@ -414,7 +430,7 @@ class Newtab2 extends React.Component {
         } else {
           that.setAlert(true, '提示', `${JSON.stringify(request.info)}`)
         }
-      }else if(request.cmd=='find-by-tag-result'){
+      } else if (request.cmd == 'find-by-tag-result') {
         // 标签搜索结果
         console.log(request.data)
       }
@@ -440,11 +456,19 @@ class Newtab2 extends React.Component {
     })
 
     chrome.storage.local.get().then((data) => {
-      if (data && data.currentNotion&&data.notions&&data.notions[data.currentNotion.id]) {
-        that.setState({ notions:data.notions,currentNotion:data.currentNotion })
+      if (
+        data &&
+        data.currentNotion &&
+        data.notions &&
+        data.notions[data.currentNotion.id]
+      ) {
+        that.setState({
+          notions: data.notions,
+          currentNotion: data.currentNotion,
+        })
       }
       if (data && data.tags) {
-        that.setState({tags:data.tags })
+        that.setState({ tags: data.tags })
       }
     })
     // chrome.storage.local.onChanged.addListener(() => that.storageChange())
@@ -457,9 +481,8 @@ class Newtab2 extends React.Component {
     // console.log(this.state.urls)
 
     for (const url in this.state.urls) {
-     
       if (url && this.state.urls[url]) {
-        let data = this.state.urls[url];
+        let data = this.state.urls[url]
         console.log(data)
         if (!data.createdAt) data.createdAt = []
         data.createdAt.sort((a, b) => b - a)
@@ -478,8 +501,8 @@ class Newtab2 extends React.Component {
             createdAt: createDay(data.createdAt[0]),
             tags: data.tags,
             // notion原始字段
-            _id:data._id,
-            _url:data._url
+            _id: data._id,
+            _url: data._url,
           })
 
           for (const a of Object.keys(data.address)) {
@@ -492,10 +515,11 @@ class Newtab2 extends React.Component {
 
     let userAddressRank = []
     for (const key in userAddress) {
-      if(key&&key.trim())  userAddressRank.push({
-        address: key,
-        count: userAddress[key],
-      })
+      if (key && key.trim())
+        userAddressRank.push({
+          address: key,
+          count: userAddress[key],
+        })
       // userAddressRank.push({
       //   address: key + '3',
       //   count: userAddress[key],
@@ -551,7 +575,7 @@ class Newtab2 extends React.Component {
               withCloseButton
               // variant='filled'
               onClose={() => that.setAlert(false)}
-              style={{zIndex:999999999999999999}}
+              style={{ zIndex: 999999999999999999 }}
             >
               <Flex justify='flex-start' align='center'>
                 <Text>{that.state.alert.text}</Text>
@@ -577,10 +601,9 @@ class Newtab2 extends React.Component {
             ''
           )}
 
-
           {this.state.address && this.state.displayLoginBtn ? (
             <Alert
-              style={{overflow:'unset'}}
+              style={{ overflow: 'unset' }}
               icon={<img src={logo} className='App-logo' alt='logo' />}
               title={(() => {
                 const { name, description } = getAppInfo()
@@ -588,35 +611,39 @@ class Newtab2 extends React.Component {
               })()}
               color='indigo'
             >
-              <Flex justify='flex-start' align='flex-end' >
+              <Flex justify='flex-start' align='flex-end'>
                 <Select
                   label={'当前Notion'}
                   placeholder={'请配置Notion数据库'}
-                  data={(()=>{
-                    let items=[];
+                  data={(() => {
+                    let items = []
                     for (const id in that.state.notions) {
                       items.push({
-                        label:that.state.notions[id].title,
-                        value:id
+                        label: that.state.notions[id].title,
+                        value: id,
                       })
                     }
                     return items
                   })()}
                   dropdownPosition='bottom'
                   value={that.state.currentNotion.id}
-                  onChange={async (newId)=>{
-                    let cn=that.state.notions[newId];
+                  onChange={async (newId) => {
+                    let cn = that.state.notions[newId]
                     await chrome.storage.local.set({
-                      currentNotion:{
-                        'databaseId':cn.databaseId, 'id':cn.id, 'matchKeywords':cn.matchKeywords, 'title':cn.title, 'token':cn.token
-                      }
+                      currentNotion: {
+                        databaseId: cn.databaseId,
+                        id: cn.id,
+                        matchKeywords: cn.matchKeywords,
+                        title: cn.title,
+                        token: cn.token,
+                      },
                     })
 
-                    that.setState({currentNotion:cn})
+                    that.setState({ currentNotion: cn })
                   }}
                   allowDeselect={false}
-                  />
-               
+                />
+
                 <Space w='xl' />
                 <Button
                   variant='outline'
@@ -627,57 +654,184 @@ class Newtab2 extends React.Component {
                 </Button>
               </Flex>
 
-              
-
-              <Flex justify='flex-end'
-              align='flex-start'
-              direction='column' 
-              style={{marginTop:'24px'}}>
-                 
-                <Text>快捷功能</Text>
-                <Space h="xs" />
-                  <Button
-                    variant='outline'
-                    color='dark' size="lg"
-                    onClick={() =>
-                      chrome.tabs.create({
+              <Flex
+                justify='flex-end'
+                align='flex-start'
+                direction='column'
+                style={{ marginTop: '24px' }}
+              >
+                <Text>#快捷功能 Tools</Text>
+                <Space h='xs' />
+                <Flex wrap={'wrap'}>
+                  {Array.from(
+                    [
+                      {
                         url: 'https://mozilla.github.io/pdf.js/web/viewer.html?file=',
-                      })
+                        name: 'PDF浏览器',
+                      },
+                      {
+                        url: 'https://translate.google.com/',
+                        name: '谷歌翻译',
+                      },
+                      {
+                        url: 'https://www.perplexity.ai/',
+                        name: 'perplexity搜索引擎',
+                      },
+                    ],
+                    (d) => {
+                      return (
+                        <Button
+                          key={d.url + d.name}
+                          variant='outline'
+                          color='dark'
+                          size='xs'
+                          onClick={() =>
+                            chrome.tabs.create({
+                              url: d.url,
+                            })
+                          }
+                          style={{ margin: '2px' }}
+                        >
+                          {d.name}
+                        </Button>
+                      )
                     }
-                  >
-                    PDF浏览器
-                  </Button> 
-                  <Text style={{marginTop:'12px'}}>{'全文翻译选择翻译为中文 -> 右键选择 发现 -> 全文翻译切换回英文 -> 点击显示中英翻译结果'}</Text>
+                  )}
+                </Flex>
               </Flex>
 
-              <Flex justify='flex-end'
-              align='flex-start'
-              direction='column' 
-              style={{marginTop:'24px'}}>
-                 
-                <Text>MetaverseDaily</Text>
-                <Space h="xs" />
-                  <Button
-                    size='xs'
-                    variant='outline'
-                    color='dark'
-                    onClick={() =>
-                      chrome.tabs.create({
-                        url: 'https://github.com/shadowcz007/MetaverseDaily',
-                      })
+              <Flex
+                justify='flex-end'
+                align='flex-start'
+                direction='column'
+                style={{ marginTop: '24px' }}
+              >
+                <Text>#趋势 Trending</Text>
+                <Space h='xs' />
+                <Flex wrap={'wrap'}>
+                  {Array.from(
+                    [
+                      {
+                        url: 'https://a16z.com/',
+                        name: "It's time to build",
+                      },
+                      {
+                        url: 'https://www.producthunt.com/',
+                        name: 'Is the next 🦄 here?',
+                      },
+                      {
+                        url: 'https://paperswithcode.com/',
+                        name: 'Research',
+                      },
+                      {
+                        url: 'https://huggingface.co/?trending=space',
+                        name: 'Huggingface',
+                      },
+                      {
+                        url: 'https://github.com/trending/python?since=daily',
+                        name: 'Github',
+                      },
+                      {
+                        url: 'https://codepen.io/trending',
+                        name: 'Codepen',
+                      },
+                      {
+                        url: 'https://news.ycombinator.com/',
+                        name: 'Hacker News',
+                      },
+                      {
+                        url: 'https://www.theverge.com/tech',
+                        name: 'technology daily',
+                      },
+                      {
+                        url: 'https://www.digitaltrends.com/',
+                        name: 'digitaltrends',
+                      },
+                      {
+                        url: 'https://www.buzzfeednews.com/section/tech',
+                        name: 'buzzfeednews tech',
+                      },
+                      {
+                        url: 'https://futurism.com/latest',
+                        name: 'futurism',
+                      },
+                      {
+                        url: 'https://twitter.com',
+                        name: 'twitter',
+                      },
+                      {
+                        url: 'https://www.youtube.com/feed/trending',
+                        name: 'youtube',
+                      },
+                    ],
+                    (d) => {
+                      return (
+                        <Button
+                          key={d.url + d.name}
+                          variant='outline'
+                          color='dark'
+                          size='xs'
+                          onClick={() =>
+                            chrome.tabs.create({
+                              url: d.url,
+                            })
+                          }
+                          style={{ margin: '2px' }}
+                        >
+                          {d.name}
+                        </Button>
+                      )
                     }
-                  >
-                    仓库地址
-                  </Button> 
-                  {
-                    this.state.extractHtml?Array.from(this.state.extractHtml,h=>{
-                      return <Badge key={h} color="gray" size="lg" onClick={()=>window.open(h)}
-                      style={{margin:'12px 0',cursor: 'pointer'}}
-                      >{h.replace('_extract.html','').replace(/.*\//,'')}</Badge>
-                    }):''
-                  }
+                  )}
+                </Flex>
               </Flex>
 
+              <Flex
+                justify='flex-end'
+                align='flex-start'
+                direction='column'
+                style={{ marginTop: '24px' }}
+              >
+                <Text>#MetaverseDaily</Text>
+                <Space h='xs' />
+                {this.state.extractHtml ? (
+                  <Flex wrap={'wrap'}>
+                    {Array.from(this.state.extractHtml.reverse(), (h) => {
+                      return (
+                        <Button
+                          key={h}
+                          variant='outline'
+                          color='dark'
+                          size='xs'
+                          onClick={() =>
+                            chrome.tabs.create({
+                              url: h,
+                            })
+                          }
+                          style={{ margin: '2px' }}
+                        >
+                          {h.replace('_extract.html', '').replace(/.*\//, '')}
+                        </Button>
+                      )
+                    })}
+                    <Button
+                      variant='outline'
+                      color='dark'
+                      size='xs'
+                      onClick={() =>
+                        chrome.tabs.create({
+                          url: 'https://github.com/shadowcz007/MetaverseDaily',
+                        })
+                      }
+                      style={{ margin: '2px' }}
+                    >
+                      仓库地址
+                    </Button>
+                  </Flex>
+                ) : (
+                  ''
+                )}
+              </Flex>
             </Alert>
           ) : (
             ''
@@ -748,7 +902,6 @@ class Newtab2 extends React.Component {
             align='flex-start'
             direction='column'
             wrap='nowrap'
-            
           >
             <Title
               order={4}
@@ -758,40 +911,50 @@ class Newtab2 extends React.Component {
             >
               标签集
             </Title>
-            <Group style={{ marginLeft: '24px' }}>{
-                (()=>{
-                  let ts=[];
-                  let tags=Object.keys(this.state.tags);
-                  for (const tag of tags) {
-                    if(this.state.tags[tag]&&this.state.tags[tag]._currentNotion&& this.state.currentNotion&&
-                      this.state.tags[tag]._currentNotion.id==this.state.currentNotion.id){
-                      ts.push({
-                        name:tag.trim(),
-                        _currentNotion:this.state.tags[tag]._currentNotion
-                      })
-                    }
+            <Group style={{ marginLeft: '24px' }}>
+              {(() => {
+                let ts = []
+                let tags = Object.keys(this.state.tags)
+                for (const tag of tags) {
+                  if (
+                    this.state.tags[tag] &&
+                    this.state.tags[tag]._currentNotion &&
+                    this.state.currentNotion &&
+                    this.state.tags[tag]._currentNotion.id ==
+                      this.state.currentNotion.id
+                  ) {
+                    ts.push({
+                      name: tag.trim(),
+                      _currentNotion: this.state.tags[tag]._currentNotion,
+                    })
                   }
-                  return Array.from(ts,(t,i)=>{
-                    return <Badge style={{userSelect: 'none',
-                      cursor: 'pointer'}}
-                    variant="outline" sx={{ paddingRight: 8,paddingLeft:8 }} 
-                    // rightSection={removeButton}
-                    onClick={()=>{
-                      // console.log(t.name)
-                      that.setLoading(true)
-                      that.setState({urls:{}})
-                      chrome.runtime.sendMessage({
-                        cmd:'find-by-tag',data:t.name,pageSize:30
-                      })
-                    }}
-                    key={i}>
-                    {t.name}</Badge>
-                  })
-                })()
-              }
-              
-                  </Group>
-            </Flex>
+                }
+                return Array.from(ts, (t, i) => {
+                  return (
+                    <Badge
+                      style={{ userSelect: 'none', cursor: 'pointer' }}
+                      variant='outline'
+                      sx={{ paddingRight: 8, paddingLeft: 8 }}
+                      // rightSection={removeButton}
+                      onClick={() => {
+                        // console.log(t.name)
+                        that.setLoading(true)
+                        that.setState({ urls: {} })
+                        chrome.runtime.sendMessage({
+                          cmd: 'find-by-tag',
+                          data: t.name,
+                          pageSize: 30,
+                        })
+                      }}
+                      key={i}
+                    >
+                      {t.name}
+                    </Badge>
+                  )
+                })
+              })()}
+            </Group>
+          </Flex>
           <Flex
             gap='lg'
             justify='flex-end'
@@ -835,7 +998,7 @@ class Newtab2 extends React.Component {
                 key={i}
               >
                 {Array.from(cards, (c, j) => {
-                  return <KnowledgeCard data={c} key={i+'_'+j} />
+                  return <KnowledgeCard data={c} key={i + '_' + j} />
                 })}
               </Flex>
             ))}
