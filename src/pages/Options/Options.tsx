@@ -14,6 +14,7 @@ async function exportNotionSetupJson() {
     let json = data.notions[data.currentNotion.id];
     json = { ...json, cfxAddress: user.cfxAddress.address };
     json._version = getId(JSON.stringify(json));
+    json._contenteditable=false;
     return json
   }
 
@@ -150,6 +151,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
                 id,
                 matchKeywords: nMatchKeywords,
               },
+              info:null
             })
             .then(() => {
               setNotions(_notions)
@@ -190,6 +192,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
               id,
               matchKeywords
             },
+            info:null
           })
           .then(() => {
 
@@ -265,12 +268,18 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
     }
   }
 
-  const resetCurrentNotion = () => {
+  // 删除当前数据库
+  const removeCurrentNotion = () => {
     return new Promise<void>((res, rej) => {
+      let _notions={...notions};
+      delete _notions[currentNotionId];
+
       chrome.storage.local
         .set({
           addNotion: null,
           currentNotion: null,
+          notions:_notions,
+          info:null
         })
         .then(() => {
           if (currentNotionId != '' && idSelected != '') {
@@ -279,6 +288,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
             setCurrentNotionProperties([]);
             setCurrentNotionMatchKeywords([])
             setIdSelected('');
+            setNotions(_notions);
           }
           res();
         })
@@ -286,7 +296,8 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
 
   }
 
-  const addNotion = (token: any, databaseId: any) => {
+  // 默认允许编辑字段配置
+  const addNotion = (token: any, databaseId: any,contenteditable=true) => {
     let id = token + databaseId;
     // console.log(currentNotionDatabaseId,currentNotionToken)  
     if (
@@ -308,7 +319,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
           data: {
             token: token,
             databaseId: databaseId,
-            id
+            id,contenteditable
           },
         },
         function (response) {
@@ -392,11 +403,22 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
           }}
         />
 
-        <Button variant='outline'
+
+          {/* 是否允许配置字段 */}
+        {
+          notions[currentNotionId]&&notions[currentNotionId]._contenteditable==true?
+          <Button variant='outline'
           color='dark' onClick={() => {
             setSetup(true)
-
           }}>配置字段映射关系</Button>
+          :''
+        }
+       
+
+          <Button variant='outline'
+          color='dark' onClick={() => {
+            removeCurrentNotion()
+          }}>移除数据库</Button>
         <Button variant='outline'
           color='dark' onClick={async () => {
             let json = await downloadNotionSetup();
@@ -535,7 +557,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
               let file_string: any = e.target.result;
               let json = JSON.parse(file_string);
               let properties = json.properties
-              // setCurrentNotionId('')
+              
               if (json.id && json.title && json.token && json.databaseId && properties && json.matchKeywords) {
 
                 setCurrentNotion(json.id,
@@ -554,7 +576,9 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
                     properties,
                     title: json.title,
                     token: json.token,
-                    url: json.url
+                    url: json.url,
+                    // 是否允许修改字段配置
+                    _contenteditable:json._contenteditable
                   };
                   chrome.storage.local.set({
                     notions
@@ -608,7 +632,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
           <Button variant='outline'
             color='dark'
             onClick={() => {
-              addNotion(currentNotionToken, currentNotionDatabaseId)
+              addNotion(currentNotionToken, currentNotionDatabaseId,true)
             }}
           >
             添加
@@ -633,15 +657,31 @@ interface TagsSetupProps {
 const TagsSetup: React.FC<TagsSetupProps> = ({ alertCallback }: TagsSetupProps) => {
   const [texts, setTexts] = React.useState([])
   const [value, setValue] = React.useState('');
+  const [nextCursor,setNextCursor]=React.useState('');
 
-  const getTags = () => {
+  const getTags = async () => {
+    let cmd='get-all-tags';
+
+    let data=await chrome.storage.local.get('info');
+
+    let start_cursor;
+    if(data&&data.info&&data.info.cmd==cmd&&data.info.has_more&&data.info.next_cursor){
+      start_cursor=data.info.next_cursor;
+      setNextCursor(start_cursor);
+    }
+
     alertCallback({
       display: false,
       title: '',
-      text: '', loadingDisplay: true
+      text: '', 
+      loadingDisplay: true
     })
     chrome.runtime.sendMessage(
-      { "cmd": 'get-all-tags' },
+      { "cmd":cmd,
+      data:{
+        start_cursor,
+        page_size:100
+      } },
       function (response) {
         console.log('收到来自后台的回复：' + response)
         setTimeout(() => {
@@ -741,10 +781,10 @@ const TagsSetup: React.FC<TagsSetupProps> = ({ alertCallback }: TagsSetupProps) 
 
         <Button variant='outline'
           color='dark'
-          onClick={(event) => {
+          onClick={async (event) => {
             event.preventDefault();
-            getTags();
-          }}>加载</Button>
+            await getTags();
+          }}>加载{nextCursor?' - nextCursor:'+nextCursor:''}</Button>
       </Flex>
       <Space h='xl' />
       <Group>
