@@ -74,7 +74,7 @@ async function getCurrentNotion () {
 }
 
 async function queryNotion0 (query, token) {
-  // let { databaseId, token } = await getCurrentNotion()
+  // console.log('query:',query)
   let notion = initNotion(token)
   let success = false
   let result, info
@@ -91,10 +91,18 @@ async function queryNotion0 (query, token) {
     info = error
   }
   if (success) {
+    // 用来翻页
+    info={
+      next_cursor:result.next_cursor,
+      has_more:result.has_more
+    }
+
     // console.log('result.results', result.results)
     result = await Promise.all(
       Array.from(result.results, async (r) => (await parseData(r))[0])
     )
+    
+
   }
   return { result, success, info }
 }
@@ -349,6 +357,7 @@ async function markCanRun(tabId,reply){
 function updateTags (items = []) {
   let tags = {}
   return new Promise(async (res, rej) => {
+
     let data = await chrome.storage.local.get('tags')
     if (data && data.tags) tags = { ...data.tags }
     if (items && items.length > 0) {
@@ -586,7 +595,8 @@ async function queryByTag (tag, page_size = 5) {
   return { result, success, info }
 }
 
-async function getAllTags () {
+async function getAllTags (start_cursor=null,page_size=100) {
+  // console.log('start_cursor----getAllTags',start_cursor)
   let { databaseId, token, matchKeywords } = await getCurrentNotion()
 
   let keys = changeKeyForNotion(
@@ -622,12 +632,15 @@ async function getAllTags () {
   }
 
   if (Object.keys(filter).length > 0 && sorts.length > 0) {
+    let q={
+      database_id: databaseId,
+      filter,
+      sorts,
+      page_size,
+    };
+    if(start_cursor) q['start_cursor']=start_cursor;
     const { result, success, info } = await queryNotion0(
-      {
-        database_id: databaseId,
-        filter,
-        sorts,
-      },
+      q,
       token
     )
     return { result, success, info }
@@ -830,6 +843,11 @@ chrome.runtime.onMessage.addListener(async function (
     // 检查是否有贡献,设置贡献条件
     queryByCfxAddress(request.data).then(({ result, success, info }) => {
       // console.log('$$$bg-check-cfx-address', result, success)
+      // info 里是翻页信息
+      chrome.storage.local.set({
+        info:{...info,_des:'翻页信息',cmd:'check-cfx-address'},
+      });
+      
       // 通知页面
       chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         chrome.tabs.sendMessage(
@@ -848,9 +866,10 @@ chrome.runtime.onMessage.addListener(async function (
       })
     })
   } else if (cmd == 'add-notion-token') {
-    const { token, databaseId } = request.data
+    const { token, databaseId,contenteditable } = request.data
     queryNotionDataBase(token, databaseId).then(({ result, success, info }) => {
       if (success) {
+        result._contenteditable=contenteditable;
         chrome.storage.local.set({
           addNotion: result,
         })
@@ -969,8 +988,16 @@ chrome.runtime.onMessage.addListener(async function (
       function (tab) {}
     )
   } else if (cmd == 'get-all-tags') {
-    getAllTags().then(({ result, success, info }) => {
-      updateTags(result || [])
+    let startCursor=request.data&&request.data.start_cursor?request.data.start_cursor:undefined;
+    let pageSize=request.data&&request.data.page_size?request.data.page_size:100;
+    getAllTags(startCursor,pageSize).then(({ result, success, info }) => {
+      // info 里是翻页信息 cmd用来标记是哪个接口发的
+      chrome.storage.local.set({
+        info:{...info,_des:'翻页信息',cmd:'get-all-tags'},
+      });
+
+      updateTags(result || []);
+
     })
   } else if (cmd == 'find-by-tag' && request.data) {
 
