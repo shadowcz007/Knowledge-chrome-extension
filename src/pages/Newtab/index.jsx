@@ -346,16 +346,22 @@ class Newtab2 extends React.Component {
     )
   }
 
+  // 有个bug，matchKeywords 没有的notion，不能登陆！！需要提示配置
   checkAddressIsCanGetKnowledge () {
     // console.log(this.state)
     const { address, currentNotion } = this.state
-    if (!currentNotion.id)
+    if (!currentNotion.id || currentNotion['matchKeywords']==undefined){
+      this.setState({
+        displayLoginBtn:false
+      })
       return this.setAlert(
         true,
         'Notion数据库',
-        '请配置',
+        '请配置'+(currentNotion['matchKeywords']==undefined?'字段信息并保存':''),
         chrome.runtime.getURL('options.html')
       )
+    }
+      
     this.setState({ urls: {} })
     this.setLoading(true)
     // 检查是否钱包地址有贡献
@@ -499,7 +505,7 @@ class Newtab2 extends React.Component {
     for (const url in this.state.urls) {
       if (url && this.state.urls[url]) {
         let data = this.state.urls[url]
-        console.log(data)
+        // console.log(data)
         if (!data.createdAt) data.createdAt = []
         data.createdAt.sort((a, b) => b - a)
 
@@ -662,9 +668,11 @@ class Newtab2 extends React.Component {
                 />
 
                 <Space w='xl' />
+
                 <Button
                   variant='outline'
                   color='dark'
+                  // 有个bug，matchKeywords 没有的notion，不能登陆！！需要提示配置
                   onClick={() => that.checkAddressIsCanGetKnowledge()}
                 >
                   🚀 登陆
