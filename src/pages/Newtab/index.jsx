@@ -389,6 +389,7 @@ class Newtab2 extends React.Component {
     if (this.state.displayLoginBtn) {
       this.getMetaverseDailyIndex()
     }
+
     chrome.runtime.onMessage.addListener(function (
       request,
       sender,
@@ -465,7 +466,22 @@ class Newtab2 extends React.Component {
         that.setState({
           notions: data.notions,
           currentNotion: data.currentNotion,
+          // displayLoginBtn:data.notions&&Object.keys(data.notions).length>0
         })
+      }else if(!(data.notions&&Object.keys(data.notions).length>0)){
+
+        that.setState({
+          displayLoginBtn:false
+        });
+
+        // that.setAlert()
+        that.setAlert(
+          true,
+          'Notion数据库',
+          '请配置',
+          chrome.runtime.getURL('options.html')
+        )
+
       }
       if (data && data.tags) {
         that.setState({ tags: data.tags })
@@ -567,6 +583,7 @@ class Newtab2 extends React.Component {
         <LoadingOverlay visible={this.state.loading} />
         <header className='App-header'>
           <Space h='xl' />
+
           {that.state.alert.display ? (
             <Alert
               icon={<img src={logo} className='App-logo' alt='logo' />}
