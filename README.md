@@ -29,6 +29,19 @@ DIY 一个 web3 的知识采集工具。
 - 翻译
 https://github.com/vitalets/google-translate-api
 
+TODO:
+更优雅的方式，分栏。
+`div=document.createElement('div');
+children=document.body.children;
+Array.from(children,c=>div.appendChild(c));
+document.body.appendChild(div)
+
+div.setAttribute('translate','no')
+div2=div.cloneNode(true)
+document.body.appendChild(div2);
+div2.setAttribute('translate','yes')
+document.body.style.display='flex'`
+
 ## Installing and Running
 
 1 开通 notion 开发者账号，获得 api 的 token
@@ -44,4 +57,5 @@ id 是 c5793ba3dd85463d9e08cfd9a4ffdbe8
 ### Procedures:
 Run `npm install` to install the dependencies.
 Run `npm start`
+
 
