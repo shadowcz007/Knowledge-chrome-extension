@@ -42,6 +42,11 @@ document.body.appendChild(div2);
 div2.setAttribute('translate','yes')
 document.body.style.display='flex'`
 
+`en=document.querySelector('div[translate=no]');
+zh=document.querySelector('div[translate=yes]');
+
+zh.innerHTML=en.innerHTML`
+
 ## Installing and Running
 
 1 开通 notion 开发者账号，获得 api 的 token
