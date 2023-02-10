@@ -510,20 +510,25 @@ async function saveToNotion (data) {
   return { result, success, info }
 }
 
-async function queryByCfxAddress (address) {
+async function queryByCfxAddress (address,start_cursor,page_size=100) {
   let { databaseId, token } = await getCurrentNotion()
 
   // TODO
-  const { result, success, info } = await queryNotion0(
-    {
-      database_id: databaseId,
-      filter: {
-        property: 'cfxAddress',
-        rich_text: {
-          equals: address,
-        },
+  let q={
+    database_id: databaseId,
+    filter: {
+      property: 'cfxAddress',
+      rich_text: {
+        equals: address,
       },
     },
+    page_size
+  };
+
+  if(start_cursor)q['start_cursor']=start_cursor;
+
+  const { result, success, info } = await queryNotion0(
+    q,
     token
   )
 
@@ -700,7 +705,7 @@ async function queryNotionDataBase (token, databaseId) {
 }
 
 
-async function queryNotEmptyOfReply (timestamp = null) {
+async function queryNotEmptyOfReply (timestamp = null,start_cursor,page_size=100) {
   // if (isQueryNotEmptyOfReply == false) {
   let { databaseId, token, matchKeywords, title } = await getCurrentNotion()
 
@@ -771,9 +776,10 @@ async function queryNotEmptyOfReply (timestamp = null) {
     }
   }
 
- let json={database_id: databaseId};
- if(filter) json[filter]=filter;
- if(sorts) json[sorts]=sorts;
+ let json={database_id: databaseId,page_size};
+ if(filter) json['filter']=filter;
+ if(sorts) json['sorts']=sorts;
+  if(start_cursor) json['start_cursor']=start_cursor;
 
   const { result, success, info } = await queryNotion0(
     json,
@@ -928,9 +934,13 @@ chrome.runtime.onMessage.addListener(async function (
         })
       })
   } else if (cmd == 'new-reply') {
+
+    let start_cursor=request.start_cursor,
+    page_size=request.page_size||100;
+
     if (request.isMy && request.address) {
       // 我的贡献
-      queryByCfxAddress(request.address).then(({ result, success, info }) => {
+      queryByCfxAddress(request.address,start_cursor,page_size).then(({ result, success, info }) => {
         updateTags(result || [])
         chrome.tabs.query(
           { active: true, currentWindow: true },
@@ -938,7 +948,7 @@ chrome.runtime.onMessage.addListener(async function (
             chrome.tabs.sendMessage(
               tabs[0].id,
               {
-                cmd: 'new-reply',
+                cmd: 'new-reply-result',
                 data: result,
                 success,
                 info,
@@ -952,7 +962,7 @@ chrome.runtime.onMessage.addListener(async function (
       })
     } else {
       //获取知识库内容
-      queryNotEmptyOfReply(request.timestamp).then(
+      queryNotEmptyOfReply(request.timestamp,start_cursor,page_size).then(
         ({ result, success, info }) => {
           // isQueryNotEmptyOfReply = false
           updateTags(result || [])

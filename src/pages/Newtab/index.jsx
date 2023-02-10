@@ -17,12 +17,12 @@ import {
   Container,
   Select,
   LoadingOverlay,
-  Header,
+  Timeline,
   Menu,
   Alert,
 } from '@mantine/core'
 
-import { IconDatabase } from '@tabler/icons'
+import { IconDatabase,IconMessageDots } from '@tabler/icons'
 
 function getAppInfo () {
   return {
@@ -237,31 +237,44 @@ class KnowledgeCard extends React.Component {
             ''
           )}
           <Space h='xl' />
-          <Flex>
-            <CopyButton
-              value={`${Array.from(c.tags, (t) => t.name).join('#')} \n \n${
-                c.replies
-              } \n \n -${c.title}\n${c.url} `}
-            >
-              {({ copied, copy }) => (
-                <Button
-                  variant='outline'
-                  color={copied ? 'teal' : 'dark'}
-                  onClick={copy}
-                >
-                  {copied ? '已复制到剪切板' : '拷贝'}
-                </Button>
-              )}
-            </CopyButton>
+          <Flex justify={"space-between"}>
+            <Flex >
+                  <CopyButton
+                    value={`${Array.from(c.tags, (t) => t.name).join('#')} \n \n${
+                      c.replies
+                    } \n \n -${c.title}\n${c.url} `}
+                  >
+                    {({ copied, copy }) => (
+                      <Button
+                        variant='outline'
+                        color={copied ? 'teal' : 'dark'}
+                        onClick={copy}
+                      >
+                        {copied ? '已复制到剪切板' : '拷贝'}
+                      </Button>
+                    )}
+                  </CopyButton>
+                  <Button
+                    leftIcon={<IconDatabase />}
+                    variant='white'
+                    color='gray'
+                    onClick={() => {
+                      window.open(c._url)
+                    }}
+                    style={{marginLeft:'12px'}}
+                  >
+                    编辑
+                  </Button>
+                  
+            </Flex>
             <Button
-              leftIcon={<IconDatabase />}
               variant='white'
               color='gray'
               onClick={() => {
-                window.open(c._url)
+                this.props.addToWorkflow(c)
               }}
             >
-              编辑
+              添加到工作流
             </Button>
           </Flex>
         </Card>
@@ -286,6 +299,9 @@ class Newtab2 extends React.Component {
       tags: {},
       // notionTitle: '',
       displayLoginBtn: true,
+      // 工作流
+      workflowShow:false,
+      workflow:[]
     }
 
     this.getData = this.getData.bind(this)
@@ -294,6 +310,8 @@ class Newtab2 extends React.Component {
 
     this.setAlert = this.setAlert.bind(this)
     this.setLoading = this.setLoading.bind(this)
+
+    this.addToWorkflow=this.addToWorkflow.bind(this)
   }
 
   setLoading (loading = true) {
@@ -327,7 +345,7 @@ class Newtab2 extends React.Component {
     // 向bg发送消息
     if (this.state.loading) return
     this.setState({
-      urls: {},
+      getDataEvent:e
     })
 
     this.setLoading(true)
@@ -339,6 +357,8 @@ class Newtab2 extends React.Component {
         timestamp: e,
         isMy: e === 'my',
         address: that.state.address,
+        start_cursor:this.state.next_cursor,
+        page_size:100
       },
       function (response) {
         that.setAlert(true, '正在获取', '请耐心等待')
@@ -406,10 +426,16 @@ class Newtab2 extends React.Component {
       //获取知识库内容 - 结果
       if (request.cmd == 'new-reply-result') {
         let res = request.data
-        // console.log('new-reply-result', res)
+        // console.log('new-reply-result', request.info)
         if (request.success) {
+          let next_cursor=null;
+          if(request.info&&request.info.has_more&&request.info.next_cursor){
+            next_cursor=request.info.next_cursor
+          }
           that.setState({
-            urls: parseData(res),
+            urls: {
+              ...that.state.urls,...parseData(res)
+            },next_cursor
           })
           that.setAlert(true, '成功', `共 ${res.length}`)
         } else {
@@ -566,6 +592,16 @@ class Newtab2 extends React.Component {
         c.replies
       }\n\n${c.title}\n${c.url}\n\n`
     }).join('')
+  }
+
+  addToWorkflow(data){
+    let workflow=this.state.workflow;
+
+    if(workflow&&workflow.length>0){
+      workflow[workflow.length-1].items.push(data)
+      this.setState({workflow})
+    }
+    console.log(data)
   }
 
   componentDidMount () {
@@ -907,8 +943,9 @@ class Newtab2 extends React.Component {
                   { value: null, label: '所有' },
                 ]}
                 onChange={(event) => {
-                  that.setLoading(false)
-                  that.getData(event)
+                  this.setLoading(false)
+                  this.setState({ urls: {} })
+                  this.getData(event)
                 }}
               />
             </Flex>
@@ -936,10 +973,77 @@ class Newtab2 extends React.Component {
             >
               标签集
             </Title>
-            <Group style={{ marginLeft: '24px' }}>
+
+            <Select
+            style={{
+              marginLeft: '14px',
+            }}
+            // label='标签'
+            data={(()=>{
+              let ts = []
+                let tags = Object.keys(this.state.tags)
+                
+                for (const tag of tags) {
+                  if (
+                    this.state.tags[tag] &&
+                    this.state.tags[tag]._currentNotion &&
+                    this.state.currentNotion &&
+                    this.state.tags[tag]._currentNotion.id ==
+                      this.state.currentNotion.id
+                  ) {
+                    ts.push({
+                      // name: tag.trim(),
+                      value:tag.trim(),
+                      label:tag.trim(),
+                      // _currentNotion: this.state.tags[tag]._currentNotion,
+                    })
+                  }
+                }
+                return ts
+            })()}
+            
+            // defaultValue={Array.from(this.state.tags, (t) => t.value)}
+            searchable
+            onChange={(newTags) => {
+              console.log(newTags)
+              if(newTags){
+              
+                // console.log(t.name)
+                this.setLoading(true)
+                this.setState({ urls: {},currentTag:newTags })
+                chrome.runtime.sendMessage({
+                  cmd: 'find-by-tag',
+                  data:newTags,
+                  pageSize: 30,
+                })
+              }else{
+                this.setState({ currentTag:null })
+              }
+            }}
+          />
+
+              <Button color='teal' onClick={()=>{
+                if(this.state.currentTag){
+                  let workflow= this.state.workflow;
+                  workflow.push({
+                    tag:this.state.currentTag,
+                    items:[]
+                  });
+                   this.setState({
+                     workflow
+                   })
+                   this.setAlert(false)
+                }
+               
+              }}>
+                 添加到工作流
+                </Button>
+
+            {/* <Group style={{ marginLeft: '24px' }}>
               {(() => {
                 let ts = []
                 let tags = Object.keys(this.state.tags)
+
                 for (const tag of tags) {
                   if (
                     this.state.tags[tag] &&
@@ -978,7 +1082,8 @@ class Newtab2 extends React.Component {
                   )
                 })
               })()}
-            </Group>
+            </Group> */}
+
           </Flex>
           <Flex
             gap='lg'
@@ -993,7 +1098,7 @@ class Newtab2 extends React.Component {
                 marginLeft: '14px',
               }}
             >
-              知识卡片
+              知识卡片 {cards.length}
             </Title>
 
             <CopyButton value={that.extractData(cards)}>
@@ -1003,6 +1108,16 @@ class Newtab2 extends React.Component {
                 </Button>
               )}
             </CopyButton>
+
+           {
+              this.state.next_cursor?<Button color='teal' onClick={()=>{
+                  //  this.state.next_cursor
+                  this.getData(this.state.getDataEvent)
+              }}>
+                    加载更多
+                  </Button>:''
+           } 
+
           </Flex>
 
           <Flex
@@ -1023,13 +1138,40 @@ class Newtab2 extends React.Component {
                 key={i}
               >
                 {Array.from(cards, (c, j) => {
-                  return <KnowledgeCard data={c} key={i + '_' + j} />
+                  return <KnowledgeCard data={c} key={i + '_' + j} addToWorkflow={this.addToWorkflow}/>
                 })}
               </Flex>
             ))}
           </Flex>
           <Space h='xl' />
         </Flex>
+        
+        {this.state.workflow&&this.state.workflow.length>0?
+        <div style={{ maxWidth: 320, margin: 'auto' ,position:'fixed',top:'24px',right:'24px',zIndex:999999999,backgroundColor:'#edf2ff',padding: '56px'}}>
+                  <Timeline color="red" active={0} lineWidth={4}>
+                      {
+                        Array.from(this.state.workflow,(wf,i)=><Timeline.Item 
+                          title={wf.tag} 
+                          bulletSize={24} 
+                          lineVariant={i>1?"dashed":"solid"}
+                        // bullet={i>1?<IconMessageDots size={12} />:''}
+                        key={i}
+                        >
+                          {
+                            Array.from(wf.items,(d,_i)=>{
+                              return <Text color="dimmed" size="sm" key={_i}>
+                              {d.title} {d.url}
+                              {Array.from(d.tags,tag=>tag.name).join(',')} 
+                            </Text>
+                            })
+                          }
+                           
+                          </Timeline.Item>
+                        )
+                      }
+                  </Timeline>
+        </div>:''}
+
       </div>
     )
   }

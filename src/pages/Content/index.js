@@ -1172,6 +1172,7 @@ class Notions extends React.Component {
         centered
         size='calc(100vw - 98px)'
         zIndex={99999999999999999}
+        translate='no'
       >
         <Flex
           miw={'60%'}

@@ -48,6 +48,25 @@ class MyGoogleTranslate extends React.Component {
           })
         }
       });
+
+
+//       TODO:
+// 更优雅的方式，分栏。
+// `div=document.createElement('div');
+// children=document.body.children;
+// Array.from(children,c=>div.appendChild(c));
+// document.body.appendChild(div)
+
+// div.setAttribute('translate','no')
+// div2=div.cloneNode(true)
+// document.body.appendChild(div2);
+// div2.setAttribute('translate','yes')
+// document.body.style.display='flex'`
+
+// `en=document.querySelector('div[translate=no]');
+// zh=document.querySelector('div[translate=yes]');
+
+// zh.innerHTML=en.innerHTML`
  
     }
 
@@ -110,6 +129,8 @@ class MyGoogleTranslate extends React.Component {
       };
 
     }
+
+
     
   // for web 保留原文
   createHoverText(){
