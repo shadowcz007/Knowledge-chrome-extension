@@ -1022,7 +1022,10 @@ class Newtab2 extends React.Component {
             }}
           />
 
-              <Button color='teal' onClick={()=>{
+              <Button  style={{
+              marginLeft: '14px',
+            }}
+            color='teal' onClick={()=>{
                 if(this.state.currentTag){
                   let workflow= this.state.workflow;
                   workflow.push({

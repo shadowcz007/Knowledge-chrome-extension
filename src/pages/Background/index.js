@@ -655,7 +655,8 @@ async function getAllTags (start_cursor=null,page_size=100) {
 }
 
 // 用来初始化字段，验证notion访问是否正常
-async function queryNotionDataBase (token, databaseId) {
+// 
+async function queryNotionDataBase (token, databaseId,keywordsSetup) {
   const notion = initNotion(token)
   let result,
     success = false,
@@ -667,11 +668,7 @@ async function queryNotionDataBase (token, databaseId) {
     success = true
   } catch (error) {
     if (error.code === APIErrorCode.ObjectNotFound) {
-      //
-      // For example: handle by asking the user to select a different database
-      //
     } else {
-      // Other error handling code
       console.error(error)
     }
     info = error
@@ -698,6 +695,7 @@ async function queryNotionDataBase (token, databaseId) {
       title,
       url,
       id: token + databaseId,
+      keywordsSetup
     }
   }
 
@@ -872,17 +870,13 @@ chrome.runtime.onMessage.addListener(async function (
       })
     })
   } else if (cmd == 'add-notion-token') {
-    const { token, databaseId,contenteditable } = request.data
-    queryNotionDataBase(token, databaseId).then(({ result, success, info }) => {
+    const { token, databaseId,contenteditable ,keywordsSetup} = request.data
+    queryNotionDataBase(token, databaseId,keywordsSetup).then(({ result, success, info }) => {
       if (success) {
         result._contenteditable=contenteditable;
         chrome.storage.local.set({
           addNotion: result,
         })
-
-        // getAllTags()
-        //   .then(({ result, success, info }) => updateTags(result || []))
-        //   .then(() => {})
       }
       chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         chrome.tabs.sendMessage(

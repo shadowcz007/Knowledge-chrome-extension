@@ -528,7 +528,7 @@ async function getSelectionByUser (reply) {
     // _console(xpath)
     res = { ...res, text: textContent }
   }
-  res.reply = reply|| getKnowledgeReply() || getUserInfo() ||res.text
+  res.reply = (reply|| getKnowledgeReply() || getUserInfo() ||res.text).trim()
   
   return res
 }
@@ -591,7 +591,7 @@ function displayComments (cms) {
     } catch (error) {
       _console(error)
     }
-    for (const tag of d.tags) {
+    for (const tag of (d.tags||[])) {
       if (!tags[tag.name])
         tags[tag.name] = {
           count: 0,
@@ -1142,21 +1142,38 @@ class Notions extends React.Component {
       // userData.tags = ''
     }
     if (userData._tags) {
-      _tags = userData._tags
+      _tags = userData._tags;
       _tags = Array.from([..._tags], (t) => ({
         label: t,
         value: t,
       })).filter((f) => f.value.trim())
-      // userData.tags = ''
+      delete userData._tags;
+    }
+
+    // label的显示字符串处理，补充用户自定义的新增字段
+    let labels={};
+    if(currentNotion.matchKeywords){
+      // 补充用户自定义的新增字段
+      Array.from(currentNotion.matchKeywords,(m,i)=>{
+          if(!userData[m.key]&&m.notionProperties&&m.notionProperties.type=="rich_text"){    
+            userData[m.key]=''
+          }
+      })
+
+      Array.from(Object.keys(userData),key=>{
+        let notionKey=currentNotion.matchKeywords.filter(mk=>mk.key==key)[0];
+        if(notionKey&&notionKey.notionProperties) labels[key]=`${notionKey.name} _ ${notionKey.notionProperties.key}`
+      })
     }
 
     this.state = {
       opened: props.opened,
       notions: props.notions,
       currentId: currentNotion ? currentNotion.id : '',
-      userData: props.userData,
+      userData: userData,
       tags,
       _tags,
+      labels
     }
   }
   render () {
@@ -1179,100 +1196,134 @@ class Notions extends React.Component {
           gap='sm'
           justify='flex-start'
           align='flex-start'
-          direction='column'
+          direction='row'
           wrap='wrap'
         >
-          <MultiSelect
-            label='标签'
-            data={that.state._tags}
-            placeholder='选择一个或新建'
-            defaultValue={Array.from(that.state.tags, (t) => t.value)}
-            searchable
-            creatable
-            getCreateLabel={(query) => `+ 新建 ${query}`}
-            onChange={(newTags) => {
-              newTags = newTags.filter((f) => f.trim())
-              // console.log(newTags)
-              that.setState({
-                userData: {
-                  ...that.state.userData,
-                  tags: newTags,
-                },
-              })
-            }}
-            onCreate={(query) => {
-              if (query.trim()) {
-                const item = { value: query, label: query }
-                // 新标签
-                if (
-                  that.state.tags.filter((t) => t.value != query).length > 0
-                ) {
+          <Flex direction='column'>
+              <MultiSelect
+               
+                label={that.state.labels['tags']||'标签'}
+                data={that.state._tags}
+                placeholder='选择一个或新建'
+                defaultValue={Array.from(that.state.tags, (t) => t.value)}
+                searchable
+                creatable
+                getCreateLabel={(query) => `+ 新建 ${query}`}
+                onChange={(newTags) => {
+                  newTags = newTags.filter((f) => f.trim())
+                  // console.log(newTags)
                   that.setState({
-                    tags: [item, ...that.state.tags],
+                    userData: {
+                      ...that.state.userData,
+                      tags: newTags,
+                    },
                   })
-                }
+                }}
+                onCreate={(query) => {
+                  if (query.trim()) {
+                    const item = { value: query, label: query }
+                    // 新标签
+                    if (
+                      that.state.tags.filter((t) => t.value != query).length > 0
+                    ) {
+                      that.setState({
+                        tags: [item, ...that.state.tags],
+                      })
+                    }
 
-                return item
+                    return item
+                  }
+                }}
+              />
+              {
+                that.state.userData.reply.length>2000?<Textarea
+                style={{ minWidth: '600px' }}
+                label={that.state.labels['reply']||'评论'}
+                error={`当前${that.state.userData.reply.length},字符数超过2000，无法提交`}
+                withAsterisk
+                placeholder='reply'
+                value={that.state.userData.reply}
+                autosize
+                minRows={2}
+                onChange={(event) => {
+                  let val = event.currentTarget.value;
+                  that.setState({
+                    userData: {
+                      ...that.state.userData,
+                      reply: val,
+                    },
+                  })
+                }}
+              /> :<Textarea
+                style={{ minWidth: '600px' }}
+             
+                label={that.state.labels['reply']||'评论'}
+                withAsterisk
+                placeholder='reply'
+                value={that.state.userData.reply}
+                autosize
+                minRows={2}
+                onChange={(event) => {
+                  let val = event.currentTarget.value;
+                  that.setState({
+                    userData: {
+                      ...that.state.userData,
+                      reply: val,
+                    },
+                  })
+                }}
+              />
               }
-            }}
-          />
-          {
-            that.state.userData.reply.length>2000?<Textarea
-            style={{ minWidth: '600px' }}
-            label='评论'
-            error={`当前${that.state.userData.reply.length},字符数超过2000，无法提交`}
-            withAsterisk
-            placeholder='reply'
-            value={that.state.userData.reply}
-            autosize
-            minRows={2}
-            onChange={(event) => {
-              let val = event.currentTarget.value.trim()
-              that.setState({
-                userData: {
-                  ...that.state.userData,
-                  reply: val,
-                },
-              })
-            }}
-          /> :<Textarea
-            style={{ minWidth: '600px' }}
-            label='评论'
-            withAsterisk
-            placeholder='reply'
-            value={that.state.userData.reply}
-            autosize
-            minRows={2}
-            onChange={(event) => {
-              let val = event.currentTarget.value.trim()
-              that.setState({
-                userData: {
-                  ...that.state.userData,
-                  reply: val,
-                },
-              })
-            }}
-          />
-          }
-          
-          <Textarea
-            style={{ minWidth: '600px' }}
-            label='标题'
-            withAsterisk
-            placeholder='title'
-            value={that.state.userData.title}
-            autosize
-            maxRows={4}
-            onChange={(event) => {
-              let val = event.currentTarget.value.trim()
-              that.setState({
-                userData: {
-                  ...that.state.userData,
-                  title: val,
-                },
-              })
-            }}
-          />
+              
+              <Textarea
+                style={{ minWidth: '600px' }}
+                
+                label={that.state.labels['title']||'标题'}
+                withAsterisk
+                placeholder='title'
+                value={that.state.userData.title}
+                autosize
+                maxRows={4}
+                onChange={(event) => {
+                  let val = event.currentTarget.value.trim()
+                  that.setState({
+                    userData: {
+                      ...that.state.userData,
+                      title: val,
+                    },
+                  })
+                }}
+              />
+          </Flex>
+          <Flex direction='column'>
+             {Array.from(Object.keys(that.state.userData),(key,i)=>{
+                if(!['title','url',
+                'reply','id',
+                'cfxAddress',
+                'createdAt',
+                'tags','text'].includes(key)) return <Textarea
+                          key={i}
+                          style={{ minWidth: '300px' }}
+                          label={that.state.labels[key]}
+                          value={that.state.userData[key]}
+                          autosize
+                          maxRows={4}
+                          onChange={(event) => {
+                            let val = event.currentTarget.value;
+                            let njson={};
+                            njson[key]=val;
+                            that.setState({
+                              userData: {
+                                ...that.state.userData,...njson
+                              },
+                            })
+                          }}
+                        />
+                 
+                })
+                } 
+          </Flex>
+
         </Flex>
         <Space h='xl' />
         <Flex
@@ -1310,11 +1361,11 @@ class Notions extends React.Component {
           >
             <Text fz='xs'>待提交</Text>
             {Array.from(Object.keys(that.state.userData), (key) => {
-              if(key!='_tags')  return (
+              if(that.state.labels[key])  return (
                 <Text
                   fz='xs'
                   key={key}
-                >{that.state.userData[key].length>2000?'！！！超出2000字符数限制':''}{`- ${key} : ${that.state.userData[key]}`}</Text>
+                >{that.state.userData[key].length>2000?'！！！超出2000字符数限制':''}{`- ${that.state.labels[key].split('_')[1].trim()} : ${that.state.userData[key]}`}</Text>
               )
             })}
           </Flex>

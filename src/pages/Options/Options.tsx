@@ -1,7 +1,7 @@
 import React from 'react';
 import './Options.css';
 
-import { ActionIcon, Title, Select, Flex, Space, Badge, Group, TextInput, Button, Alert, Text, LoadingOverlay, FileInput } from '@mantine/core';
+import { ActionIcon, Title, Select, Flex, Space, Badge, Group, TextInput, Button, Alert, Text, LoadingOverlay, FileInput,Textarea } from '@mantine/core';
 import { IconX, IconAlertCircle, IconUpload } from '@tabler/icons';
 
 import { Md5 } from 'ts-md5'
@@ -99,8 +99,19 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
   const [currentNotionDatabaseId, setCurrentNotionDatabaseId] = React.useState('' as any)
   const [currentNotionToken, setCurrentNotionToken] = React.useState('' as any)
   // const [isInit,setIsInit]=React.useState(false)
-
+  const [keywordsSetup,setKeywordsSetup]=React.useState(Array.from(`其他 key
+  其他2 key2`.split('\n'),k=>k.trim()).join('\n'))
   // console.log('initNotions',isInit)
+
+  const [diyDisplay,setDiyDisplay]=React.useState(false);
+
+  const _baseKeys=`网站链接 url
+  标题 title
+  创建时间 createdAt
+  标签 tags
+  划选的文字 text
+  评论 reply
+  钱包地址 cfxAddress`;
 
   if (isInit === false) {
     isInit = true;
@@ -113,7 +124,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
 
         if (d.currentNotion && d.currentNotion.id) {
           let nP: any = Object.values(d.notions[d.currentNotion.id].properties || {});
-          let { properties, keywords } = matchToolsKeys(nP)
+          let { properties, keywords } = matchToolsKeys(nP,_baseKeys)
           console.log('**', properties)
           await setCurrentNotion(d.currentNotion.id,
             d.currentNotion.title, d.currentNotion.token,
@@ -128,16 +139,17 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
       chrome.storage.local.get().then(async (res) => {
         console.log('##onChanged', isInit)
         if (res.addNotion && res.addNotion.id) {
-
-          const { id, properties, title, matchKeywords, databaseId, token } = res.addNotion;
-          // console.log('notions',Object.keys(notions))
+          // _keywordsSetup 是用户自己设定的新的
+          const { id, properties, title, matchKeywords, databaseId, token,keywordsSetup } = res.addNotion;
+          console.log('##onChanged matchKeywords',matchKeywords)
           let _notions = { ...res.notions }
           _notions[id] = { ...res.addNotion }
 
           // console.log('_notions',Object.keys(_notions))
 
           let nP: any = Object.values(properties);
-          let { properties: newP, keywords } = matchToolsKeys(nP)
+          //  用来初始化字段配置的
+          let { properties: newP, keywords } = matchToolsKeys(nP,keywordsSetup)
           let nMatchKeywords = matchKeywords || keywords;
 
           chrome.storage.local
@@ -164,13 +176,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
 
 
         } else if (res && res.currentNotion && res.currentNotion.id && notions[res.currentNotion.id] && res.currentNotion.id != idSelected) {
-
-          // let nP:any=Object.values(res.currentNotion.properties||{});
-          // let { properties, keywords } = matchToolsKeys(nP)
-
-          // await setCurrentNotion(res.currentNotion.id,
-          //   res.currentNotion.title,res.currentNotion.token,
-          //   res.currentNotion.databaseId,properties,res.currentNotion.matchKeywords || keywords);
+ 
 
         }
       })
@@ -225,21 +231,20 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
   }
 
   // let notionsList:any = 
-
+  // 用来初始化字段配置的
   // 把notion和本插件的key对应起来
-  const matchToolsKeys = (properties: []) => {
+  const matchToolsKeys = (properties: [],keywordsSetup:string) => {
+    // console.log('matchToolsKeys!!!keywordsSetup',keywordsSetup)
     let keywords: any = {}
     Array.from(
-      `网站链接 url
-    标题 title
-    创建时间 createdAt
-    标签 tags
-    划选的文字 text
-    评论 reply
-    钱包地址 cfxAddress`.split('\n')
+      keywordsSetup.split('\n')
         .filter((f) => f.trim()),
       (r) => {
-        let rs = r.trim().split(' ')
+        let rs = r.trim().split(' ');
+        // 补丁，支持一行只写一个字段名字，不写中英文对应也可以。
+        if(rs.length==1){
+          rs=[rs[0],rs[0]]
+        }
         let key = rs[1];
 
         keywords[key] = {
@@ -262,6 +267,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
           }
       }
     )
+    // console.log('keywords',keywordsSetup,keywords)
     return {
       keywords: Object.values(keywords),
       properties,
@@ -299,7 +305,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
   // 默认允许编辑字段配置
   const addNotion = (token: any, databaseId: any,contenteditable=true) => {
     let id = token + databaseId;
-    // console.log(currentNotionDatabaseId,currentNotionToken)  
+    // console.log('addNotion',keywordsSetup)  
     if (
       databaseId != undefined &&
       databaseId != null &&
@@ -312,14 +318,20 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
         text: '', loadingDisplay: true
       })
       // console.log(notions)
+      const baseKeys=[...Array.from(_baseKeys.split('\n'),n=>n.trim()),
+      ...Array.from(keywordsSetup.trim().split('\n'),n=>n.trim())
+    ].filter(f=>f).join('\n')
+
       // 发到后台
       chrome.runtime.sendMessage(
         {
           cmd: 'add-notion-token',
           data: {
-            token: token,
-            databaseId: databaseId,
-            id,contenteditable
+            token,
+            databaseId,
+            id,
+            contenteditable,
+            keywordsSetup:baseKeys
           },
         },
         function (response) {
@@ -387,7 +399,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
             if (n) {
 
               let nP: any = Object.values(n.properties);
-              let { properties, keywords } = matchToolsKeys(nP)
+              let { properties, keywords } = matchToolsKeys(nP,_baseKeys)
 
               await setCurrentNotion(id, n.title, n.token, n.databaseId, properties, n.matchKeywords || keywords);
 
@@ -597,7 +609,15 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
             }
           }}
         />
-        <Flex
+
+        <Button 
+        style={{ marginLeft: '24px', marginTop: '12px', marginBottom: '12px' }}
+        variant='outline'
+          color='dark' onClick={() => {
+           setDiyDisplay(true)
+          }}>手动添加</Button>
+
+{diyDisplay?<Flex
           style={{ marginLeft: '24px', marginTop: '12px' }}
           mih={50}
           gap="md"
@@ -614,7 +634,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
             value={currentNotionDatabaseId}
             onChange={(event) => {
               // console.log(event.currentTarget.value.trim())
-              setCurrentNotionDatabaseId(event.currentTarget.value.trim())
+              setCurrentNotionDatabaseId(event.currentTarget.value.trim()) 
             }}
           />
           <TextInput
@@ -624,21 +644,37 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
             placeholder='例如:secret_8X2Ryn7H8qsmTQ4c1gEQeP6A6Mw4QZgErwh7SwKKewO'
             value={currentNotionToken}
             onChange={(event) => {
-              setCurrentNotionToken(event.currentTarget.value.trim())
+              setCurrentNotionToken(event.currentTarget.value.trim()) 
             }}
           // ref={that.testRef}
           />
+
+            <Textarea
+                style={{ minWidth: '300px' }}
+                label='其他字段补充，一行一个新的字段'
+                placeholder={keywordsSetup}
+                value={''}
+                autosize
+                minRows={6}
+                onChange={(event:any) => {
+                  let val = event.currentTarget.value;
+                  if(val) {
+                    setKeywordsSetup(val)
+                  }
+                }}
+              />
 
           <Button variant='outline'
             color='dark'
             onClick={() => {
               addNotion(currentNotionToken, currentNotionDatabaseId,true)
             }}
-          >
-            添加
+          > 添加
           </Button>
 
-        </Flex>
+        </Flex>:''}
+        
+
       </Flex>
 
       <Space h='xl' />
