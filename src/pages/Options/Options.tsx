@@ -99,8 +99,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
   const [currentNotionDatabaseId, setCurrentNotionDatabaseId] = React.useState('' as any)
   const [currentNotionToken, setCurrentNotionToken] = React.useState('' as any)
   // const [isInit,setIsInit]=React.useState(false)
-  const [keywordsSetup,setKeywordsSetup]=React.useState(Array.from(`其他 key
-  其他2 key2`.split('\n'),k=>k.trim()).join('\n'))
+  const [keywordsSetup,setKeywordsSetup]=React.useState('')
   // console.log('initNotions',isInit)
 
   const [diyDisplay,setDiyDisplay]=React.useState(false);
@@ -652,8 +651,9 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
             <Textarea
                 style={{ minWidth: '300px' }}
                 label='其他字段补充，一行一个新的字段'
-                placeholder={keywordsSetup}
-                value={''}
+                placeholder={Array.from(`其他 key
+                其他2 key2`.split('\n'),k=>k.trim()).join('\n')}
+                value={keywordsSetup}
                 autosize
                 minRows={6}
                 onChange={(event:any) => {
