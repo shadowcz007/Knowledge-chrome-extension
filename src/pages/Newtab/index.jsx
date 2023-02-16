@@ -488,7 +488,7 @@ class Newtab2 extends React.Component {
       }
     })
 
-    chrome.storage.local.get().then((data) => {
+    chrome.storage.local.get(['currentNotion','notions'],(data) => {
       if (
         data &&
         data.currentNotion &&
@@ -518,7 +518,7 @@ class Newtab2 extends React.Component {
       if (data && data.tags) {
         that.setState({ tags: data.tags })
       }
-    })
+    }) 
     // chrome.storage.local.onChanged.addListener(() => that.storageChange())
   }
 

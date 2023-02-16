@@ -8,8 +8,8 @@ import { Md5 } from 'ts-md5'
 import { Provider } from '@idealight-labs/anyweb-js-sdk'
 
 async function exportNotionSetupJson() {
-  let data = await chrome.storage.local.get();
-  let user = await chrome.storage.sync.get();
+  let data:any = await chromeStorageGet(['notions','currentNotion']);
+  let user:any = await chromeStorageSyncGet('cfxAddress')
   if (user && user.cfxAddress && user.cfxAddress.address && user.cfxAddress.addressIsCheck && data.currentNotion && data.currentNotion.id && data.notions) {
     let json = data.notions[data.currentNotion.id];
     json = { ...json, cfxAddress: user.cfxAddress.address };
@@ -115,7 +115,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
   if (isInit === false) {
     isInit = true;
 
-    chrome.storage.local.get().then(async d => {
+    chrome.storage.local.get(['notions','currentNotion'],async d => {
 
       if (d && d.notions && Object.keys(d.notions).length > 0 && Object.keys(notions).length == 0) {
         setNotions(d.notions)
@@ -131,11 +131,11 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
 
         }
       };
-    })
+    }) 
 
     chrome.storage.local.onChanged.addListener((e) => {
       // if(isInit==false) isInit=true;
-      chrome.storage.local.get().then(async (res) => {
+      chrome.storage.local.get(['addNotion','notions'],async (res) => {
         console.log('##onChanged', isInit)
         if (res.addNotion && res.addNotion.id) {
           // _keywordsSetup 是用户自己设定的新的
@@ -174,11 +174,8 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
             });
 
 
-        } else if (res && res.currentNotion && res.currentNotion.id && notions[res.currentNotion.id] && res.currentNotion.id != idSelected) {
- 
-
-        }
-      })
+        } 
+      }) 
     })
   }
 
@@ -682,7 +679,21 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
   </div>;
 };
 
+async function chromeStorageGet(k:any){
+  return new Promise((res,rej)=>{
+    chrome.storage.local.get(k,r=>{
+      res(r)
+    })
+  })
+}
 
+async function chromeStorageSyncGet(k:any){
+  return new Promise((res,rej)=>{
+    chrome.storage.sync.get(k,r=>{
+      res(r)
+    })
+  })
+}
 
 // 设置标签
 let tagsInit = false;
@@ -698,7 +709,8 @@ const TagsSetup: React.FC<TagsSetupProps> = ({ alertCallback }: TagsSetupProps) 
   const getTags = async () => {
     let cmd='get-all-tags';
 
-    let data=await chrome.storage.local.get('info');
+    let data:any=await chromeStorageGet('info');
+   
 
     let start_cursor;
     if(data&&data.info&&data.info.cmd==cmd&&data.info.has_more&&data.info.next_cursor){
@@ -732,7 +744,7 @@ const TagsSetup: React.FC<TagsSetupProps> = ({ alertCallback }: TagsSetupProps) 
   }
 
   const getTagsFromLocal = () => {
-    chrome.storage.local.get('tags').then(data => {
+    chrome.storage.local.get('tags',data => {
       // console.log(data)
       if (data && data.tags && Object.keys(data.tags).length > 0) {
         let tags: any = Object.keys(data.tags).sort((a: any, b: any) => a - b)
@@ -743,7 +755,7 @@ const TagsSetup: React.FC<TagsSetupProps> = ({ alertCallback }: TagsSetupProps) 
         title: '',
         text: '', loadingDisplay: false
       })
-    })
+    }) 
   }
 
   if (tagsInit == false) {
@@ -911,7 +923,7 @@ const AddressSetup: React.FC<AddressProps> = ({ alertCallback }: AddressProps) =
 
   const check = async () => {
     addressInit = true;
-    let data = await chrome.storage.sync.get('cfxAddress')
+    let data:any = await chromeStorageSyncGet('cfxAddress')
     if (data && data.cfxAddress) {
       if (address != data.cfxAddress.address) setAddress(data.cfxAddress.address)
       if (addressIsCheck != data.cfxAddress.addressIsCheck) setAddressIsCheck(data.cfxAddress.addressIsCheck)

@@ -18,8 +18,22 @@ function initNotion (token) {
   return notion
 }
 
+async function chromeStorageGet(k){
+  return new Promise((res,rej)=>{
+    chrome.storage.local.get(k,r=>{
+      res(r)
+    })
+  })
+}
+
 async function getNotionsMatchId (id) {
-  let sData = await chrome.storage.local.get('notions')
+  let sData=null;
+  try {
+    sData = await chrome.storage.local.get('notions')
+  } catch (error) {
+    sData = await chromeStorageGet('notions')
+  }
+ 
   if (sData && sData.notions && sData.notions[id]) {
     let currentNotion = sData.notions[id]
     return {
@@ -54,7 +68,12 @@ async function setCurrentNotion (notion = {}) {
 }
 
 async function getCurrentNotion () {
-  let sData = await chrome.storage.local.get('currentNotion')
+  let sData =null;
+  try {
+    sData = await chrome.storage.local.get('currentNotion')
+  } catch (error) {
+    sData = await chromeStorageGet('currentNotion')
+  }
   if (sData && sData.currentNotion) {
     return {
       id: sData.currentNotion.id,
@@ -358,7 +377,12 @@ function updateTags (items = []) {
   let tags = {}
   return new Promise(async (res, rej) => {
 
-    let data = await chrome.storage.local.get('tags')
+    let data =null;
+    try {
+      data = await chrome.storage.local.get('tags')
+    } catch (error) {
+      data = await chromeStorageGet('tags')
+    }
     if (data && data.tags) tags = { ...data.tags }
     if (items && items.length > 0) {
       Array.from(items, (d) => {

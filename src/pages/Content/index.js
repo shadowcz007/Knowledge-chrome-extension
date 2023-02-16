@@ -843,7 +843,7 @@ function addRating () {
   div2.style = `position:fixed;top:44px;left:12px;z-index:999999999999999999`
   document.body.insertAdjacentElement('beforeend', div2)
 
-  chrome.storage.local.get('markPosition').then((res) => {
+  chrome.storage.local.get('markPosition',res => {
     if (
       res &&
       res.markPosition &&
@@ -853,7 +853,7 @@ function addRating () {
       div2.style.left = res.markPosition.left
       div2.style.top = res.markPosition.top
     }
-  })
+  });
 
   window.isMoveClicked = false
   div2.addEventListener('click', (e) => {
@@ -874,7 +874,7 @@ function addRating () {
         }
         if (div2.style.top != top) div2.style.setProperty('top', top)
         if (div2.style.left != left) div2.style.setProperty('left', left)
-        chrome.storage.local.get('markPosition').then((data) => {
+        chrome.storage.local.get('markPosition',data => {
           if (
             data &&
             data.markPosition &&
@@ -888,7 +888,7 @@ function addRating () {
               },
             })
           }
-        })
+        }) 
       })
       // TODO 记录下来
     }
@@ -1045,11 +1045,11 @@ function update () {
       chrome.storage &&
       chrome.storage.local
     ) {
-      chrome.storage.local.get('tags').then(({ tags }, _) => {
+      chrome.storage.local.get('tags',({ tags }) => {
         if (tags) window._knowledgeTags = { ...tags }
         // _console(window._knowledgeTags)
         res(window._knowledgeTags)
-      })
+      }) 
     } else {
       res({})
     }
@@ -1426,9 +1426,17 @@ async function getCfxAddress () {
   return
 }
 
-async function getNotions () {
-  let data = await chrome.storage.local.get()
+async function chromeStorageGet(k){
+  return new Promise((res,rej)=>{
+    chrome.storage.local.get(k,r=>{
+      res(r)
+    })
+  })
+}
 
+async function getNotions () {
+  let data = await chromeStorageGet(['notions','currentNotion'])
+  
   let notionsForSelect = []
   if (data && data.notions) {
     notionsForSelect = Array.from(Object.values(data.notions), (n) => ({
@@ -1480,7 +1488,8 @@ async function createPrompt (notions, userData) {
   div.className="notranslate"
   // TODO
   // 读取本地的标签缓存
-  let data = await chrome.storage.local.get('tags')
+  let data =await chromeStorageGet('tags')
+   
   if (data && data.tags) {
     userData._tags = [...userData.tags, ...Object.keys(data.tags)].unque()
   }

@@ -1,0 +1,64 @@
+{
+    "action": {
+        "default_title": "Hello World!",
+        "default_popup": "popup.html",
+        "default_icon": {
+            "34": "icon-34.png"
+        },
+        "default_badge_text": "Nice!"
+    },
+    "author": "shadow",
+    "browser_url_overrides": {
+        "newtab": "newtab.html"
+    },
+    "web_accessible_resources": [
+        "content.styles.css",
+        "newtab.html",
+        "popup.html",
+        "icon-128.png",
+        "icon-34.png",
+        "contentScript.bundle.js",
+        "options.html"
+    ],
+    "content_scripts": [{
+        "matches": [
+            "http://*/*",
+            "https://*/*"
+        ],
+        "js": [
+            "contentScript.bundle.js"
+        ],
+        "css": [
+            "content.styles.css"
+        ]
+    }],
+    "description": "A extension for Knowledge | 发现知识，收集整理知识,https://github.com/shadowcz007",
+    "externally_connectable": {
+        "matches": [
+            "http://*/*",
+            "https://*/*",
+            "<all_urls>"
+        ]
+    },
+    "host_permissions": [
+        "https://translate.google.com/"
+    ],
+    "icons": {
+        "128": "icon-128.png"
+    },
+    "manifest_version": 2,
+    "name": "Knowledge",
+    "options_page": "options.html",
+    "permissions": [
+        "activeTab",
+        "tabs",
+        "storage",
+        "contextMenus",
+        "downloads"
+    ],
+    "version": "1.0.0",
+    "-ms-preload": {
+        "backgroundScript": "backgroundScriptsAPIBridge.js",
+        "contentScript": "contentScriptsAPIBridge.js"
+    }
+}

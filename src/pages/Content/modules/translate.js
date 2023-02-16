@@ -20,6 +20,13 @@ String.prototype.format3=function(){
   return text
 }
 
+async function chromeStorageGet(k){
+  return new Promise((res,rej)=>{
+    chrome.storage.local.get(k,r=>{
+      res(r)
+    })
+  })
+}
 
  
 class MyGoogleTranslate extends React.Component {
@@ -94,7 +101,7 @@ class MyGoogleTranslate extends React.Component {
         pdf:'pdfAllPages',
         web:'translateResult'
       }
-      let data=await chrome.storage.local.get(key[type]);
+      let data=await chromeStorageGet(key[type]);
       if(data&&data[key[type]]){
         pages=data[key[type]];
       }
@@ -107,7 +114,7 @@ class MyGoogleTranslate extends React.Component {
         web:'translateResult'
       }
       let pages=[];
-      let data=await chrome.storage.local.get(key[type]);
+      let data=await chromeStorageGet(key[type]);
       if(data&&data[key[type]]){
         pages=[...this.state.pages];
         if(data[key[type]].length==pages.length) await chrome.storage.local.set({[key[type]]:pages});
@@ -472,7 +479,7 @@ class MyGoogleTranslate extends React.Component {
                             
                               // 实验性，收集删除的词语
                               let text=pages[i][k].en;
-                              let data=await chrome.storage.local.get('__bad__remove_')
+                              let data=await chromeStorageGet('__bad__remove_')
                               let json=data.__bad__remove_||{};
                               if(!json[text]) json[text]=0;
                               json[text]++;

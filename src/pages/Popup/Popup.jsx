@@ -42,7 +42,7 @@ const Popup = () => {
     .split(',')
   const descriptions = description.split('|')
 
-  chrome.storage.local.get().then((sData) => {
+  chrome.storage.local.get('currentNotion',(sData) => {
     // console.log('run',sData)
     if (sData && sData.currentNotion) {
       if (
@@ -54,7 +54,7 @@ const Popup = () => {
     // if(sData&&sData.pageSet){
     //   if(getId(JSON.stringify(sData.pageSet))!=getId(JSON.stringify(funs))) setFuns(sData.pageSet)
     // }
-  })
+  }) 
   return (
     <div className='App'>
       <header className='App-header'>

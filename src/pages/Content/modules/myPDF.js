@@ -28,7 +28,15 @@ class MyPDFSwitch extends React.Component {
   
   }
   
-  
+
+  async function chromeStorageGet(k){
+    return new Promise((res,rej)=>{
+      chrome.storage.local.get(k,r=>{
+        res(r)
+      })
+    })
+  }
+
   class MyPdfRead extends React.Component {
     constructor (props) {
       super(props)
@@ -56,7 +64,7 @@ class MyPDFSwitch extends React.Component {
       
       var pages=this.initPagesData();
       try {
-        let data=await chrome.storage.local.get('pdfAllPages');
+        let data=await chromeStorageGet('pdfAllPages');
         if(data&&data.pdfAllPages) pages=data.pdfAllPages;
         // pages=JSON.parse(localStorage.getItem('_pdf_all_pages_'))
       } catch (error) {
@@ -172,7 +180,7 @@ class MyPDFSwitch extends React.Component {
         <Button.Group>  
             <Indicator label={that.state.currentPageAnnotations.length} inline size={22}>
               <Button variant='outline' color={'dark'} onClick={async(e)=>{
-                    let data=await chrome.storage.local.get('pdfAllPages');
+                    let data=await chromeStorageGet('pdfAllPages');
                     // 当前页码
                     const {pageNum,count}=that.extractCurrentPageNum()
                     let pages= JSON.parse(JSON.stringify((new Array(count)).fill([])));
