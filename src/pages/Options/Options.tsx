@@ -151,7 +151,7 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
           let { properties: newP, keywords } = matchToolsKeys(nP,keywordsSetup)
           let nMatchKeywords = matchKeywords || keywords;
 
-          chrome.storage.local
+          await chrome.storage.local
             .set({
               addNotion: null,
               notions: _notions,
@@ -163,16 +163,14 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
                 matchKeywords: nMatchKeywords,
               },
               info:null
-            })
-            .then(() => {
-              setNotions(_notions)
+            });
+
+            setNotions(_notions)
               setIdSelected(id);
               setCurrentNotionId(id)
               setCurrentNotionTitle(title)
               setCurrentNotionProperties(newP)
               setCurrentNotionMatchKeywords(nMatchKeywords)
-            });
-
 
         } 
       }) 
@@ -181,11 +179,11 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
 
 
   const setCurrentNotion = (id: string, title: string, token: string, databaseId: string, properties: never[], matchKeywords: []) => {
-    return new Promise<void>((res, rej) => {
+    return new Promise<void>(async (res, rej) => {
       // console.log(currentNotionId!==id,currentNotionId,id)
       if (currentNotionId !== id) {
 
-        chrome.storage.local
+        await chrome.storage.local
           .set({
             currentNotion: {
               databaseId,
@@ -195,29 +193,29 @@ const NotionsSetup: React.FC<NotionsProps> = ({ alertCallback }: NotionsProps) =
               matchKeywords
             },
             info:null
-          })
-          .then(() => {
-
-            setIdSelected(id);
-            setCurrentNotionId(id)
-            setCurrentNotionTitle(title)
-            setCurrentNotionProperties(properties)
-            setCurrentNotionMatchKeywords(matchKeywords)
-            setSetup(false);
-
-            alertCallback({
-              display: true,
-              title: '当前notion',
-              text: `${title} \n\n  键值对 ${Array.from(
-                properties,
-                (p: any) => `${p.key} - ${p.type}`
-              )}`, loadingDisplay: false
-            }
-            );
-            // console.log( setup,currentNotionTitle,currentNotionProperties,currentNotionProperties.length)
-            res()
-            // chrome.storage.local.set({ addNotion: null })
           });
+
+          
+          setIdSelected(id);
+          setCurrentNotionId(id)
+          setCurrentNotionTitle(title)
+          setCurrentNotionProperties(properties)
+          setCurrentNotionMatchKeywords(matchKeywords)
+          setSetup(false);
+
+          alertCallback({
+            display: true,
+            title: '当前notion',
+            text: `${title} \n\n  键值对 ${Array.from(
+              properties,
+              (p: any) => `${p.key} - ${p.type}`
+            )}`, loadingDisplay: false
+          }
+          );
+          // console.log( setup,currentNotionTitle,currentNotionProperties,currentNotionProperties.length)
+          res()
+          // chrome.storage.local.set({ addNotion: null })
+
       } else {
         res()
       }
