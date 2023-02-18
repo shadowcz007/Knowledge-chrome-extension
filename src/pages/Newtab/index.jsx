@@ -488,7 +488,7 @@ class Newtab2 extends React.Component {
       }
     })
 
-    chrome.storage.local.get(['currentNotion','notions'],(data) => {
+    chrome.storage.local.get(['currentNotion','notions','tags'],(data) => {
       if (
         data &&
         data.currentNotion &&
