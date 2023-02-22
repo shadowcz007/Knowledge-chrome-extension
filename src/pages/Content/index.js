@@ -14,16 +14,31 @@ import {
   Button,
   Modal,
   Space,
-  MultiSelect,Group,
-  Textarea,CopyButton,Alert,Menu,Switch ,Indicator,List, ThemeIcon,Paper,Transition
+  MultiSelect,
+  Group,
+  Textarea,
+  CopyButton,
+  Alert,
+  Menu,
+  Switch,
+  Indicator,
+  List,
+  ThemeIcon,
+  Paper,
+  Transition,
 } from '@mantine/core'
- 
-import { IconCircleCheck, IconCircleDashed, IconSettings, IconMessageCircle } from '@tabler/icons';
+
+import {
+  IconCircleCheck,
+  IconCircleDashed,
+  IconSettings,
+  IconMessageCircle,
+} from '@tabler/icons'
 
 import { addStyle } from './modules/myStyle'
-import {getUserInfo} from './modules/twitter'
-import {MyGoogleTranslate} from './modules/translate'
-import { MyPDFSwitch,MyPdfRead } from './modules/myPDF'
+import { getUserInfo } from './modules/twitter'
+import { MyGoogleTranslate } from './modules/translate'
+import { MyPDFSwitch, MyPdfRead } from './modules/myPDF'
 // console.log(getUserInfo)
 // 格式化字符串的功能
 // 1. Superheroes
@@ -53,16 +68,18 @@ String.prototype.format = function (start = '', end = '') {
   return Object.keys(ids).join('\n')
 }
 
-String.prototype.format2=function(){
- return this.replace(/\n/ig,' ').split('.').join('.\n\n');
+String.prototype.format2 = function () {
+  return this.replace(/\n/gi, ' ').split('.').join('.\n\n')
 }
 
-String.prototype.format3=function(){
-  let text=this;
-  let n='？！。”'.split('')
-  text=text.split('\n').filter(f=>f.trim())
-  text=Array.from(text,m1=>!n.includes(m1[m1.length-1])?m1+='||':m1)
-  text=text.join('\n').replace(/\|\|\n/ig,'');
+String.prototype.format3 = function () {
+  let text = this
+  let n = '？！。”'.split('')
+  text = text.split('\n').filter((f) => f.trim())
+  text = Array.from(text, (m1) =>
+    !n.includes(m1[m1.length - 1]) ? (m1 += '||') : m1
+  )
+  text = text.join('\n').replace(/\|\|\n/gi, '')
   return text
 }
 
@@ -121,24 +138,24 @@ function sentenceMatchTags (sentence, tags = []) {
   return { sentenceTexts, result }
 }
 
-function linkMatchSites(link){
+function linkMatchSites (link) {
   // 内置一些好站点，比如
   const sites = {
-    "github.com": 'code',
-    "github.io": 'project page',
-    "arxiv.org/abs/": 'paper',
-    "arxiv.org/pdf": 'pdf',
-    "huggingface.co/spaces": 'demo',
-    "replicate.com": "demo",
-    "youtube.com": "video",
-    "twitter.com": "social media",
-    "discord.gg":'dao'
+    'github.com': 'code',
+    'github.io': 'project page',
+    'arxiv.org/abs/': 'paper',
+    'arxiv.org/pdf': 'pdf',
+    'huggingface.co/spaces': 'demo',
+    'replicate.com': 'demo',
+    'youtube.com': 'video',
+    'twitter.com': 'social media',
+    'discord.gg': 'dao',
   }
-  let result = {};
+  let result = {}
 
   for (const key in sites) {
     if (link.includes(key)) {
-      result[sites[key]] = key;
+      result[sites[key]] = key
     }
   }
 
@@ -171,10 +188,6 @@ function parseSentenceMatchTags (sentenceTexts, sentenceMatchTagsResult, color) 
   })
 }
 
-
-
-
-
 // 找到页面的超链接里符合tags的
 // 标签多的排前面
 function findPageLinks (elements, tags) {
@@ -189,10 +202,10 @@ function findPageLinks (elements, tags) {
     // 12个字符以上 && sentence不等于标签本身
     // link不等于本页面
     let link = parseUrl(child.href || '')
-    
+
     // 是否是关心的优质网站
-    let mSites=linkMatchSites(link);
-    
+    let mSites = linkMatchSites(link)
+
     let pos = getElementViewPosition(child)
 
     // sentenceMatchTags 的处理
@@ -212,7 +225,7 @@ function findPageLinks (elements, tags) {
           result,
           getColor(child)
         )
-        
+
         targets.push({
           pageId: link,
           pageTitle: sentence,
@@ -226,21 +239,24 @@ function findPageLinks (elements, tags) {
           ),
         })
       }
-    }else if(Object.keys(mSites).length>0&&
-    !getHostname(link).includes(getPageHostname()) &&
-    !getPageHostname().includes(getHostname(link))&&
-    getPageHostname()!=getHostname(link)
-    ){
-      
+    } else if (
+      Object.keys(mSites).length > 0 &&
+      !getHostname(link).includes(getPageHostname()) &&
+      !getPageHostname().includes(getHostname(link)) &&
+      getPageHostname() != getHostname(link)
+    ) {
       // 匹配网站的处理
       targets.push({
         pageId: link,
-        pageTitle: sentence.trim()||getHostname(link),
+        pageTitle: sentence.trim() || getHostname(link),
         // a标签
         sentenceTexts: sentenceTexts,
         pos,
         // 匹配到的tags
-        tags:Array.from(Object.keys(mSites), (c) => ({ name: c,color:'orange'})),
+        tags: Array.from(Object.keys(mSites), (c) => ({
+          name: c,
+          color: 'orange',
+        })),
       })
     }
   }
@@ -258,7 +274,6 @@ function getColor (element) {
 }
 
 function addMarkForLinks (element, pageRelate, tags) {
-  
   if (
     element &&
     !element.getAttribute('data-badge') &&
@@ -339,11 +354,16 @@ function travelCommit (commit) {
       currentNode.textContent &&
       commit.text &&
       commit.text.trim() != '' &&
-      currentNode.textContent.trim() == commit.text.trim()&&
-      currentNode.parentElement&&!currentNode.parentElement.className.match('mantine-')
+      currentNode.textContent.trim() == commit.text.trim() &&
+      currentNode.parentElement &&
+      !currentNode.parentElement.className.match('mantine-')
     ) {
       // 在原网页插入，不在插件的内容里插入
-      console.log('addMarkForCommit',commit.text,currentNode.parentElement.className)
+      console.log(
+        'addMarkForCommit',
+        commit.text,
+        currentNode.parentElement.className
+      )
       // if('mantine-Text-root')
       addMarkForCommit(currentNode.parentElement, commit)
     }
@@ -452,16 +472,15 @@ function getElementViewPosition (element) {
 let lastKnownScrollPosition = 0
 let ticking = false
 
-
 function getPageUrl () {
   return parseUrl(window.location.href)
 }
-function getHostname(url){
-  let u=new URL(url);
+function getHostname (url) {
+  let u = new URL(url)
   return u.hostname
 }
-function getPageHostname(){
-  return getHostname(window.location.href);
+function getPageHostname () {
+  return getHostname(window.location.href)
 }
 function parseUrl (url) {
   return url.replace(/\?.*/, '')
@@ -528,19 +547,19 @@ async function getSelectionByUser (reply) {
     // _console(xpath)
     res = { ...res, text: textContent }
   }
-  res.reply = (reply|| getKnowledgeReply() || getUserInfo() ||res.text).trim()
-  
+  res.reply = (reply || getKnowledgeReply() || getUserInfo() || res.text).trim()
+
   return res
 }
 
 // 返回用户选择的文本
-function getSelectionText(){
-  let text=''
+function getSelectionText () {
+  let text = ''
   let selObj = window.getSelection()
   if (selObj.type != 'None') {
-    text = selObj.toString();
+    text = selObj.toString()
   }
- return text
+  return text
 }
 
 /* 输出 {
@@ -559,12 +578,11 @@ function getComments () {
 }
 
 function displayComments (cms) {
- 
   // 只保留前4条,标签多的排前面
   let pageRelate = findPageLinks(
     document.body.querySelectorAll('a'),
     Object.keys(window._knowledgeTags || [])
-  );
+  )
 
   let textContents = {}
   //   标签
@@ -591,7 +609,7 @@ function displayComments (cms) {
     } catch (error) {
       _console(error)
     }
-    for (const tag of (d.tags||[])) {
+    for (const tag of d.tags || []) {
       if (!tags[tag.name])
         tags[tag.name] = {
           count: 0,
@@ -609,12 +627,11 @@ function displayComments (cms) {
   _console(textContents, pageRelate)
 
   // popup的提示显示
-  if(Object.keys(textContents).length==0&&pageRelate.length==0){
-     setPopup('Mark')
-  }else{
+  if (Object.keys(textContents).length == 0 && pageRelate.length == 0) {
+    setPopup('Mark')
+  } else {
     setPopup(`${Object.keys(textContents).length}*${pageRelate.length}`)
   }
-
 
   // 页面内值得关注的链接
   addMarkForLinks(
@@ -833,17 +850,17 @@ function Demo () {
 // render(<Demo2 />, div2)
 
 function addRating () {
-  let id='knowledge-data-rating-icon';
-  if (document.querySelector('#'+id)) {
-    document.querySelector('#'+id).remove();
+  let id = 'knowledge-data-rating-icon'
+  if (document.querySelector('#' + id)) {
+    document.querySelector('#' + id).remove()
   }
-   
+
   let div2 = document.createElement('div')
-  div2.id = id;
+  div2.id = id
   div2.style = `position:fixed;top:44px;left:12px;z-index:999999999999999999`
   document.body.insertAdjacentElement('beforeend', div2)
 
-  chrome.storage.local.get('markPosition',res => {
+  chrome.storage.local.get('markPosition', (res) => {
     if (
       res &&
       res.markPosition &&
@@ -853,14 +870,14 @@ function addRating () {
       div2.style.left = res.markPosition.left
       div2.style.top = res.markPosition.top
     }
-  });
+  })
 
   window.isMoveClicked = false
   div2.addEventListener('click', (e) => {
     // 用来判断是否点击到位，不然会到hover里去了;
     if (e.target.className.match(/mantine\-.*\-root/)) {
       window.isMoveClicked = !window.isMoveClicked
-    };
+    }
   })
 
   // 跟随鼠标
@@ -874,7 +891,7 @@ function addRating () {
         }
         if (div2.style.top != top) div2.style.setProperty('top', top)
         if (div2.style.left != left) div2.style.setProperty('left', left)
-        chrome.storage.local.get('markPosition',data => {
+        chrome.storage.local.get('markPosition', (data) => {
           if (
             data &&
             data.markPosition &&
@@ -888,7 +905,7 @@ function addRating () {
               },
             })
           }
-        }) 
+        })
       })
       // TODO 记录下来
     }
@@ -913,10 +930,13 @@ function addBadge (
   element.insertAdjacentElement('afterbegin', div2)
   element.setAttribute('data-badge', true)
 
-  addStyle(`
+  addStyle(
+    `
   .mantine-HoverCard-dropdown{
     z-index:999999999999999999 !important
-  }`,'mantine-HoverCard-dropdown-css')
+  }`,
+    'mantine-HoverCard-dropdown-css'
+  )
 
   const countBtn = (
     <Avatar.Group>
@@ -992,44 +1012,49 @@ function addBadge (
         )}
 
         {relate && relate.length > 0
-          ? [...Array.from(relate, (e) => (
-              <a
-                target='_blank'
-                key={e.pageTitle}
-                href={e.pageId}
-                style={{
-                  textDecoration: 'none',
-                  boxShadow: 'none',
-                  fontSize: '12px',
-                  display: 'block',
-                  fontWeight: 300,
-                  border: 'none',
-                  color: '#2196f3',
-                  margin: '4px',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {color == 'blue'
-                  ? Array.from(e.tags, (t) => (
-                      <Badge key={t.name} size='xs' color={t.color?t.color:'blue'} >
-                        {t.name}
-                      </Badge>
-                    ))
-                  : ''}
-                {e.pageTitle}{' '}
-                {color == 'red' ? (
-                  <Badge key={e.pageTitle} size='xs'>
-                    {Array.from(e.tags, (t) => t.name).join(' ')}
-                  </Badge>
-                ) : (
-                  ''
-                )}
-              </a>
-            )),
-            // <Button variant='outline' color={'dark'} onClick={()=>console.log(Array.from(relate,r=>r.pageTitle))}>翻译</Button>
-          ]
+          ? [
+              ...Array.from(relate, (e) => (
+                <a
+                  target='_blank'
+                  key={e.pageTitle}
+                  href={e.pageId}
+                  style={{
+                    textDecoration: 'none',
+                    boxShadow: 'none',
+                    fontSize: '12px',
+                    display: 'block',
+                    fontWeight: 300,
+                    border: 'none',
+                    color: '#2196f3',
+                    margin: '4px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {color == 'blue'
+                    ? Array.from(e.tags, (t) => (
+                        <Badge
+                          key={t.name}
+                          size='xs'
+                          color={t.color ? t.color : 'blue'}
+                        >
+                          {t.name}
+                        </Badge>
+                      ))
+                    : ''}
+                  {e.pageTitle}{' '}
+                  {color == 'red' ? (
+                    <Badge key={e.pageTitle} size='xs'>
+                      {Array.from(e.tags, (t) => t.name).join(' ')}
+                    </Badge>
+                  ) : (
+                    ''
+                  )}
+                </a>
+              )),
+              // <Button variant='outline' color={'dark'} onClick={()=>console.log(Array.from(relate,r=>r.pageTitle))}>翻译</Button>
+            ]
           : ''}
       </HoverCard.Dropdown>
     </HoverCard>,
@@ -1045,83 +1070,101 @@ function update () {
       chrome.storage &&
       chrome.storage.local
     ) {
-      chrome.storage.local.get('tags',({ tags }) => {
+      chrome.storage.local.get('tags', ({ tags }) => {
         if (tags) window._knowledgeTags = { ...tags }
         // _console(window._knowledgeTags)
         res(window._knowledgeTags)
-      }) 
+      })
     } else {
       res({})
     }
   })
 }
 
-
-
-
-
 class MyMenu extends React.Component {
   constructor (props) {
     super(props)
     this.state = {
-      title:props.title,
-      text:props.text,
-      result:props.result
+      title: props.title,
+      text: props.text,
+      result: props.result,
     }
   }
   render () {
     let that = this
-    return (<Flex 
-    direction='column'
-    align='flex-start'
-    justify='flex-start'
-    style={{maxWidth:'600px',backgroundColor:'#eee',padding:'12px',borderRadius:'12px'}}
-    >
-      <Flex direction='row' >
-      <Text fz={'sm'} style={{maxWidth:'440px',marginLeft:'24px'}}>{that.state.result}</Text> 
-      <Text fz={'sm'}>{that.state.text}</Text>
+    return (
+      <Flex
+        direction='column'
+        align='flex-start'
+        justify='flex-start'
+        style={{
+          maxWidth: '600px',
+          backgroundColor: '#eee',
+          padding: '12px',
+          borderRadius: '12px',
+        }}
+      >
+        <Flex direction='row'>
+          <Text fz={'sm'} style={{ maxWidth: '440px', marginLeft: '24px' }}>
+            {that.state.result}
+          </Text>
+          <Text fz={'sm'}>{that.state.text}</Text>
+        </Flex>
       </Flex>
-      </Flex>)
+    )
   }
 }
-
 
 class MyAlert extends React.Component {
   constructor (props) {
     super(props)
     this.state = {
-      opened:true,
-      title:props.title,
-      texts:props.texts
+      opened: true,
+      title: props.title,
+      texts: props.texts,
     }
   }
   render () {
     let that = this
-    return (<Alert
-      // icon={<img src={logo} className='App-logo' alt='logo' />}
-      title={that.state.title}
-      color='indigo'
-      withCloseButton
-      // variant='filled'
-      onClose={() => that.props.onClose()}
-    >
-      <Flex justify='flex-start' align='flex-start' style={{width:'100%'}}>
-        {Array.from(that.state.texts,(t,i)=><Flex 
-        direction={'column'}
-        key={t+i} 
-        style={{ width: '40%',
-          margin:'0 24px'}}
-        >{Array.from(t.split('\n'),(_t,_i)=><Text key={_i+_t}>{_t}<br/></Text> )}</Flex>)}
-        <Space w='xl' />
-        <CopyButton value={that.state.texts.join('\n')}>
-              {({ copied, copy }) => (
-                <Button variant='outline' color={copied ? 'teal' : 'dark'} onClick={copy}>
-                  {copied ? '已复制到剪切板' : '拷贝'}
-                </Button>
-              )}
-            </CopyButton>
-      </Flex>
-    </Alert>)
+    return (
+      <Alert
+        // icon={<img src={logo} className='App-logo' alt='logo' />}
+        title={that.state.title}
+        color='indigo'
+        withCloseButton
+        // variant='filled'
+        onClose={() => that.props.onClose()}
+      >
+        <Flex justify='flex-start' align='flex-start' style={{ width: '100%' }}>
+          {Array.from(that.state.texts, (t, i) => (
+            <Flex
+              direction={'column'}
+              key={t + i}
+              style={{ width: '40%', margin: '0 24px' }}
+            >
+              {Array.from(t.split('\n'), (_t, _i) => (
+                <Text key={_i + _t}>
+                  {_t}
+                  <br />
+                </Text>
+              ))}
+            </Flex>
+          ))}
+          <Space w='xl' />
+          <CopyButton value={that.state.texts.join('\n')}>
+            {({ copied, copy }) => (
+              <Button
+                variant='outline'
+                color={copied ? 'teal' : 'dark'}
+                onClick={copy}
+              >
+                {copied ? '已复制到剪切板' : '拷贝'}
+              </Button>
+            )}
+          </CopyButton>
+        </Flex>
+      </Alert>
+    )
   }
 }
 
@@ -1142,27 +1185,34 @@ class Notions extends React.Component {
       // userData.tags = ''
     }
     if (userData._tags) {
-      _tags = userData._tags;
+      _tags = userData._tags
       _tags = Array.from([..._tags], (t) => ({
         label: t,
         value: t,
       })).filter((f) => f.value.trim())
-      delete userData._tags;
+      delete userData._tags
     }
 
     // label的显示字符串处理，补充用户自定义的新增字段
-    let labels={};
-    if(currentNotion.matchKeywords){
+    let labels = {}
+    if (currentNotion.matchKeywords) {
       // 补充用户自定义的新增字段
-      Array.from(currentNotion.matchKeywords,(m,i)=>{
-          if(!userData[m.key]&&m.notionProperties&&m.notionProperties.type=="rich_text"){    
-            userData[m.key]=''
-          }
+      Array.from(currentNotion.matchKeywords, (m, i) => {
+        if (
+          !userData[m.key] &&
+          m.notionProperties &&
+          m.notionProperties.type == 'rich_text'
+        ) {
+          userData[m.key] = ''
+        }
       })
 
-      Array.from(Object.keys(userData),key=>{
-        let notionKey=currentNotion.matchKeywords.filter(mk=>mk.key==key)[0];
-        if(notionKey&&notionKey.notionProperties) labels[key]=`${notionKey.name} _ ${notionKey.notionProperties.key}`
+      Array.from(Object.keys(userData), (key) => {
+        let notionKey = currentNotion.matchKeywords.filter(
+          (mk) => mk.key == key
+        )[0]
+        if (notionKey && notionKey.notionProperties)
+          labels[key] = `${notionKey.name} _ ${notionKey.notionProperties.key}`
       })
     }
 
@@ -1173,7 +1223,7 @@ class Notions extends React.Component {
       userData: userData,
       tags,
       _tags,
-      labels
+      labels,
     }
   }
   render () {
@@ -1200,45 +1250,44 @@ class Notions extends React.Component {
           wrap='wrap'
         >
           <Flex direction='column'>
-              <MultiSelect
-               
-                label={that.state.labels['tags']||'标签'}
-                data={that.state._tags}
-                placeholder='选择一个或新建'
-                defaultValue={Array.from(that.state.tags, (t) => t.value)}
-                searchable
-                creatable
-                getCreateLabel={(query) => `+ 新建 ${query}`}
-                onChange={(newTags) => {
-                  newTags = newTags.filter((f) => f.trim())
-                  // console.log(newTags)
-                  that.setState({
-                    userData: {
-                      ...that.state.userData,
-                      tags: newTags,
-                    },
-                  })
-                }}
-                onCreate={(query) => {
-                  if (query.trim()) {
-                    const item = { value: query, label: query }
-                    // 新标签
-                    if (
-                      that.state.tags.filter((t) => t.value != query).length > 0
-                    ) {
-                      that.setState({
-                        tags: [item, ...that.state.tags],
-                      })
-                    }
-
-                    return item
+            <MultiSelect
+              label={that.state.labels['tags'] || '标签'}
+              data={that.state._tags}
+              placeholder='选择一个或新建'
+              defaultValue={Array.from(that.state.tags, (t) => t.value)}
+              searchable
+              creatable
+              getCreateLabel={(query) => `+ 新建 ${query}`}
+              onChange={(newTags) => {
+                newTags = newTags.filter((f) => f.trim())
+                // console.log(newTags)
+                that.setState({
+                  userData: {
+                    ...that.state.userData,
+                    tags: newTags,
+                  },
+                })
+              }}
+              onCreate={(query) => {
+                if (query.trim()) {
+                  const item = { value: query, label: query }
+                  // 新标签
+                  if (
+                    that.state.tags.filter((t) => t.value != query).length > 0
+                  ) {
+                    that.setState({
+                      tags: [item, ...that.state.tags],
+                    })
                   }
-                }}
-              />
-              {
-                that.state.userData.reply.length>2000?<Textarea
+
+                  return item
+                }
+              }}
+            />
+            {that.state.userData.reply.length > 2000 ? (
+              <Textarea
                 style={{ minWidth: '600px' }}
-                label={that.state.labels['reply']||'评论'}
+                label={that.state.labels['reply'] || '评论'}
                 error={`当前${that.state.userData.reply.length},字符数超过2000，无法提交`}
                 withAsterisk
                 placeholder='reply'
@@ -1246,7 +1295,7 @@ class Notions extends React.Component {
                 autosize
                 minRows={2}
                 onChange={(event) => {
-                  let val = event.currentTarget.value;
+                  let val = event.currentTarget.value
                   that.setState({
                     userData: {
                       ...that.state.userData,
@@ -1254,17 +1303,18 @@ class Notions extends React.Component {
                     },
                   })
                 }}
-              /> :<Textarea
+              />
+            ) : (
+              <Textarea
                 style={{ minWidth: '600px' }}
-             
-                label={that.state.labels['reply']||'评论'}
+                label={that.state.labels['reply'] || '评论'}
                 withAsterisk
                 placeholder='reply'
                 value={that.state.userData.reply}
                 autosize
                 minRows={2}
                 onChange={(event) => {
-                  let val = event.currentTarget.value;
+                  let val = event.currentTarget.value
                   that.setState({
                     userData: {
                       ...that.state.userData,
@@ -1273,57 +1323,64 @@ class Notions extends React.Component {
                   })
                 }}
               />
-              }
-              
-              <Textarea
-                style={{ minWidth: '600px' }}
-                
-                label={that.state.labels['title']||'标题'}
-                withAsterisk
-                placeholder='title'
-                value={that.state.userData.title}
-                autosize
-                maxRows={4}
-                onChange={(event) => {
-                  let val = event.currentTarget.value.trim()
-                  that.setState({
-                    userData: {
-                      ...that.state.userData,
-                      title: val,
-                    },
-                  })
-                }}
-              />
+            )}
+
+            <Textarea
+              style={{ minWidth: '600px' }}
+              label={that.state.labels['title'] || '标题'}
+              withAsterisk
+              placeholder='title'
+              value={that.state.userData.title}
+              autosize
+              maxRows={4}
+              onChange={(event) => {
+                let val = event.currentTarget.value.trim()
+                that.setState({
+                  userData: {
+                    ...that.state.userData,
+                    title: val,
+                  },
+                })
+              }}
+            />
           </Flex>
           <Flex direction='column'>
-             {Array.from(Object.keys(that.state.userData),(key,i)=>{
-                if(!['title','url',
-                'reply','id',
-                'cfxAddress',
-                'createdAt',
-                'tags','text'].includes(key)) return <Textarea
-                          key={i}
-                          style={{ minWidth: '300px' }}
-                          label={that.state.labels[key]}
-                          value={that.state.userData[key]}
-                          autosize
-                          maxRows={4}
-                          onChange={(event) => {
-                            let val = event.currentTarget.value;
-                            let njson={};
-                            njson[key]=val;
-                            that.setState({
-                              userData: {
-                                ...that.state.userData,...njson
-                              },
-                            })
-                          }}
-                        />
-                 
-                })
-                } 
+            {Array.from(Object.keys(that.state.userData), (key, i) => {
+              if (
+                ![
+                  'title',
+                  'url',
+                  'reply',
+                  'id',
+                  'cfxAddress',
+                  'createdAt',
+                  'tags',
+                  'text',
+                ].includes(key)
+              )
+                return (
+                  <Textarea
+                    key={i}
+                    style={{ minWidth: '300px' }}
+                    label={that.state.labels[key]}
+                    value={that.state.userData[key]}
+                    autosize
+                    maxRows={4}
+                    onChange={(event) => {
+                      let val = event.currentTarget.value
+                      let njson = {}
+                      njson[key] = val
+                      that.setState({
+                        userData: {
+                          ...that.state.userData,
+                          ...njson,
+                        },
+                      })
+                    }}
+                  />
+                )
+            })}
           </Flex>
-
         </Flex>
         <Space h='xl' />
         <Flex
@@ -1361,12 +1418,17 @@ class Notions extends React.Component {
           >
             <Text fz='xs'>待提交</Text>
             {Array.from(Object.keys(that.state.userData), (key) => {
-              if(that.state.labels[key])  return (
-                <Text
-                  fz='xs'
-                  key={key}
-                >{that.state.userData[key].length>2000?'！！！超出2000字符数限制':''}{`- ${that.state.labels[key].split('_')[1].trim()} : ${that.state.userData[key]}`}</Text>
-              )
+              if (that.state.labels[key])
+                return (
+                  <Text fz='xs' key={key}>
+                    {that.state.userData[key].length > 2000
+                      ? '！！！超出2000字符数限制'
+                      : ''}
+                    {`- ${that.state.labels[key].split('_')[1].trim()} : ${
+                      that.state.userData[key]
+                    }`}
+                  </Text>
+                )
             })}
           </Flex>
         </Flex>
@@ -1382,10 +1444,11 @@ class Notions extends React.Component {
           <Button
             style={{
               color: 'white',
-              'backgroundColor': '#228be6',
+              backgroundColor: '#228be6',
             }}
             onClick={() => {
-              if(that.state.userData.reply.length>2000) return alert('超出字符数限制')
+              if (that.state.userData.reply.length > 2000)
+                return alert('超出字符数限制')
               console.log(that.state)
               // that.state.userData.tags = [...that.state.tags]
               // 在这里提交
@@ -1426,17 +1489,17 @@ async function getCfxAddress () {
   return
 }
 
-async function chromeStorageGet(k){
-  return new Promise((res,rej)=>{
-    chrome.storage.local.get(k,r=>{
+async function chromeStorageGet (k) {
+  return new Promise((res, rej) => {
+    chrome.storage.local.get(k, (r) => {
       res(r)
     })
   })
 }
 
 async function getNotions () {
-  let data = await chromeStorageGet(['notions','currentNotion'])
-  
+  let data = await chromeStorageGet(['notions', 'currentNotion'])
+
   let notionsForSelect = []
   if (data && data.notions) {
     notionsForSelect = Array.from(Object.values(data.notions), (n) => ({
@@ -1459,16 +1522,16 @@ async function getNotions () {
   return notionsForSelect
 }
 
-function createAlert(title,texts){
+function createAlert (title, texts) {
+  let div = document.querySelector('#knowledge-alert-div')
+  if (div) div.remove()
 
-  let div =document.querySelector('#knowledge-alert-div');
-  if(div)div.remove()
-  
-  div= document.createElement('div');
-  div.id="knowledge-alert-div";
-  document.body.appendChild(div);
+  div = document.createElement('div')
+  div.id = 'knowledge-alert-div'
+  document.body.appendChild(div)
 
-  addStyle(`
+  addStyle(
+    `
     #knowledge-alert-div {
       position: fixed;
       right: 0px;
@@ -1476,20 +1539,23 @@ function createAlert(title,texts){
       top: 0px;
       overflow-y: scroll;
       z-index: 99999999999999999999;
-    }`,'knowledge-alert-div-css')
+    }`,
+    'knowledge-alert-div-css'
+  )
 
-  render(<MyAlert title={title} texts={texts} onClose={()=>div.remove()}
-  />,div)
-  
+  render(
+    <MyAlert title={title} texts={texts} onClose={() => div.remove()} />,
+    div
+  )
 }
 
 async function createPrompt (notions, userData) {
   let div = document.createElement('div')
-  div.className="notranslate"
+  div.className = 'notranslate'
   // TODO
   // 读取本地的标签缓存
-  let data =await chromeStorageGet('tags')
-   
+  let data = await chromeStorageGet('tags')
+
   if (data && data.tags) {
     userData._tags = [...userData.tags, ...Object.keys(data.tags)].unque()
   }
@@ -1520,8 +1586,9 @@ chrome.runtime.onMessage.addListener(async function (
   } else if (request.cmd == 'login') {
     // alert('请登录anyweb或者填写钱包地址')
     if (window.confirm('请登录anyweb填写钱包地址')) {
-        chrome.runtime.sendMessage({ cmd: 'open-login' }, function (response) {
-          _console('收到来自后台的回复：' + response) })
+      chrome.runtime.sendMessage({ cmd: 'open-login' }, function (response) {
+        _console('收到来自后台的回复：' + response)
+      })
     }
   } else if (request.cmd == 'mark-push') {
     if (request.data && request.success) displayComments(request.data)
@@ -1530,56 +1597,61 @@ chrome.runtime.onMessage.addListener(async function (
     }
     alert('已提交')
     //TODO bug contentScript.bundle.js:55423 Ignored call to 'alert()'. The document is sandboxed, and the 'allow-modals' keyword is not set.
-
   } else if (request.cmd === 'get-by-pageId-run') {
     domContentLoadedDoSomething()
   } else if (request.cmd == 'get-by-pageId-result') {
     // console.log(request)
     if (request.data) displayComments(request.data)
-  }else if(request.cmd == 'translate-run'){
-    let text=getSelectionText();
-    chrome.runtime.sendMessage({ cmd: 'translate' ,data:text}, function (response) {
-      _console('收到来自后台的回复：' + response) })
-  }else if(request.cmd=='translate-result'){
-    const { data,
-      success,
-      info}=request;
-      if(success){
-        _console(data);
-        createAlert('翻译结果',[data.en,data.zh])
+  } else if (request.cmd == 'translate-run') {
+    let text = getSelectionText()
+    chrome.runtime.sendMessage(
+      { cmd: 'translate', data: text },
+      function (response) {
+        _console('收到来自后台的回复：' + response)
       }
-  }else if(request.cmd=='page-set-contenteditable'){
+    )
+  } else if (request.cmd == 'translate-result') {
+    const { data, success, info } = request
+    if (success) {
+      _console(data)
+      createAlert('翻译结果', [data.en, data.zh])
+    }
+  } else if (request.cmd == 'page-set-contenteditable') {
     pageSetContenteditable()
-    _console(request.data);
-  }else if(request.cmd=='display-translate-pannel'){
-    if(document.body.querySelector('#know-insert-google-translate')) document.body.querySelector('#know-insert-google-translate').style.display='block'
+    _console(request.data)
+  } else if (request.cmd == 'display-translate-pannel') {
+    if (document.body.querySelector('#know-insert-google-translate'))
+      document.body.querySelector(
+        '#know-insert-google-translate'
+      ).style.display = 'block'
   }
 
   sendResponse('我收到了你的消息！')
 })
 
-
 // 页面的功能控制
-function pageSetContenteditable(){
-  if(document.body.getAttribute('contenteditable')){ document.body.removeAttribute('contenteditable')}else{
-    document.body.setAttribute('contenteditable',true);
+function pageSetContenteditable () {
+  if (document.body.getAttribute('contenteditable')) {
+    document.body.removeAttribute('contenteditable')
+  } else {
+    document.body.setAttribute('contenteditable', true)
   }
 }
 
-
 // 直接使用谷歌翻译，从保存的记录里调取 - pdf
-function insertGoogleTranslate(){
+function insertGoogleTranslate () {
   // if(window.location.host!='translate.google.com')return
-  
-  let id='know-insert-google-translate'
-  let div=document.querySelector('#'+id);
-  
-  if(!div){
-    div=document.createElement('div');
-    div.id=id;
-    div.className="notranslate"
-    document.body.appendChild(div);
-    addStyle(`
+
+  let id = 'know-insert-google-translate'
+  let div = document.querySelector('#' + id)
+
+  if (!div) {
+    div = document.createElement('div')
+    div.id = id
+    div.className = 'notranslate'
+    document.body.appendChild(div)
+    addStyle(
+      `
     #know-insert-google-translate {
       display:none;
       position: fixed;
@@ -1607,31 +1679,44 @@ function insertGoogleTranslate(){
       background: none;
       border: none;
     }
-    `,id+'-css');
+    `,
+      id + '-css'
+    )
   }
 
-  render(<MyGoogleTranslate />,div)
-
+  render(<MyGoogleTranslate />, div)
 }
 
-function setPopup(t){
+function setPopup (t) {
   chrome.runtime.sendMessage(
-    { cmd: 'set-badge-text', data: { text:t } },
+    { cmd: 'set-badge-text', data: { text: t } },
     function (response) {
       console.log(response)
     }
   )
 }
 
-
 function domContentLoadedDoSomething () {
   _console('DOM loaded')
-  setPopup('loaded')  
-  createPDFDiv();
-  insertGoogleTranslate()
-  window.requestAnimationFrame(() => {
-    update().then(() => getComments())
-  })
+  console.log(window._run_domContentLoadedDoSomething)
+  let t =
+    5 * 60 -
+    (new Date().getTime() - (window._run_domContentLoadedDoSomething || 0)) /
+      1000
+  if (t < 0) {
+    // 5min 后可以刷新
+    console.log('激活状态！5min 后可以刷新')
+    window._run_domContentLoadedDoSomething = new Date().getTime()
+    setPopup('loaded')
+    createPDFDiv()
+    insertGoogleTranslate()
+    window.requestAnimationFrame(() => {
+      update().then(() => getComments())
+    })
+  } else {
+    console.log('激活状态！不刷新', t)
+    setPopup('-')
+  }
 }
 
 if (document.readyState !== 'complete') {
@@ -1641,11 +1726,11 @@ if (document.readyState !== 'complete') {
 domContentLoadedDoSomething()
 // setTimeout(() => domContentLoadedDoSomething(), 50)
 
-window.onfocus = function(e){
-	console.log("激活状态！")
-  if(document.readyState=='complete')  domContentLoadedDoSomething()
-}
+window.onfocus = function (e) {
+  console.log('激活状态！')
 
+  if (document.readyState == 'complete') domContentLoadedDoSomething()
+}
 
 document.addEventListener('scroll', (event) => {
   if (
@@ -1660,18 +1745,15 @@ document.addEventListener('scroll', (event) => {
     })
     ticking = true
   }
-
- 
 })
 
-
 // https://mozilla.github.io/pdf.js/web/viewer.html?file=
-// pdf 
-function createPDFDiv(){
-  let div=document.createElement('div');
-  div.id="knowlege-pdf-read-new";
-  div.className='knowlege-pdf-read'
-  div.style=`position: fixed;
+// pdf
+function createPDFDiv () {
+  let div = document.createElement('div')
+  div.id = 'knowlege-pdf-read-new'
+  div.className = 'knowlege-pdf-read'
+  div.style = `position: fixed;
   width: 420px;
   height: 50vh;
   top: 32px;
@@ -1679,21 +1761,25 @@ function createPDFDiv(){
   right: 0;
   background-color: #eee;
   display:none;
-  z-index: 999;`;
- 
-  if(!document.querySelector('#'+div.id)&&window.location.href.match('https://mozilla.github.io/pdf.js/web/viewer.html')){
-    document.body.appendChild(div);
+  z-index: 999;`
+
+  if (
+    !document.querySelector('#' + div.id) &&
+    window.location.href.match(
+      'https://mozilla.github.io/pdf.js/web/viewer.html'
+    )
+  ) {
+    document.body.appendChild(div)
     // toolbarViewerRight
-    let toolbarViewerRight= document.body.querySelector('#toolbarViewerRight')
+    let toolbarViewerRight = document.body.querySelector('#toolbarViewerRight')
     // 收集开关
-    let selectBtn=document.createElement('button');
+    let selectBtn = document.createElement('button')
 
-    render(<MyPDFSwitch domId={div.id}/>,selectBtn)
-    
-    toolbarViewerRight.insertAdjacentElement('afterbegin', selectBtn);
+    render(<MyPDFSwitch domId={div.id} />, selectBtn)
 
-    render(<MyPdfRead />,div);
+    toolbarViewerRight.insertAdjacentElement('afterbegin', selectBtn)
 
+    render(<MyPdfRead />, div)
   }
 
   // 样式修改 for .freeTextEditor.internal
@@ -1706,5 +1792,4 @@ function createPDFDiv(){
   //   white-space: break-spaces !important;
   // }
   // `,'knowlege-pdf-read-new-css');
-
 }

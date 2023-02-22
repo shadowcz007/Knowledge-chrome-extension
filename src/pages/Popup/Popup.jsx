@@ -2,11 +2,11 @@ import React from 'react'
 import logo from '../../assets/img/icon-128.png'
 import './Popup.css'
 
-import { Button, Text, Space, Flex,Switch } from '@mantine/core'
+import { Button, Text, Space, Flex, Switch } from '@mantine/core'
 
-import {Md5} from 'ts-md5'
+import { Md5 } from 'ts-md5'
 
-const getId=(t)=>{
+const getId = (t) => {
   return Md5.hashStr(t)
 }
 
@@ -19,21 +19,19 @@ chrome.runtime.onMessage.addListener(async function (
   sender,
   sendResponse
 ) {
-  const { cmd } = request;
+  const { cmd } = request
 
-//  console.log(cmd)
- sendResponse('我是popup，我已收到你的消息：' + JSON.stringify(request))
-});
-
-
+  //  console.log(cmd)
+  sendResponse('我是popup，我已收到你的消息：' + JSON.stringify(request))
+})
 
 const Popup = () => {
   const [notionTitle, setNotionTitle] = React.useState('')
-  const [funs,setFuns]=React.useState({
-    'page-set-contenteditable':{
-      label:'编辑全文',
-      value:false
-    }
+  const [funs, setFuns] = React.useState({
+    'page-set-contenteditable': {
+      label: '编辑全文',
+      value: false,
+    },
   })
   const name = chrome.runtime.getManifest().name.trim()
   const [description, url] = chrome.runtime
@@ -42,7 +40,7 @@ const Popup = () => {
     .split(',')
   const descriptions = description.split('|')
 
-  chrome.storage.local.get('currentNotion',(sData) => {
+  chrome.storage.local.get('currentNotion', (sData) => {
     // console.log('run',sData)
     if (sData && sData.currentNotion) {
       if (
@@ -54,7 +52,7 @@ const Popup = () => {
     // if(sData&&sData.pageSet){
     //   if(getId(JSON.stringify(sData.pageSet))!=getId(JSON.stringify(funs))) setFuns(sData.pageSet)
     // }
-  }) 
+  })
   return (
     <div className='App'>
       <header className='App-header'>
@@ -77,13 +75,13 @@ const Popup = () => {
             <Button
               onClick={(event) => {
                 event.preventDefault()
-               
+
                 chrome.tabs.query(
                   { active: true, currentWindow: true },
                   function (tabs) {
                     chrome.tabs.sendMessage(
                       tabs[0].id,
-                      { cmd: 'display-translate-pannel'},
+                      { cmd: 'display-translate-pannel' },
                       function (response) {
                         console.log(response)
                       }
@@ -92,7 +90,7 @@ const Popup = () => {
                 )
               }}
             >
-              打开翻译助手
+              打开采集助手
             </Button>
             <Space h='xl' />
             <Button
@@ -116,7 +114,7 @@ const Popup = () => {
             >
               打开配置页面
             </Button>
-            <Space h='xl' />     
+            <Space h='xl' />
             <Button
               variant='outline'
               color='gray'
@@ -128,8 +126,9 @@ const Popup = () => {
             >
               问题反馈
             </Button>
-         </Flex> <Space h='xl' />
-            {/*<Switch.Group
+          </Flex>{' '}
+          <Space h='xl' />
+          {/*<Switch.Group
              
               defaultValue={(()=>{
                 let items=[];
@@ -183,7 +182,6 @@ const Popup = () => {
             </Switch.Group> */}
         </>
       </header>
-    
     </div>
   )
 }

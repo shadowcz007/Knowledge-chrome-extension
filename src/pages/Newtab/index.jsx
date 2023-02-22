@@ -22,7 +22,7 @@ import {
   Alert,
 } from '@mantine/core'
 
-import { IconDatabase,IconMessageDots } from '@tabler/icons'
+import { IconDatabase, IconMessageDots } from '@tabler/icons'
 
 function getAppInfo () {
   return {
@@ -85,18 +85,27 @@ class CardTitle extends React.Component {
   render () {
     let { title, text, date, tag } = this.props
     return (
-      <Container size={440} px={12}>
+      <Container size={380} px={12}>
         <Title order={3} align='left'>
           {title}
           <Badge color='violet' variant='light' size='xs'>
             {date}
           </Badge>
-          <Badge color='gray' variant='light' size='xs'>
-            {tag}
-          </Badge>
+          {tag}
         </Title>
         <Space h='xs' />
-        <Title order={6} align='left' weight={100}>
+        <Title
+          order={6}
+          align='left'
+          weight={100}
+          style={{
+            whiteSpace: 'nowrap',
+            /* 文字用省略号代替超出的部分 */
+            textOverflow: 'ellipsis',
+            /* 匀速溢出内容，隐藏 */
+            overflow: 'hidden',
+          }}
+        >
           {text}
         </Title>
       </Container>
@@ -175,11 +184,11 @@ class KnowledgeCard extends React.Component {
     let c = this.props.data
     return (
       <Container
-        size={440}
+        size={380}
         px={12}
         // key={(new Date()).getTime()}
         style={{
-          minWidth: '440px',
+          minWidth: '380px',
           padding: '24px',
         }}
       >
@@ -201,13 +210,28 @@ class KnowledgeCard extends React.Component {
                 title={c.title}
                 date={c.createdAt}
                 tag={
-                  c.tags && c.tags.length > 0
-                    ? Array.from(c.tags, (t, i) => (
-                        <Badge key={t.name + i} size='xs' color={t.color}>
+                  c.tags && c.tags.length > 0 ? (
+                    <Flex
+                      wrap={'wrap'}
+                      style={{
+                        margin: '4px',
+                      }}
+                    >
+                      {Array.from(c.tags, (t, i) => (
+                        <Badge
+                          key={t.name + i}
+                          size='xs'
+                          color={t.color}
+                          style={{ margin: '4px' }}
+                          variant='outline'
+                        >
                           {t.name}
                         </Badge>
-                      ))
-                    : ''
+                      ))}
+                    </Flex>
+                  ) : (
+                    ''
+                  )
                 }
                 text={c.url || ''}
               />
@@ -237,40 +261,40 @@ class KnowledgeCard extends React.Component {
             ''
           )}
           <Space h='xl' />
-          <Flex justify={"space-between"}>
-            <Flex >
-                  <CopyButton
-                    value={`${Array.from(c.tags, (t) => t.name).join('#')} \n \n${
-                      c.replies
-                    } \n \n -${c.title}\n${c.url} `}
-                  >
-                    {({ copied, copy }) => (
-                      <Button
-                        variant='outline'
-                        color={copied ? 'teal' : 'dark'}
-                        onClick={copy}
-                      >
-                        {copied ? '已复制到剪切板' : '拷贝'}
-                      </Button>
-                    )}
-                  </CopyButton>
+          <Flex justify={'space-between'}>
+            <Flex>
+              <CopyButton
+                value={`${Array.from(c.tags, (t) => t.name).join('#')} \n \n${
+                  c.replies
+                } \n \n -${c.title}\n${c.url} `}
+              >
+                {({ copied, copy }) => (
                   <Button
-                    leftIcon={<IconDatabase />}
-                    variant='white'
-                    color='gray'
-                    onClick={() => {
-                      window.open(c._url)
-                    }}
-                    style={{marginLeft:'12px'}}
+                    variant='outline'
+                    color={copied ? 'teal' : 'dark'}
+                    onClick={copy}
                   >
-                    编辑
+                    {copied ? '已复制到剪切板' : '拷贝'}
                   </Button>
-                  
+                )}
+              </CopyButton>
+              <Button
+                leftIcon={<IconDatabase />}
+                variant='white'
+                color='gray'
+                onClick={() => {
+                  window.open(c._url)
+                }}
+                style={{ marginLeft: '12px' }}
+              >
+                编辑
+              </Button>
             </Flex>
             <Button
               variant='white'
               color='gray'
               onClick={() => {
+                // this.props.addToWorkflowStep();
                 this.props.addToWorkflow(c)
               }}
             >
@@ -300,8 +324,8 @@ class Newtab2 extends React.Component {
       // notionTitle: '',
       displayLoginBtn: true,
       // 工作流
-      workflowShow:false,
-      workflow:[]
+      workflowShow: false,
+      workflow: [],
     }
 
     this.getData = this.getData.bind(this)
@@ -311,7 +335,8 @@ class Newtab2 extends React.Component {
     this.setAlert = this.setAlert.bind(this)
     this.setLoading = this.setLoading.bind(this)
 
-    this.addToWorkflow=this.addToWorkflow.bind(this)
+    this.addToWorkflow = this.addToWorkflow.bind(this)
+    this.addToWorkflowStep = this.addToWorkflowStep.bind(this)
   }
 
   setLoading (loading = true) {
@@ -345,7 +370,7 @@ class Newtab2 extends React.Component {
     // 向bg发送消息
     if (this.state.loading) return
     this.setState({
-      getDataEvent:e
+      getDataEvent: e,
     })
 
     this.setLoading(true)
@@ -357,8 +382,8 @@ class Newtab2 extends React.Component {
         timestamp: e,
         isMy: e === 'my',
         address: that.state.address,
-        start_cursor:this.state.next_cursor,
-        page_size:100
+        start_cursor: this.state.next_cursor,
+        page_size: 100,
       },
       function (response) {
         that.setAlert(true, '正在获取', '请耐心等待')
@@ -370,18 +395,19 @@ class Newtab2 extends React.Component {
   checkAddressIsCanGetKnowledge () {
     // console.log(this.state)
     const { address, currentNotion } = this.state
-    if (!currentNotion.id || currentNotion['matchKeywords']==undefined){
+    if (!currentNotion.id || currentNotion['matchKeywords'] == undefined) {
       this.setState({
-        displayLoginBtn:false
+        displayLoginBtn: false,
       })
       return this.setAlert(
         true,
         'Notion数据库',
-        '请配置'+(currentNotion['matchKeywords']==undefined?'字段信息并保存':''),
+        '请配置' +
+          (currentNotion['matchKeywords'] == undefined ? '字段信息并保存' : ''),
         chrome.runtime.getURL('options.html')
       )
     }
-      
+
     this.setState({ urls: {} })
     this.setLoading(true)
     // 检查是否钱包地址有贡献
@@ -428,14 +454,20 @@ class Newtab2 extends React.Component {
         let res = request.data
         // console.log('new-reply-result', request.info)
         if (request.success) {
-          let next_cursor=null;
-          if(request.info&&request.info.has_more&&request.info.next_cursor){
-            next_cursor=request.info.next_cursor
+          let next_cursor = null
+          if (
+            request.info &&
+            request.info.has_more &&
+            request.info.next_cursor
+          ) {
+            next_cursor = request.info.next_cursor
           }
           that.setState({
             urls: {
-              ...that.state.urls,...parseData(res)
-            },next_cursor
+              ...that.state.urls,
+              ...parseData(res),
+            },
+            next_cursor,
           })
           that.setAlert(true, '成功', `共 ${res.length}`)
         } else {
@@ -488,7 +520,7 @@ class Newtab2 extends React.Component {
       }
     })
 
-    chrome.storage.local.get(['currentNotion','notions','tags'],(data) => {
+    chrome.storage.local.get(['currentNotion', 'notions', 'tags'], (data) => {
       if (
         data &&
         data.currentNotion &&
@@ -500,11 +532,10 @@ class Newtab2 extends React.Component {
           currentNotion: data.currentNotion,
           // displayLoginBtn:data.notions&&Object.keys(data.notions).length>0
         })
-      }else if(!(data.notions&&Object.keys(data.notions).length>0)){
-
+      } else if (!(data.notions && Object.keys(data.notions).length > 0)) {
         that.setState({
-          displayLoginBtn:false
-        });
+          displayLoginBtn: false,
+        })
 
         // that.setAlert()
         that.setAlert(
@@ -513,12 +544,11 @@ class Newtab2 extends React.Component {
           '请配置',
           chrome.runtime.getURL('options.html')
         )
-
       }
       if (data && data.tags) {
         that.setState({ tags: data.tags })
       }
-    }) 
+    })
     // chrome.storage.local.onChanged.addListener(() => that.storageChange())
   }
 
@@ -594,14 +624,32 @@ class Newtab2 extends React.Component {
     }).join('')
   }
 
-  addToWorkflow(data){
-    let workflow=this.state.workflow;
-
-    if(workflow&&workflow.length>0){
-      workflow[workflow.length-1].items.push(data)
-      this.setState({workflow})
+  addToWorkflow (data) {
+    let workflow = this.state.workflow
+    if (!workflow || (workflow && workflow.length <= 0)) {
+      // console.log(this.state, this)
+      workflow = this.addToWorkflowStep()
     }
-    console.log(data)
+    if (workflow && workflow.length > 0) {
+      workflow[workflow.length - 1].items.push(data)
+      this.setState({ workflow })
+    }
+    // console.log(data)
+  }
+
+  addToWorkflowStep () {
+    if (this.state.currentTag) {
+      let workflow = this.state.workflow
+      workflow.push({
+        tag: this.state.currentTag,
+        items: [],
+      })
+      this.setState({
+        workflow,
+      })
+      this.setAlert(false)
+      return workflow
+    }
   }
 
   componentDidMount () {
@@ -612,7 +660,7 @@ class Newtab2 extends React.Component {
     let that = this
     const { userAddressRank, cards } = that.parseData()
     const date = createDay()
-
+    const timelineRef = React.createRef()
     // 分成4组
     let cardsSplitThree = []
     for (let i = 0; i < cards.length; i += cards.length / 3) {
@@ -622,7 +670,14 @@ class Newtab2 extends React.Component {
 
     return (
       <div className='App'>
-        <LoadingOverlay visible={this.state.loading} />
+        <LoadingOverlay
+          visible={this.state.loading}
+          style={{
+            position: 'fixed',
+            top: 0,
+          }}
+          zIndex={9999999999}
+        />
         <header className='App-header'>
           <Space h='xl' />
 
@@ -975,14 +1030,14 @@ class Newtab2 extends React.Component {
             </Title>
 
             <Select
-            style={{
-              marginLeft: '14px',
-            }}
-            // label='标签'
-            data={(()=>{
-              let ts = []
+              style={{
+                marginLeft: '14px',
+              }}
+              // label='标签'
+              data={(() => {
+                let ts = []
                 let tags = Object.keys(this.state.tags)
-                
+
                 for (const tag of tags) {
                   if (
                     this.state.tags[tag] &&
@@ -993,54 +1048,60 @@ class Newtab2 extends React.Component {
                   ) {
                     ts.push({
                       // name: tag.trim(),
-                      value:tag.trim(),
-                      label:tag.trim(),
+                      value: tag.trim(),
+                      label: tag.trim(),
                       // _currentNotion: this.state.tags[tag]._currentNotion,
                     })
                   }
                 }
                 return ts
-            })()}
-            
-            // defaultValue={Array.from(this.state.tags, (t) => t.value)}
-            searchable
-            onChange={(newTags) => {
-              console.log(newTags)
-              if(newTags){
-              
-                // console.log(t.name)
-                this.setLoading(true)
-                this.setState({ urls: {},currentTag:newTags })
-                chrome.runtime.sendMessage({
-                  cmd: 'find-by-tag',
-                  data:newTags,
-                  pageSize: 30,
-                })
-              }else{
-                this.setState({ currentTag:null })
-              }
-            }}
-          />
-
-              <Button  style={{
-              marginLeft: '14px',
-            }}
-            color='teal' onClick={()=>{
-                if(this.state.currentTag){
-                  let workflow= this.state.workflow;
-                  workflow.push({
-                    tag:this.state.currentTag,
-                    items:[]
-                  });
-                   this.setState({
-                     workflow
-                   })
-                   this.setAlert(false)
+              })()}
+              // defaultValue={Array.from(this.state.tags, (t) => t.value)}
+              searchable
+              onChange={(newTags) => {
+                console.log(newTags)
+                if (newTags) {
+                  // console.log(t.name)
+                  this.setLoading(true)
+                  this.setState({ urls: {}, currentTag: newTags })
+                  chrome.runtime.sendMessage({
+                    cmd: 'find-by-tag',
+                    data: newTags,
+                    pageSize: 30,
+                  })
+                } else {
+                  this.setState({ currentTag: null })
                 }
-               
-              }}>
-                 添加到工作流
-                </Button>
+              }}
+            />
+
+            <Button
+              style={{
+                marginLeft: '14px',
+              }}
+              color='teal'
+              onClick={() => {
+                this.addToWorkflowStep()
+              }}
+            >
+              添加到工作流
+            </Button>
+
+            <Button
+              style={{
+                marginLeft: '14px',
+              }}
+              color='teal'
+              onClick={() => {
+                if (this.state.currentTag) {
+                  chrome.tabs.create({
+                    url: `https://bing.com/search?q=${this.state.currentTag} use case`,
+                  })
+                }
+              }}
+            >
+              搜索更多用例
+            </Button>
 
             {/* <Group style={{ marginLeft: '24px' }}>
               {(() => {
@@ -1086,7 +1147,6 @@ class Newtab2 extends React.Component {
                 })
               })()}
             </Group> */}
-
           </Flex>
           <Flex
             gap='lg'
@@ -1112,15 +1172,19 @@ class Newtab2 extends React.Component {
               )}
             </CopyButton>
 
-           {
-              this.state.next_cursor?<Button color='teal' onClick={()=>{
+            {this.state.next_cursor ? (
+              <Button
+                color='teal'
+                onClick={() => {
                   //  this.state.next_cursor
                   this.getData(this.state.getDataEvent)
-              }}>
-                    加载更多
-                  </Button>:''
-           } 
-
+                }}
+              >
+                加载更多
+              </Button>
+            ) : (
+              ''
+            )}
           </Flex>
 
           <Flex
@@ -1141,40 +1205,101 @@ class Newtab2 extends React.Component {
                 key={i}
               >
                 {Array.from(cards, (c, j) => {
-                  return <KnowledgeCard data={c} key={i + '_' + j} addToWorkflow={this.addToWorkflow}/>
+                  return (
+                    <KnowledgeCard
+                      data={c}
+                      key={i + '_' + j}
+                      addToWorkflow={this.addToWorkflow}
+                      // addToWorkflowStep={this.addToWorkflowStep}
+                    />
+                  )
                 })}
               </Flex>
             ))}
           </Flex>
           <Space h='xl' />
         </Flex>
-        
-        {this.state.workflow&&this.state.workflow.length>0?
-        <div style={{ maxWidth: 320, margin: 'auto' ,position:'fixed',top:'24px',right:'24px',zIndex:999999999,backgroundColor:'#edf2ff',padding: '56px'}}>
-                  <Timeline color="red" active={0} lineWidth={4}>
-                      {
-                        Array.from(this.state.workflow,(wf,i)=><Timeline.Item 
-                          title={wf.tag} 
-                          bulletSize={24} 
-                          lineVariant={i>1?"dashed":"solid"}
-                        // bullet={i>1?<IconMessageDots size={12} />:''}
-                        key={i}
-                        >
-                          {
-                            Array.from(wf.items,(d,_i)=>{
-                              return <Text color="dimmed" size="sm" key={_i}>
-                              {d.title} {d.url}
-                              {Array.from(d.tags,tag=>tag.name).join(',')} 
-                            </Text>
-                            })
-                          }
-                           
-                          </Timeline.Item>
-                        )
-                      }
-                  </Timeline>
-        </div>:''}
 
+        {this.state.workflow && this.state.workflow.length > 0 ? (
+          <div
+            style={{
+              maxWidth: 320,
+              margin: 'auto',
+              position: 'fixed',
+              top: '24px',
+              right: '24px',
+              zIndex: 999999999,
+              backgroundColor: '#edf2ff',
+              padding: '56px',
+            }}
+          >
+            <CopyButton
+              value={(async () => {
+                return new Promise((res, rej) => {
+                  // this.state.workflow
+                  setTimeout(() => {
+                    if (timelineRef.current) res(timelineRef.current.innerHTML)
+                  }, 1000)
+                })
+                // console.log(timelineRef)
+              })()}
+            >
+              {({ copied, copy }) => (
+                <Button color={copied ? 'teal' : 'blue'} onClick={copy}>
+                  {copied ? '已复制到剪切板' : '拷贝全部'}
+                </Button>
+              )}
+            </CopyButton>
+
+            <Timeline color='red' active={0} lineWidth={4} ref={timelineRef}>
+              {Array.from(this.state.workflow, (wf, i) => (
+                <Timeline.Item
+                  title={wf.tag}
+                  bulletSize={24}
+                  lineVariant={i > 1 ? 'dashed' : 'solid'}
+                  // bullet={i>1?<IconMessageDots size={12} />:''}
+                  key={i}
+                >
+                  {Array.from(wf.items, (d, _i) => {
+                    return (
+                      <CardTitle
+                        title={d.title}
+                        tag={
+                          d.tags && d.tags.length > 0 ? (
+                            <Flex
+                              wrap={'wrap'}
+                              style={{
+                                margin: '4px',
+                              }}
+                            >
+                              {Array.from(d.tags, (t, i) => (
+                                <Badge
+                                  key={t.name + i}
+                                  size='xs'
+                                  color={t.color}
+                                  style={{ margin: '4px' }}
+                                  variant='outline'
+                                >
+                                  {t.name}
+                                </Badge>
+                              ))}
+                            </Flex>
+                          ) : (
+                            ''
+                          )
+                        }
+                        text={d.url || ''}
+                        key={_i}
+                      />
+                    )
+                  })}
+                </Timeline.Item>
+              ))}
+            </Timeline>
+          </div>
+        ) : (
+          ''
+        )}
       </div>
     )
   }
